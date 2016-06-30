@@ -1,10 +1,20 @@
-filetype plugin indent on
+"vi互換をオフする
+set nocompatible
 
+
+" 色
+set background=dark
+let g:hybrid_use_iTerm_colors = 1
+colorscheme hybrid
 syntax on
 
-"色
-set background=dark
-colorscheme solarized
+"ビープ音すべてを無効にする
+set visualbell t_vb=
+
+" 行番号の色を設定
+hi CursorLineNr ctermbg=4 ctermfg=0
+set cursorline
+hi clear CursorLine
 
 set wrap
 
@@ -48,7 +58,8 @@ set smarttab
 "クリップボードの共有
 set clipboard=unnamed,autoselect
 
-set whichwrap=b,h,l,s,[,],<,>
+"カーソル移動で行をまたげるようにする
+set whichwrap=b,s,h,l,<,>,~,[,]
 
 "バックスペースを使いやすく
 set backspace=indent,eol,start
@@ -67,9 +78,6 @@ set display=lastline
 "変更中のファイルでも、保存しないで他のファイルを表示する
 set hidden
 
-"vi互換をオフする
-set nocompatible
-
 " バックアップファイルを作成しない
 set nobackup
 " バックアップファイルのディレクトリ指定
@@ -86,3 +94,6 @@ nmap <CR> i<CR><ESC>
 
 " 検索結果のハイライトをEsc連打でクリアする
 nnoremap <ESC><ESC> :nohlsearch<CR>
+
+
+filetype plugin indent on
