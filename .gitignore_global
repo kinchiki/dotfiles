@@ -1,3 +1,4 @@
 *~
-*.key
+.*.un~
+*.swp
 .DS_Store

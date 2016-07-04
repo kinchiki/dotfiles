@@ -1,8 +1,13 @@
 "vi互換をオフする
 set nocompatible
 
+"行番号の色を設定
+autocmd ColorScheme * highlight LineNr ctermfg=12
+hi CursorLineNr ctermbg=4 ctermfg=0
+set cursorline
+hi clear CursorLine
 
-" 色
+"色
 set background=dark
 let g:hybrid_use_iTerm_colors = 1
 colorscheme hybrid
@@ -10,11 +15,6 @@ syntax on
 
 "ビープ音すべてを無効にする
 set visualbell t_vb=
-
-" 行番号の色を設定
-hi CursorLineNr ctermbg=4 ctermfg=0
-set cursorline
-hi clear CursorLine
 
 set wrap
 
@@ -75,24 +75,31 @@ set matchtime=1
 "長い行も表示
 set display=lastline
 
-"変更中のファイルでも、保存しないで他のファイルを表示する
+"変更中のファイルでも保存しないで他のファイルを表示する
 set hidden
 
-" バックアップファイルを作成しない
+"バックアップファイルを作成しない
 set nobackup
-" バックアップファイルのディレクトリ指定
+"バックアップファイルのディレクトリ指定
 set backupdir=$HOME/.vim/backup
+"アンドゥファイルを作成しない
+set noundofile
+"アンドゥファイルのディレクトリ指定
+set undodir=$HOME/.vim/backup
 
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
 
 "Yを行末までヤンクに
 nnoremap Y y$
 
 "ノーマルモードのまま改行
 nmap <CR> i<CR><ESC>
+"ノーマルモードのままスペース
+nmap <space> i<space><esc>
 
-" 検索結果のハイライトをEsc連打でクリアする
+"検索結果のハイライトをEsc連打でクリアする
 nnoremap <ESC><ESC> :nohlsearch<CR>
 
 

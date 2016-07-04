@@ -1,5 +1,5 @@
-#
-# Executes commands at the start of an interactive session.
+
+ commands at the start of an interactive session.
 #
 # Authors:
 #   Sorin Ionescu <sorin.ionescu@gmail.com>
@@ -10,33 +10,40 @@ if [[ -s "${ZDOTDIR:-$HOME}/.zprezto/init.zsh" ]]; then
   source "${ZDOTDIR:-$HOME}/.zprezto/init.zsh"
 fi
 
+
 # Customize to your needs...
 
-alias la="ls -A"
-alias lg="ls -Agh"
-alias ll="ls -Ahl"
+alias la='ls -A'
+alias lg='ls -Agh'
+alias ll='ls -Ahl'
+alias ld='ls -ldh .*'
 
-alias rm="rm -i"
+alias rm='rm -i'
 alias cp='cp -i'
 alias mv='mv -i'
+
+alias catn='cat -n'
 
 # sudo の後のコマンドでエイリアスを有効にする
 alias sudo='sudo '
 
-# #export PATH="$HOME/.rbenv/shims:$PATH"
-#if which rbenv > /dev/null; then eval "$(rbenv init -)" ; fi
+# #export PATH='$HOME/.rbenv/shims:$PATH'
+#if which rbenv > /dev/null; then eval '$(rbenv init -)' ; fi
 
-alias rb="ruby"
-alias rails="bundle exec rails"
-alias ra="bundle exec rails"
-alias be="bundle exec"
-alias rake="bundle exec rake"
-alias xcode="open -a /Applications/Xcode.app"
-alias subl="/Applications/Sublime\ Text.app/Contents/SharedSupport/bin/subl"
-alias brewdgc="brew update && brew upgrade && brew cleanup"
+alias rb='ruby'
+alias rails='bundle exec rails'
+alias ra='bundle exec rails'
+alias be='bundle exec'
+alias rake='bundle exec rake'
+alias xcode='open -a /Applications/Xcode.app'
+alias subl='/Applications/Sublime\ Text.app/Contents/SharedSupport/bin/subl'
+alias brewdgc='brew update && brew upgrade && brew cleanup'
+
+alias dot='~/Documents/GitHub/dotfiles'
 
 # MacVim関連
 if [ -f /Applications/MacVim.app/Contents/MacOS/Vim ]; then
   alias vi='env LANG=ja_JP.UTF-8 /Applications/MacVim.app/Contents/MacOS/Vim "$@"'
   alias vim='env_LANG=ja_JP.UTF-8 /Applications/MacVim.app/Contents/MacOS/Vim "$@"'
 fi
+
