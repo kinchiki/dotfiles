@@ -99,6 +99,9 @@ nmap <CR> i<CR><ESC>
 "ノーマルモードのままスペース
 nmap <space> i<space><esc>
 
+"rだけでリドゥ
+nmap r <C-r>
+
 "検索結果のハイライトをEsc連打でクリアする
 nnoremap <ESC><ESC> :nohlsearch<CR>
 

@@ -1,5 +1,5 @@
 
- commands at the start of an interactive session.
+ nds at the start of an interactive session.
 #
 # Authors:
 #   Sorin Ionescu <sorin.ionescu@gmail.com>
@@ -37,7 +37,7 @@ alias be='bundle exec'
 alias rake='bundle exec rake'
 alias xcode='open -a /Applications/Xcode.app'
 alias subl='/Applications/Sublime\ Text.app/Contents/SharedSupport/bin/subl'
-alias brewdgc='brew update && brew upgrade && brew cleanup'
+alias brewup='brew update && brew upgrade && brew cleanup'
 
 alias dot='~/Documents/GitHub/dotfiles'
 
@@ -46,4 +46,5 @@ if [ -f /Applications/MacVim.app/Contents/MacOS/Vim ]; then
   alias vi='env LANG=ja_JP.UTF-8 /Applications/MacVim.app/Contents/MacOS/Vim "$@"'
   alias vim='env_LANG=ja_JP.UTF-8 /Applications/MacVim.app/Contents/MacOS/Vim "$@"'
 fi
+
 
