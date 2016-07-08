@@ -91,16 +91,29 @@ set undodir=$HOME/.vim/backup
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 
-"Yを行末までヤンクに
+"Yで行末までヤンク
 nnoremap Y y$
 
+"カーソル移動
+nnoremap j gj
+nnoremap k gk
+nnoremap gj j
+nnoremap gk k
+noremap <S-h> ^
+noremap <S-j> }
+noremap <S-k> {
+noremap <S-l> $
+
+"C-dでノーマルモード
+inoremap <C-d> <esc>
+
 "ノーマルモードのまま改行
-nmap <CR> i<CR><ESC>
+nnoremap <CR> i<CR><ESC>
 "ノーマルモードのままスペース
-nmap <space> i<space><esc>
+nnoremap <space> i<space><esc>
 
 "rだけでリドゥ
-nmap r <C-r>
+nnoremap r <C-r>
 
 "検索結果のハイライトをEsc連打でクリアする
 nnoremap <ESC><ESC> :nohlsearch<CR>
