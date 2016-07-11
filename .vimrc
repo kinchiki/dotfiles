@@ -108,7 +108,7 @@ noremap <S-l> $
 inoremap <C-d> <esc>
 
 "ノーマルモードのまま改行
-nnoremap <CR> i<CR><ESC>
+nnoremap <CR> I<CR><ESC>
 "ノーマルモードのままスペース
 nnoremap <space> i<space><esc>
 
