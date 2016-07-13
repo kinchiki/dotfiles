@@ -1,3 +1,7 @@
+"行番号の色を設定
+autocmd ColorScheme * highlight LineNr ctermfg=12
+hi CursorLineNr ctermbg=4 ctermfg=0
+
 " カラー
 set background=dark
 let g:hybrid_use_iTerm_colors = 1
