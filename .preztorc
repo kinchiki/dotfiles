@@ -1,0 +1,66 @@
+#
+# Executes commands at the start of an interactive session.
+#
+# Authors:
+#   Sorin Ionescu <sorin.ionescu@gmail.com>
+#
+
+# Source Prezto.
+if [[ -s "${ZDOTDIR:-$HOME}/.zprezto/init.zsh" ]]; then
+  source "${ZDOTDIR:-$HOME}/.zprezto/init.zsh"
+fi
+
+
+# Customize to your needs...
+
+
+# lsのエイリアス
+alias la='ls -A'
+alias lg='ls -Agh'
+alias ll='ls -Ahl'
+alias ld='ls -dh .*'
+alias lld='ls -ldh .*'
+
+# 確認
+alias rm='rm -i'
+alias cp='cp -i'
+alias mv='mv -i'
+
+# alias g=git
+alias e='echo'
+alias cn='cat -n'
+
+# sudo の後のコマンドでエイリアスを有効にする
+alias sudo='sudo '
+
+alias rb='ruby'
+alias rails='bundle exec rails'
+alias ra='bundle exec rails'
+alias be='bundle exec'
+alias rake='bundle exec rake'
+
+alias xcode='open -a /Applications/Xcode.app'
+alias subl='/Applications/Sublime\ Text.app/Contents/SharedSupport/bin/subl'
+
+alias brewup='brew update && brew upgrade && brew cleanup'
+
+alias -g dot='~/Documents/GitHub/dotfiles'
+alias -g C='| pbcopy'
+alias -g G='| grep'
+
+alias -g zrc='~/.zshrc'
+alias -g vrc='~/.vimrc'
+alias -g gvrc='~/.gvimrc'
+
+# MacVim関連
+if [ -f /Applications/MacVim.app/Contents/MacOS/Vim ]; then
+  alias vi='env LANG=ja_JP.UTF-8 /Applications/MacVim.app/Contents/MacOS/Vim "$@"'
+  alias vim='env_LANG=ja_JP.UTF-8 /Applications/MacVim.app/Contents/MacOS/Vim "$@"'
+fi
+
+alias v='vim'
+
+alias preup='cd ~/.zprezto && git pull && git submodule update --init --recursive && cd ~'
+
+# export PATH='$HOME/.rbenv/shims:$PATH'
+# if which rbenv > /dev/null; then eval '$(rbenv init -)' ; fi

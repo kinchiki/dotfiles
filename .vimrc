@@ -101,11 +101,8 @@ set noundofile
 set undodir=$HOME/.vim/backup
 
 
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+""""""""""""""""""""""""""""""
 
-
-"Yで行末までヤンク
-nnoremap Y y$
 
 "カーソル移動
 nnoremap j gj
@@ -127,6 +124,9 @@ nnoremap <space> i<space><esc>
 
 "rだけでリドゥ
 nnoremap r <C-r>
+
+"Yで行末までヤンク
+nnoremap Y y$
 
 "検索結果のハイライトをEsc連打でクリアする
 nnoremap <ESC><ESC> :nohlsearch<CR>
