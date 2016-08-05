@@ -1,12 +1,13 @@
-"行番号の色を設定
-autocmd ColorScheme * highlight LineNr ctermfg=12
-hi CursorLineNr ctermbg=4 ctermfg=0
-
 " カラー
 set background=dark
 let g:hybrid_use_iTerm_colors = 1
 colorscheme hybrid
-syntax on
+
+"行番号の色や現在行の設定
+autocmd ColorScheme * highlight LineNr ctermfg=12
+highlight CursorLineNr ctermbg=4 ctermfg=0
+
+syntax enable
 
 " タブを常に表示
 set showtabline=2
@@ -35,5 +36,5 @@ set visualbell t_vb=
 set columns=80
 set lines=48
 
-set guifontwide=Ricty:h16
-set guifont=Ricty:h16
+set guifontwide=Ricty:h18
+set guifont=Ricty:h18
