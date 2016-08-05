@@ -1,0 +1,25 @@
+[core]
+    excludesfile = /Users/akito/.gitignore_global
+    editor = subl -w
+[difftool "sourcetree"]
+	cmd = opendiff \"$LOCAL\" \"$REMOTE\"
+	path = 
+[mergetool "sourcetree"]
+	cmd = /Applications/SourceTree.app/Contents/Resources/opendiff-w.sh \"$LOCAL\" \"$REMOTE\" -ancestor \"$BASE\" -merge \"$MERGED\"
+	trustExitCode = true
+[user]
+    name = AkitoMizuno
+    email = mznak10@gmail.com
+[push]
+	default = matching
+[alias]
+    a   = add
+    co  = checkout
+    st  = status -sb
+    cm  = commit
+    br  = branch
+    cmm = commit -m
+    l   = log --oneline
+    cmma = commit -am
+[color]
+    ui = true
