@@ -1,6 +1,6 @@
 [core]
     excludesfile = /Users/akito/.gitignore_global
-    editor = subl -w
+	editor = vim -c \"set fenc=utf-8\"
 [difftool "sourcetree"]
 	cmd = opendiff \"$LOCAL\" \"$REMOTE\"
 	path = 
