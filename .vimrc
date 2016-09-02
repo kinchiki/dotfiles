@@ -99,9 +99,13 @@ set backupdir=$HOME/.vim/backup
 set noundofile
 "アンドゥファイルのディレクトリ指定
 set undodir=$HOME/.vim/backup
+"スワップファイルを作成しない
+set noswapfile
+
 
 
 """"""""""""""""""""""""""""""
+
 
 
 "カーソル移動
