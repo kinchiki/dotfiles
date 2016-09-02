@@ -16,10 +16,10 @@
     a   = add
     co  = checkout
     st  = status -sb
-    cm  = commit
+    ci  = commit
     br  = branch
-    cmm = commit -m
+    cim = commit -m
     l   = log --oneline
-    cmma = commit -am
+    ciam = commit -am
 [color]
     ui = true
