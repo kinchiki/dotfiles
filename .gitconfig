@@ -22,4 +22,4 @@
     l   = log --oneline
     ciam = commit -am
 [color]
-    ui = true
+	ui = auto
