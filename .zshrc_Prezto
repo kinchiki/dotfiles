@@ -1,5 +1,5 @@
-
- commands at the start of an interactive session.
+#
+# Executes commands at the start of an interactive session.
 #
 # Authors:
 #   Sorin Ionescu <sorin.ionescu@gmail.com>
@@ -26,10 +26,11 @@ alias rm='rm -i'
 alias cp='cp -i'
 alias mv='mv -i'
 
-# alias g=git
+alias g=git
 alias e='echo'
 alias cn='cat -n'
 alias pb='pbcopy <'
+alias th='touch'
 
 # sudo の後のコマンドでエイリアスを有効にする
 alias sudo='sudo '
@@ -43,8 +44,6 @@ alias buninst='bundle install --path vendor/bundle'
 
 alias xcode='open -a /Applications/Xcode.app'
 alias subl='/Applications/Sublime\ Text.app/Contents/SharedSupport/bin/subl'
-
-alias brewup='brew update && brew upgrade && brew cleanup'
 
 alias -g dot='~/GitHub/dotfiles'
 alias -g C='| pbcopy'
@@ -60,6 +59,18 @@ alias vgv='vim ~/.gvimrc'
 
 alias sz='source ~/.zshrc'
 
+alias pj='phantomjs'
+
+alias brewup='brew update && brew upgrade && brew cleanup'
+alias preup='cd ~/.zprezto && git pull && git submodule update --init --recursive ; cd ~'
+
+
+# git
+alias gs='git status -sb'
+alias gc='git commit -m'
+alias gad='git add .'
+
+
 # MacVim関連
 if [ -f /Applications/MacVim.app/Contents/MacOS/Vim ]; then
   alias vi='env LANG=ja_JP.UTF-8 /Applications/MacVim.app/Contents/MacOS/Vim "$@"'
@@ -68,7 +79,6 @@ fi
 
 alias v='vim'
 
-alias preup='cd ~/.zprezto && git pull && git submodule update --init --recursive ; cd ~'
 
 # export PATH='$HOME/.rbenv/shims:$PATH'
 # if which rbenv > /dev/null; then eval '$(rbenv init -)' ; fi
