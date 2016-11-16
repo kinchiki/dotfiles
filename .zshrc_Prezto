@@ -26,6 +26,7 @@ alias rm='rm -i'
 alias cp='cp -i'
 alias mv='mv -i'
 
+# 省略
 alias g=git
 alias e='echo'
 alias cn='cat -n'
@@ -35,6 +36,7 @@ alias th='touch'
 # sudo の後のコマンドでエイリアスを有効にする
 alias sudo='sudo '
 
+# ruby and rails
 alias rb='ruby'
 alias rails='bundle exec rails'
 alias ra='bundle exec rails'
@@ -42,34 +44,42 @@ alias be='bundle exec'
 alias rake='bundle exec rake'
 alias buninst='bundle install --path vendor/bundle'
 
+# アプリ起動
 alias xcode='open -a /Applications/Xcode.app'
 alias subl='/Applications/Sublime\ Text.app/Contents/SharedSupport/bin/subl'
 
-alias -g dot='~/GitHub/dotfiles'
+# ユニバーサルエイリアス
 alias -g C='| pbcopy'
 alias -g G='| grep'
+alias -g dot='~/GitHub/dotfiles'
 
+# 設定ファイル
 alias -g zrc='~/.zshrc'
 alias -g vrc='~/.vimrc'
 alias -g gvrc='~/.gvimrc'
-
 alias vz='vim ~/.zshrc'
 alias vv='vim ~/.vimrc'
 alias vgv='vim ~/.gvimrc'
 
 alias sz='source ~/.zshrc'
 
-alias pj='phantomjs'
+# PostgreSQL
+alias pgstt='pg_ctl start'
+alias pgstp='pg_ctl stop'
+alias pgres='pg_ctl restart'
+alias pgsts='pg_ctl status'
 
+# アップデート
 alias brewup='brew update && brew upgrade && brew cleanup'
-alias preup='cd ~/.zprezto && git pull && git submodule update --init --recursive ; cd ~'
-
+alias preup='cd ~/.zprezto && git pull && git submodule update --init --recursive ; cd -'
 
 # git
-alias gs='git status -sb'
+alias gad='git add'
+alias gau='git add -u'
+alias gaa='git add -A'
 alias gc='git commit -m'
-alias gad='git add .'
-
+alias gl='git log --oneline'
+alias gs='git status -sb'
 
 # MacVim関連
 if [ -f /Applications/MacVim.app/Contents/MacOS/Vim ]; then
@@ -79,7 +89,11 @@ fi
 
 alias v='vim'
 
+# 単語移動
+bindkey '^[\e[C' forward-word
+bindkey '^[\e[D' backward-word
+bindkey ";5C" forward-word
+bindkey ";5D" backward-word
 
 # export PATH='$HOME/.rbenv/shims:$PATH'
 # if which rbenv > /dev/null; then eval '$(rbenv init -)' ; fi
-

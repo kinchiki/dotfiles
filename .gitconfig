@@ -13,7 +13,9 @@
 [push]
 	default = matching
 [alias]
-    a   = add
+    ad  = add
+    adu = add -u
+    ada = add -A
     co  = checkout
     st  = status -sb
     ci  = commit

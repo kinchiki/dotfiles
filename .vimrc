@@ -8,7 +8,7 @@ set nocompatible
 
 "カーソル位置表示
 set ruler
-"行数
+"行番号表示
 set number
 
 "色
@@ -137,7 +137,7 @@ nnoremap Y y$
 "ESCキー2度押しでハイライトの切り替え
 nnoremap <silent><Esc><Esc> :<C-u>set nohlsearch!<CR>
 
-
+"ペースト時に自動インデントで崩れるのを防ぐ
 if &term =~ "xterm"
     let &t_SI .= "\e[?2004h"
     let &t_EI .= "\e[?2004l"
