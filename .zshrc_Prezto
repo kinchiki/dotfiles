@@ -13,6 +13,31 @@ fi
 
 # Customize to your needs...
 
+# 必要かどうかが分からん
+# for zsh-completions
+# fpath=(/usr/local/share/zsh-completions $fpath)
+# autoload -Uz compinit
+# ↓で起動がめちゃ遅くなった
+# compinit
+
+
+# Preztoで多分設定されていないもの
+
+# ../ の後は今いるディレクトリを補完しない
+zstyle ':completion:*' ignore-parents parent pwd ..
+
+# Ctrl+Dでzshを終了しない
+setopt ignore_eof
+
+# 先頭がスペースならヒストリーに追加しない。
+setopt hist_ignore_space
+
+# rm * を実行する前に確認される。
+setopt rmstar_wait
+
+# ヒストリに保存するときに余分なスペースを削除する
+setopt hist_reduce_blanks
+
 
 # lsのエイリアス
 alias la='ls -A'
@@ -97,3 +122,6 @@ bindkey ";5D" backward-word
 
 # export PATH='$HOME/.rbenv/shims:$PATH'
 # if which rbenv > /dev/null; then eval '$(rbenv init -)' ; fi
+
+# 区切り文字設定 zprofileに書くとなぜか反映されなかった
+export WORDCHARS="*?[]~;=!#$%^(){}<>"
