@@ -3,7 +3,7 @@
 	editor = vim -c \"set fenc=utf-8\"
 [difftool "sourcetree"]
 	cmd = opendiff \"$LOCAL\" \"$REMOTE\"
-	path = 
+	path =
 [mergetool "sourcetree"]
 	cmd = /Applications/SourceTree.app/Contents/Resources/opendiff-w.sh \"$LOCAL\" \"$REMOTE\" -ancestor \"$BASE\" -merge \"$MERGED\"
 	trustExitCode = true
@@ -16,12 +16,13 @@
     ad  = add
     adu = add -u
     ada = add -A
+    ci  = commit
+    cim = commit -m
+    cia = commit -ma
+    ciame = commit --amend
     co  = checkout
     st  = status -sb
-    ci  = commit
     br  = branch
-    cim = commit -m
     l   = log --oneline
-    ciam = commit -am
 [color]
 	ui = auto
