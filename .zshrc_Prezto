@@ -104,6 +104,9 @@ alias gaa='git add -A'
 alias gc='git commit -m'
 alias gl='git log --oneline'
 alias gs='git status -sb'
+alias gg='git grep'
+alias gd='git diff'
+alias gdc='git diff --cached'
 
 # MacVim関連
 if [ -f /Applications/MacVim.app/Contents/MacOS/Vim ]; then
