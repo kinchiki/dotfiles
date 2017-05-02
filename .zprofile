@@ -67,8 +67,7 @@ fi
 #
 
 if [[ ! -d "$TMPDIR" ]]; then
-  export TMPDIR="/tmp/$LOGNAME"
-  mkdir -p -m 700 "$TMPDIR"
+  export TMPDIR="$(mktemp -d)"
 fi
 
 TMPPREFIX="${TMPDIR%/}/zsh"
@@ -82,6 +81,6 @@ export PGDATA=/usr/local/var/postgres
 export ARCHFLAGS='-arch x86_64'
 export PATH="$PATH:$HOME/.bin"
 export PATH="$HOME/.nodebrew/current/bin:$PATH"
-export EDITOR=vim 
+export EDITOR=vim
 # export WORDCHARS="*?[]~;=!#$%^(){}<>" なぜか効かない
 export LESS='-i -g -s -F -M -R -X'
