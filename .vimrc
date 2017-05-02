@@ -17,7 +17,7 @@ let g:hybrid_use_iTerm_colors = 1
 colorscheme hybrid
 
 " 行番号の色や現在行の設定
-autocmd ColorScheme * highlight LineNr ctermfg=12
+autocmd ColorScheme * highlight LineNr ctermfg=249
 highlight CursorLineNr ctermbg=4 ctermfg=0
 set cursorline
 highlight clear CursorLine
@@ -159,5 +159,11 @@ augroup vimrcEx
   \ exe "normal g`\"" | endif
 augroup END
 
+" 改行時の自動コメント無効化
+augroup auto_comment_off
+    autocmd!
+    autocmd BufEnter * setlocal formatoptions-=r
+    autocmd BufEnter * setlocal formatoptions-=o
+augroup END
 
 filetype plugin indent on
