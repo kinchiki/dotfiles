@@ -108,6 +108,7 @@ alias gc='git commit -m'
 alias gl='git log --oneline'
 alias gs='git status -sb'
 alias gg='git grep'
+alias ggc='git grep -C'
 alias gd='git diff'
 alias gdc='git diff --cached'
 
