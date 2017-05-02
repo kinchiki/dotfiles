@@ -20,6 +20,9 @@ fi
 # ↓で起動がめちゃ遅くなった
 # compinit
 
+fpath=(/path/to/homebrew/share/zsh-completions $fpath)
+autoload -U compinit
+compinit -u
 
 # Preztoで多分設定されていないもの
 
