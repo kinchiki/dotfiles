@@ -24,6 +24,8 @@
   l   = log --oneline
   d   = diff
   g   = grep
+  gc  = grep -C
+  sta = stash
 [grep]
 	lineNumber = true
 [push]
