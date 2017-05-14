@@ -34,7 +34,7 @@ zstyle ':prezto:load' pmodule \
   'completion' \
   'syntax-highlighting' \
   'autosuggestions' \
-  'prompt' \
+  'prompt'
 
 #
 # Autosuggestions
@@ -178,3 +178,6 @@ zstyle ':prezto:module:prompt' theme 'pure'
 
 # Integrate with iTerm2.
 # zstyle ':prezto:module:tmux:iterm' integrate 'yes'
+
+# Set the default session name:
+# zstyle ':prezto:module:tmux:session' name 'YOUR DEFAULT SESSION NAME'
