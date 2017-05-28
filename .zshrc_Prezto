@@ -13,16 +13,19 @@ fi
 
 # Customize to your needs...
 
-# 必要かどうかが分からん
-# for zsh-completions
-# fpath=(/usr/local/share/zsh-completions $fpath)
-# autoload -Uz compinit
-# ↓で起動がめちゃ遅くなった
-# compinit
 
-fpath=(/path/to/homebrew/share/zsh-completions $fpath)
-autoload -U compinit
-compinit -u
+# autoload はシェル関数を自動読み込みするシェルの組み込み関数
+# compinit というシェル関数を自動読み込み
+# compinit は補完機能を引き出してくれるコマンド
+# autoload 探索するディレクトリは FPATH に入っている
+fpath=(/usr/local/share/zsh-completions $fpath)
+# 補完機能有効
+# -U は alias の展開を しない ためのオプション
+# -z は関数を zsh 形式で読み込むというオプション
+autoload -Uz compinit
+# 実行
+# -u は compinitのテスト避ける
+compinit
 
 # Preztoで多分設定されていないもの
 
