@@ -138,17 +138,9 @@ export WORDCHARS="*?[]~;=!#$%^(){}<>"
 
 # peco
 function peco-select-history() {
-    local tac
-    if which tac > /dev/null; then
-        tac="tac"
-    else
-        tac="tail -r"
-    fi
-    BUFFER=$(\history -n 1 | \
-        eval $tac | \
-        peco --query "$LBUFFER")
+    BUFFER="$(history -nr 1 | awk '!a[$0]++' | peco --query "$LBUFFER" | sed 's/\\n/\n/')"
     CURSOR=$#BUFFER
-    zle clear-screen
+    zle -R -c
 }
 zle -N peco-select-history
-bindkey '^r' peco-select-history
+bindkey '^R' peco-select-history
