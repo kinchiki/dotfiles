@@ -60,7 +60,7 @@ set gdefault
 
 " 不可視文字の設定
 set list
-set listchars=tab:>-,eol:↲,extends:»,precedes:«,nbsp:%
+set listchars=tab:>-,eol:↲,trail:␣,extends:»,precedes:«,nbsp:%
 
 " コマンドラインモードのファイル補完設定
 set wildmode=list:longest,full
