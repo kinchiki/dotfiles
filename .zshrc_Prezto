@@ -25,7 +25,7 @@ fpath=(/usr/local/share/zsh-completions $fpath)
 autoload -Uz compinit
 # 実行
 # -u は compinitのテスト避ける
-compinit
+# compinit
 
 # Preztoで多分設定されていないもの
 
