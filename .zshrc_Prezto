@@ -82,7 +82,6 @@ alias subl='/Applications/Sublime\ Text.app/Contents/SharedSupport/bin/subl'
 # ユニバーサルエイリアス
 alias -g C='| pbcopy'
 alias -g G='| grep'
-alias -g dot='~/GitHub/dotfiles'
 
 # 設定ファイル
 alias -g zrc='~/.zshrc'
@@ -130,9 +129,6 @@ bindkey '^[\e[C' forward-word
 bindkey '^[\e[D' backward-word
 bindkey ";5C" forward-word
 bindkey ";5D" backward-word
-
-# export PATH='$HOME/.rbenv/shims:$PATH'
-# if which rbenv > /dev/null; then eval '$(rbenv init -)' ; fi
 
 # 区切り文字設定 zprofileに書くとなぜか反映されなかった
 export WORDCHARS="*?[]~;=!#$%^(){}<>"
