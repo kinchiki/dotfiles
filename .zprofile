@@ -87,3 +87,5 @@ export PATH="$HOME/.nodebrew/current/bin:$PATH"
 export EDITOR=vim
 # export WORDCHARS="*?[]~;=!#$%^(){}<>" なぜか効かない
 export LESS='-i -g -s -F -M -R -X'
+export PATH="/usr/local/opt/mysql@5.6/bin:$PATH"
+export PATH="/usr/local/opt/imagemagick@6/bin:$PATH"
