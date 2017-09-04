@@ -120,6 +120,9 @@ alias gg='git grep'
 alias ggc='git grep -C'
 alias gd='git diff'
 alias gdc='git diff --cached'
+alias gsta='git stash'
+alias gstali='git stash list'
+alias gstalip='git stash list -p'
 
 # MacVim関連
 if [ -f /Applications/MacVim.app/Contents/MacOS/Vim ]; then
