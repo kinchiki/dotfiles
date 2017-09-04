@@ -26,6 +26,8 @@
   g   = grep
   gc  = grep -C
   sta = stash
+  stali = stash list
+  stalip = stash list -p
 [grep]
 	lineNumber = true
 [push]
