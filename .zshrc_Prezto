@@ -123,6 +123,8 @@ alias gdc='git diff --cached'
 alias gsta='git stash'
 alias gstali='git stash list'
 alias gstalip='git stash list -p'
+# copy current branch
+alias ccb='git symbolic-ref --short HEAD'
 
 # MacVim関連
 if [ -f /Applications/MacVim.app/Contents/MacOS/Vim ]; then
