@@ -12,22 +12,26 @@
 	branch = auto
 	ui     = auto
 [alias]
-  ad  = add
-  adu = add -u
-  ada = add -A
-  ci  = commit
-  cim = commit -m
-  cia = commit -ma
-  co  = checkout
-  st  = status -sb
-  br  = branch
-  l   = log --oneline
-  d   = diff
-  g   = grep
-  gc  = grep -C
-  sta = stash
-  stali = stash list
-  stalip = stash list -p
+    ad  = add
+    adu = add -u
+    ada = add -A
+    ci  = commit
+    cim = commit -m
+    cia = commit -ma
+    co  = checkout
+    st  = status -sb
+    br  = branch
+    l   = log --oneline
+    lg  = log --graph --decorate --oneline
+    dcw = diff --color-words
+    dc  = diff --cached
+    df  = diff
+    dw  = diff -w
+    g   = grep
+    gc  = grep -C
+    sta = stash
+    stali = stash list
+    stalip = stash list -p
 [grep]
 	lineNumber = true
 [push]
