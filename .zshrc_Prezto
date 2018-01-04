@@ -124,8 +124,9 @@ alias gdw='git diff -w'
 alias gdc='git diff --cached'
 alias gdcw='git diff --color-words'
 alias gsta='git stash'
-alias gstali='git stash list'
-alias gstalip='git stash list -p'
+alias gstal='git stash list'
+alias gstalp='git stash list -p'
+alias gcoma='git checkout master'
 # copy current branch
 alias ccb='git symbolic-ref --short HEAD'
 
