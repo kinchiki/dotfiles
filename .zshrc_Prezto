@@ -51,8 +51,11 @@ setopt hist_reduce_blanks
 # ベープ音を消す
 setopt no_beep
 
+# 区切り文字設定 zprofileに書くとなぜか反映されなかった
+export WORDCHARS="*?[]~;=!#$%^(){}<>"
 
-# lsのエイリアス
+########## alias ##########
+# ls
 alias la='ls -A'
 alias lg='ls -Agh'
 alias ll='ls -Ahl'
@@ -64,7 +67,7 @@ alias rm='rm -i'
 alias cp='cp -i'
 alias mv='mv -i'
 
-# 省略
+# abridgement
 alias g=git
 alias v=vim
 alias e=echo
@@ -75,17 +78,17 @@ alias th=touch
 # sudo の後のコマンドでエイリアスを有効にする
 alias sudo='sudo '
 
-# ruby and rails
+# development
 alias rb=ruby
 alias rails='bundle exec rails'
 alias ra='bundle exec rails'
 alias be='bundle exec'
 alias rake='bundle exec rake'
 alias buninst='bundle install --path vendor/bundle'
-
+alias nb=nodebrew
 alias ns='npm run rails-server'
 
-# アプリ起動
+# app lauch
 alias xcode='open -a /Applications/Xcode.app'
 alias subl='/Applications/Sublime\ Text.app/Contents/SharedSupport/bin/subl'
 
@@ -93,14 +96,12 @@ alias subl='/Applications/Sublime\ Text.app/Contents/SharedSupport/bin/subl'
 alias -g C='| pbcopy'
 alias -g G='| grep'
 
-# 設定ファイル
+# config file
 alias -g zrc='~/.zshrc'
 alias -g vrc='~/.vimrc'
-alias -g gvrc='~/.gvimrc'
+alias -g zpro='~/.zprofile'
 alias vz='vim ~/.zshrc'
 alias vv='vim ~/.vimrc'
-alias vgv='vim ~/.gvimrc'
-
 alias sz='source ~/.zshrc'
 
 # PostgreSQL
@@ -109,7 +110,7 @@ alias pgstp='pg_ctl stop'
 alias pgres='pg_ctl restart'
 alias pgsts='pg_ctl status'
 
-# アップデート
+# prezto update
 alias preup='cd ~/.zprezto && git pull && git submodule update --init --recursive ; cd -'
 
 # git
@@ -131,18 +132,15 @@ alias gsta='git stash'
 alias gstal='git stash list'
 alias gstalp='git stash list -p'
 alias gcoma='git checkout master'
-# copy current branch
-alias ccb='git symbolic-ref --short HEAD'
+alias ccb='git symbolic-ref --short HEAD' # copy current branch
 
 
+########## key bind ##########
 # 単語移動
 bindkey '^[\e[C' forward-word
 bindkey '^[\e[D' backward-word
 bindkey ";5C" forward-word
 bindkey ";5D" backward-word
-
-# 区切り文字設定 zprofileに書くとなぜか反映されなかった
-export WORDCHARS="*?[]~;=!#$%^(){}<>"
 
 # peco
 function peco-select-history() {
