@@ -103,6 +103,7 @@ alias -g zpro='~/.zprofile'
 alias vz='vim ~/.zshrc'
 alias vv='vim ~/.vimrc'
 alias sz='source ~/.zshrc'
+alias updatecompletion='rm -f ~/.zcompdump; compinit'
 
 # PostgreSQL
 alias pgstt='pg_ctl start'
