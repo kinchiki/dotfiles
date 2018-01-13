@@ -1,5 +1,4 @@
 " エンコーディング
-" GUI版のために無効
 set encoding=utf-8
 scriptencoding utf-8
 
@@ -105,7 +104,6 @@ set undodir=$HOME/.vim/backup
 set noswapfile
 
 
-
 " ---------- リマップ ---------- "
 " カーソル移動
 nnoremap j gj
@@ -118,9 +116,6 @@ noremap <S-h> ^
 noremap <S-j> }
 noremap <S-k> {
 noremap <S-l> $
-
-" ;;でノーマルモード
-inoremap ;; <esc>
 
 " ノーマルモードのまま改行
 nnoremap <CR> A<CR><ESC>
@@ -136,9 +131,11 @@ nnoremap Y y$
 " ESCキー2度押しでハイライトの切り替え
 nnoremap <silent><Esc><Esc> :<C-u>set nohlsearch!<CR>
 
+" pでヤンクした文字列をペースト（カットした文字を無視）
+nnoremap n "0p
 
 
-" ---------- その他 ---------- "
+" ---------- other ---------- "
 " ペースト時に自動インデントで崩れるのを防ぐ
 if &term =~ "xterm"
     let &t_SI .= "\e[?2004h"

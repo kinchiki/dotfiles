@@ -48,6 +48,9 @@ setopt rmstar_wait
 # ヒストリに保存するときに余分なスペースを削除する
 setopt hist_reduce_blanks
 
+# ベープ音を消す
+setopt no_beep
+
 
 # lsのエイリアス
 alias la='ls -A'
@@ -63,6 +66,7 @@ alias mv='mv -i'
 
 # 省略
 alias g=git
+alias v=vim
 alias e=echo
 alias cn='cat -n'
 alias pb='pbcopy <'
@@ -129,14 +133,6 @@ alias gstalp='git stash list -p'
 alias gcoma='git checkout master'
 # copy current branch
 alias ccb='git symbolic-ref --short HEAD'
-
-# MacVim関連
-if [ -f /Applications/MacVim.app/Contents/MacOS/Vim ]; then
-  alias vi='env LANG=ja_JP.UTF-8 /Applications/MacVim.app/Contents/MacOS/Vim "$@"'
-  alias vim='env_LANG=ja_JP.UTF-8 /Applications/MacVim.app/Contents/MacOS/Vim "$@"'
-fi
-
-alias v=vim
 
 
 # 単語移動
