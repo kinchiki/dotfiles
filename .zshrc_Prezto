@@ -104,6 +104,7 @@ alias vz='vim ~/.zshrc'
 alias vv='vim ~/.vimrc'
 alias sz='source ~/.zshrc'
 alias updatecompletion='rm -f ~/.zcompdump; compinit'
+alias -g sshconf='~/.ssh/config'
 
 # PostgreSQL
 alias pgstt='pg_ctl start'
@@ -134,7 +135,7 @@ alias gsta='git stash'
 alias gstal='git stash list'
 alias gstalp='git stash list -p'
 alias gcoma='git checkout master'
-alias ccb='git symbolic-ref --short HEAD' # copy current branch
+alias gcb="git symbolic-ref --short HEAD | tr -d '\n'" # display current branch
 
 
 ########## key bind ##########
