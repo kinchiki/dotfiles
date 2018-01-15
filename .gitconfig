@@ -1,24 +1,25 @@
 [user]
-	name = Akito Mizuno
-	email = mznakt@gmail.com
+    name = Akito Mizuno
+    email = mznakt@gmail.com
 [core]
-	excludesfile = ~/.gitignore_global
-	editor = vim -c \"set fenc=utf-8\"
-	precomposeunicode = true
-	quotepath = false
+    excludesfile = ~/.gitignore_global
+    editor = vim -c \"set fenc=utf-8\"
+    precomposeunicode = true
+    quotepath = false
 [color]
-	diff   = auto
-	status = auto
-	branch = auto
-	ui     = auto
+    diff   = auto
+    status = auto
+    branch = auto
+    ui     = auto
 [alias]
     ad  = add
     adu = add -u
     ada = add -A
     ci  = commit
     cim = commit -m
-    cia = commit -ma
+    cia = commit --amend
     co  = checkout
+    coma = checkout master
     st  = status -sb
     br  = branch
     l   = log --oneline
@@ -30,19 +31,20 @@
     g   = grep
     gc  = grep -C
     sta = stash
-    stali = stash list
-    stalip = stash list -p
+    stal = stash list
+    stalp = stash list -p
+    pl = pull
 [grep]
-	lineNumber = true
+    lineNumber = true
 [push]
-	default = simple
+    default = simple
 [difftool "sourcetree"]
-	cmd = opendiff \"$LOCAL\" \"$REMOTE\"
-	path = 
+    cmd = opendiff \"$LOCAL\" \"$REMOTE\"
+    path =
 [mergetool "sourcetree"]
-	cmd = /Applications/SourceTree.app/Contents/Resources/opendiff-w.sh \"$LOCAL\" \"$REMOTE\" -ancestor \"$BASE\" -merge \"$MERGED\"
-	trustExitCode = true
+    cmd = /Applications/SourceTree.app/Contents/Resources/opendiff-w.sh \"$LOCAL\" \"$REMOTE\" -ancestor \"$BASE\" -merge \"$MERGED\"
+    trustExitCode = true
 [ghq]
     root = ~/src
 [commit]
-	template = ~/.stCommitMsg
+    template = ~/.stCommitMsg
