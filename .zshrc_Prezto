@@ -135,7 +135,7 @@ alias gsta='git stash'
 alias gstal='git stash list'
 alias gstalp='git stash list -p'
 alias gcoma='git checkout master'
-alias gcb="git symbolic-ref --short HEAD | tr -d '\n'" # display current branch
+alias gcb="git symbolic-ref --short HEAD | tr -d '\n' | pbcopy" # display current branch
 
 
 ########## key bind ##########
