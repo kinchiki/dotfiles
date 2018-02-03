@@ -87,6 +87,8 @@ alias rake='bundle exec rake'
 alias buninst='bundle install --path vendor/bundle'
 alias nb=nodebrew
 alias ns='npm run rails-server'
+alias va=vagrant
+alias dc=docker
 
 # app lauch
 alias xcode='open -a /Applications/Xcode.app'
