@@ -139,6 +139,7 @@ alias gstalp='git stash list -p'
 alias gcoma='git checkout master'
 alias gcb="git symbolic-ref --short HEAD | tr -d '\n' | pbcopy" # display current branch
 
+disable r
 
 ########## key bind ##########
 # 単語移動
