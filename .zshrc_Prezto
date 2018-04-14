@@ -76,7 +76,7 @@ alias pb='pbcopy <'
 alias th=touch
 
 # sudo の後のコマンドでエイリアスを有効にする
-alias sudo='sudo '
+# alias sudo='sudo '
 
 # development
 alias rb=ruby
