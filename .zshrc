@@ -88,7 +88,8 @@ alias buninst='bundle install --path vendor/bundle'
 alias nb=nodebrew
 alias ns='npm run rails-server'
 alias va=vagrant
-alias dc=docker
+alias dk=docker
+alias dc='docker-compose'
 
 # app lauch
 alias xcode='open -a /Applications/Xcode.app'
@@ -138,6 +139,7 @@ alias gstal='git stash list'
 alias gstalp='git stash list -p'
 alias gcoma='git checkout master'
 alias gcb="git symbolic-ref --short HEAD | tr -d '\n' | pbcopy" # display current branch
+alias groot='cd `git rev-parse --show-toplevel`' # cd project root
 
 disable r
 
