@@ -108,6 +108,7 @@ alias vv='vim ~/.vimrc'
 alias sz='source ~/.zshrc'
 alias updatecompletion='rm -f ~/.zcompdump; compinit'
 alias -g sshconf='~/.ssh/config'
+alias sshlist="cat ~/.ssh/config | grep -e '^Host' | cut -d ' ' -f 2"
 
 # PostgreSQL
 alias pgstt='pg_ctl start'
@@ -134,6 +135,7 @@ alias gd='git diff'
 alias gdw='git diff -w'
 alias gdc='git diff --cached'
 alias gdcw='git diff --color-words'
+alias gco='git checkout'
 alias gsta='git stash'
 alias gstal='git stash list'
 alias gstalp='git stash list -p'
