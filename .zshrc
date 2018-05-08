@@ -81,10 +81,9 @@ alias th=touch
 # development
 alias rb=ruby
 alias rails='bundle exec rails'
-alias ra='bundle exec rails'
 alias be='bundle exec'
-alias rake='bundle exec rake'
-alias buninst='bundle install --path vendor/bundle'
+alias ra='bundle exec rails'
+alias rubocop='bundle exec rubocop'
 alias nb=nodebrew
 alias ns='npm run rails-server'
 alias va=vagrant
