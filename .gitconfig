@@ -50,5 +50,7 @@
     template = ~/.stCommitMsg
 [credential]
 	helper = osxkeychain
+[merge]
+	ff = false
 [pull]
 	ff = only
