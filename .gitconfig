@@ -34,6 +34,7 @@
     stal = stash list
     stalp = stash list -p
     pl = pull
+    rc = rebase --continue
 [grep]
     lineNumber = true
 [push]
