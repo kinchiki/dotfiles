@@ -141,6 +141,7 @@ alias gstalp='git stash list -p'
 alias gcoma='git checkout master'
 alias gcb="git symbolic-ref --short HEAD | tr -d '\n' | pbcopy" # display current branch
 alias groot='cd `git rev-parse --show-toplevel`' # cd project root
+alias gpushu='git push -u origin `git symbolic-ref --short HEAD | tr -d '\n'`'
 
 disable r
 
