@@ -96,7 +96,7 @@ alias subl='/Applications/Sublime\ Text.app/Contents/SharedSupport/bin/subl'
 
 # ユニバーサルエイリアス
 alias -g C='| pbcopy'
-alias -g G='| grep'
+alias -g G='| grep -v grep | grep'
 
 # config file
 alias -g zrc='~/.zshrc'
