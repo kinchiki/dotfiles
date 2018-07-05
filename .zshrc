@@ -25,7 +25,7 @@ fpath=(/usr/local/share/zsh-completions $fpath)
 # 補完機能有効
 # -U は alias の展開を「しない」ためのオプション
 # -z は関数を zsh 形式で読み込むというオプション
-autoload -Uz compinit
+# autoload -Uz compinit
 
 # 実行 -u は compinitのテスト避ける
 # いらない？
@@ -141,7 +141,7 @@ alias gstalp='git stash list -p'
 alias gcoma='git checkout master'
 alias gcb="git symbolic-ref --short HEAD | tr -d '\n' | pbcopy" # display current branch
 alias groot='cd `git rev-parse --show-toplevel`' # cd project root
-alias gpushu='git push -u origin `git symbolic-ref --short HEAD | tr -d '\n'`'
+alias gpushu="git push -u origin $(echo $(git symbolic-ref --short HEAD | tr -d '\n'))"
 
 disable r
 
