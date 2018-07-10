@@ -9,10 +9,10 @@ module.exports = {
     updateChannel: 'stable',
 
     // default font size in pixels for all tabs
-    fontSize: 12,
+    fontSize: 15,
 
     // font family with optional fallbacks
-    fontFamily: 'Menlo, "DejaVu Sans Mono", Consolas, "Lucida Console", monospace',
+    fontFamily: 'Ricty , Menlo, "DejaVu Sans Mono", Consolas, "Lucida Console", monospace',
 
     // default font weight: 'normal' or 'bold'
     fontWeight: 'normal',
@@ -27,10 +27,10 @@ module.exports = {
     cursorAccentColor: '#000',
 
     // `'BEAM'` for |, `'UNDERLINE'` for _, `'BLOCK'` for █
-    cursorShape: 'BLOCK',
+    cursorShape: 'BEAM',
 
     // set to `true` (without backticks and without quotes) for blinking cursor
-    cursorBlink: false,
+    cursorBlink: true,
 
     // color of the text
     foregroundColor: '#fff',
@@ -107,7 +107,7 @@ module.exports = {
     env: {},
 
     // set to `false` for no bell
-    bell: 'SOUND',
+    bell: 'false',
 
     // if `true` (without backticks and without quotes), selected text will automatically be copied to the clipboard
     copyOnSelect: false,
