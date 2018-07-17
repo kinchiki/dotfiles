@@ -12,8 +12,8 @@ set number
 
 " カラー
 set background=dark
-" let g:hybrid_use_iTerm_colors = 1
-" colorscheme hybrid
+let g:hybrid_use_iTerm_colors = 1
+colorscheme hybrid
 
 " 行番号の色や現在行の設定
 autocmd ColorScheme * highlight LineNr ctermfg=249
