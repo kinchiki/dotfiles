@@ -145,7 +145,7 @@ alias gco.='git checkout .'
 alias gcoma='git checkout master'
 alias gcb="git symbolic-ref --short HEAD | tr -d '\n' | pbcopy" # copy current branch
 alias groot='cd `git rev-parse --show-toplevel`' # cd project root
-alias gpushu="git push -u origin $(echo $(git symbolic-ref --short HEAD | tr -d '\n'))"
+alias gpushu="git push -u origin $(git symbolic-ref --short HEAD | tr -d '\n')"
 
 disable r
 
