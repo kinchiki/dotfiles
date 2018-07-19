@@ -143,6 +143,7 @@ alias gstalp='git stash list -p'
 alias gco='git checkout'
 alias gco.='git checkout .'
 alias gcoma='git checkout master'
+alias gpush='git push'
 alias gcb="git symbolic-ref --short HEAD | tr -d '\n' | pbcopy" # copy current branch
 alias groot='cd `git rev-parse --show-toplevel`' # cd project root
 function gpush-u() {
