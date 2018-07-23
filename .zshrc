@@ -138,12 +138,13 @@ alias gdc='git diff --cached'
 alias gdcw='git diff --color-words'
 alias gco='git checkout'
 alias gsta='git stash'
-alias gstal='git stash list'
-alias gstalp='git stash list -p'
+alias gstalist='git stash list'
+alias gstalistp='git stash list -p'
 alias gco='git checkout'
 alias gco.='git checkout .'
 alias gcoma='git checkout master'
 alias gpush='git push'
+alias gpl='git pull'
 alias gcb="git symbolic-ref --short HEAD | tr -d '\n' | pbcopy" # copy current branch
 alias groot='cd `git rev-parse --show-toplevel`' # cd project root
 function gpush-u() {
