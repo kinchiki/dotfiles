@@ -145,6 +145,7 @@ alias gco.='git checkout .'
 alias gcoma='git checkout master'
 alias gpush='git push'
 alias gpl='git pull'
+alias gshow='git show'
 alias gcb="git symbolic-ref --short HEAD | tr -d '\n' | pbcopy" # copy current branch
 alias groot='cd `git rev-parse --show-toplevel`' # cd project root
 function gpush-u() {
