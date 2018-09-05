@@ -75,6 +75,9 @@ alias cn='cat -n'
 alias pb='pbcopy <'
 alias th=touch
 
+# utilty
+alias topc='top -o cpu -s 2'
+
 # sudo の後のコマンドでエイリアスを有効にする
 # alias sudo='sudo '
 
