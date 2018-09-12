@@ -149,10 +149,13 @@ alias gpush='git push'
 alias gpl='git pull'
 alias gshow='git show'
 alias gcb="git symbolic-ref --short HEAD | tr -d '\n' | pbcopy" # copy current branch
-alias -g groot="$(git rev-parse --show-toplevel| tr -d '\n')" # git root
+function cdgroot() {
+    ROOTPATH=$(git rev-parse --show-toplevel| tr -d '\n')
+    cd $ROOTPATH
+}
 function gpush-u() {
-  BRANCH=`git symbolic-ref --short HEAD | tr -d '\n'`
-  git push -u origin $BRANCH
+    BRANCH=$(git symbolic-ref --short HEAD | tr -d '\n')
+    git push -u origin $BRANCH
 }
 
 disable r
