@@ -28,8 +28,8 @@
     dc  = diff --cached
     df  = diff
     dw  = diff -w
-    g   = grep
-    gc  = grep -C
+    g   = grep -i
+    gc  = grep -C -i
     sta = stash
     stal = stash list
     stalp = stash list -p
