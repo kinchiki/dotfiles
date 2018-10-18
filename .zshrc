@@ -69,7 +69,6 @@ alias mv='mv -i'
 
 # abridgement
 alias g=git
-alias v=vim
 alias e=echo
 alias cn='cat -n'
 alias pb='pbcopy <'
@@ -133,7 +132,7 @@ alias gl='git log --oneline'
 alias glg='git log --graph --decorate --oneline'
 alias gs='git status -sb'
 alias gg='git grep -i'
-alias ggc='git grep -C -i'
+alias ggc='git grep -i -C'
 alias gd='git diff'
 alias gdw='git diff -w'
 alias gdc='git diff --cached'
