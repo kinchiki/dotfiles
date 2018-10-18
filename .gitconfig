@@ -29,7 +29,7 @@
     df  = diff
     dw  = diff -w
     g   = grep -i
-    gc  = grep -C -i
+    gc  = grep -i -C
     sta = stash
     stal = stash list
     stalp = stash list -p
