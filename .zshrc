@@ -33,6 +33,9 @@ fpath=(/usr/local/share/zsh-completions $fpath)
 
 # Preztoで多分設定されていないもの
 
+# 右に時間を表示
+RPROMPT=%*
+
 # ../ の後は今いるディレクトリを補完しない
 zstyle ':completion:*' ignore-parents parent pwd ..
 
