@@ -154,6 +154,7 @@ alias gpl='git pull'
 alias gshow='git show'
 alias gfp='git fetch --prune'
 alias gcb="git symbolic-ref --short HEAD | tr -d '\n' | pbcopy" # copy current branch
+alias gitalias="git config --list | grep '^alias\.'"
 function cdgroot() {
     ROOTPATH=$(git rev-parse --show-toplevel| tr -d '\n')
     cd $ROOTPATH
