@@ -28,7 +28,7 @@ fpath=(/usr/local/share/zsh-completions $fpath)
 
 # 実行 -u は compinitのテスト避ける
 # -i はいらない？
-autoload -Uz compinit && compinit -i
+autoload -Uz compinit # && compinit -i
 
 # Preztoで多分設定されていないもの
 
@@ -152,6 +152,7 @@ alias gpush='git push'
 alias gpl='git pull'
 alias gshow='git show'
 alias gfp='git fetch --prune'
+alias gbrdelete='git branch | grep -v master | xargs git branch -d'
 alias gcb="git symbolic-ref --short HEAD | tr -d '\n' | pbcopy" # copy current branch
 alias gitalias="git config --list | grep '^alias\.'"
 function cdgroot() {
