@@ -102,7 +102,6 @@ alias g=git
 alias e=echo
 alias cn='cat -n'
 alias pb='pbcopy <'
-alias th=touch
 
 # utilty
 alias topc='top -o cpu -s 2'
@@ -120,6 +119,8 @@ alias rubocop='bundle exec rubocop'
 alias va=vagrant
 alias dk=docker
 alias dc='docker-compose'
+
+alias reload='exec $SHELL -l'
 
 # app lauch
 alias xcode='open -a /Applications/Xcode.app'
