@@ -74,26 +74,3 @@ fi
 if [[ ! -d "${TMPDIR}" ]]; then
   mkdir -m 700 "${TMPDIR}"
 fi
-
-
-########## MyConfig ##########
-
-
-if which rbenv > /dev/null; then eval "$(rbenv init -)"; fi
-# export PATH="$HOME/.goenv/bin:$PATH"
-# eval "$(goenv init -)"
-export PGDATA=/usr/local/var/postgres
-export ARCHFLAGS='-arch x86_64'
-export PATH="$PATH:$HOME/.bin"
-# export PATH="$HOME/.nodebrew/current/bin:$PATH"
-export EDITOR=vim
-# export WORDCHARS="*?[]~;=!#$%^(){}<>" なぜか効かない
-export LESS='-i -g -s -F -M -R -X -W -N'
-export PATH="/usr/local/opt/mysql@5.6/bin:$PATH"
-export PATH="/usr/local/opt/imagemagick@6/bin:$PATH"
-# export GOPATH="$HOME/src/go"
-# export PATH=$PATH:$GOPATH/bin
-export LANG=en_US.UTF-8
-export LC_ALL=en_US.UTF-8
-export NVM_DIR="$HOME/.nvm"
-[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm

@@ -53,8 +53,36 @@ setopt hist_reduce_blanks
 # ベープ音を消す
 setopt no_beep
 
-# 区切り文字設定 zprofileに書くとなぜか反映されなかった
+
+########## env ##########
+export LANG=en_US.UTF-8
+export LC_ALL=en_US.UTF-8
+export LESS='-i -g -s -F -M -R -X -W -N'
+export EDITOR=vim
+export ARCHFLAGS='-arch x86_64'
 export WORDCHARS="*?[]~;=!#$%^(){}<>"
+
+
+########## PATH ##########
+if which rbenv > /dev/null; then eval "$(rbenv init -)"; fi
+export PGDATA=/usr/local/var/postgres
+export PATH="$PATH:$HOME/.bin"
+export PATH="/usr/local/opt/mysql@5.6/bin:$PATH"
+export PATH="/usr/local/opt/imagemagick@6/bin:$PATH"
+export NVM_DIR="$HOME/.nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
+export GOENV_ROOT="$HOME/.goenv"
+export PATH="$GOENV_ROOT/bin:$PATH"
+eval "$(goenv init -)"
+export PATH="$GOROOT/bin:$PATH"
+export PATH="$PATH:$GOPATH/bin"
+export PYENV_ROOT="$HOME/.pyenv"
+command -v pyenv >/dev/null || export PATH="$PYENV_ROOT/bin:$PATH"
+eval "$(pyenv init -)"
+
+# export GOROOT="$GOROOT/bin" #
+# export PATH="$GOROOT:$PATH"
+
 
 ########## alias ##########
 # ls
