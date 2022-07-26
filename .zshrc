@@ -64,24 +64,35 @@ export WORDCHARS="*?[]~;=!#$%^(){}<>"
 
 
 ########## PATH ##########
-if which rbenv > /dev/null; then eval "$(rbenv init -)"; fi
+
 export PGDATA=/usr/local/var/postgres
 export PATH="$PATH:$HOME/.bin"
 export PATH="/usr/local/opt/mysql@5.6/bin:$PATH"
 export PATH="/usr/local/opt/imagemagick@6/bin:$PATH"
+
+## rbenv
+if which rbenv > /dev/null; then eval "$(rbenv init -)"; fi
+
+## NVM
 export NVM_DIR="$HOME/.nvm"
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
+
+## goenv
 export GOENV_ROOT="$HOME/.goenv"
 export PATH="$GOENV_ROOT/bin:$PATH"
 eval "$(goenv init -)"
-export PATH="$GOROOT/bin:$PATH"
-export PATH="$PATH:$GOPATH/bin"
+# export PATH="$GOROOT/bin:$PATH"
+# export PATH="$PATH:$GOPATH/bin"
+
+## pyenv
 export PYENV_ROOT="$HOME/.pyenv"
 command -v pyenv >/dev/null || export PATH="$PYENV_ROOT/bin:$PATH"
 eval "$(pyenv init -)"
 
-# export GOROOT="$GOROOT/bin" #
-# export PATH="$GOROOT:$PATH"
+#gloud
+export GCLOUD="$HOME/dev/google-cloud-sdk"
+export PATH="$GCLOUD/bin:$PATH"
+source "$GCLOUD/completion.zsh.inc"
 
 
 ########## alias ##########
