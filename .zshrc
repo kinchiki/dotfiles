@@ -13,9 +13,6 @@ fi
 
 # Customize to your needs...
 
-# マシン毎のローカルの設定読み込み
-[ -f ~/.zshrc.local ] && source ~/.zshrc.local
-
 # 補完機能有効
 # autoload はシェル関数を自動読み込みするシェルの組み込み関数
 # compinit というシェル関数を自動読み込み
@@ -59,40 +56,8 @@ export LANG=en_US.UTF-8
 export LC_ALL=en_US.UTF-8
 export LESS='-i -g -s -F -M -R -X -W -N'
 export EDITOR=vim
-export ARCHFLAGS='-arch x86_64'
+#export ARCHFLAGS='-arch x86_64'
 export WORDCHARS="*?[]~;=!#$%^(){}<>"
-
-
-########## PATH ##########
-
-export PGDATA=/usr/local/var/postgres
-export PATH="$PATH:$HOME/.bin"
-export PATH="/usr/local/opt/mysql@5.6/bin:$PATH"
-export PATH="/usr/local/opt/imagemagick@6/bin:$PATH"
-
-## rbenv
-if which rbenv > /dev/null; then eval "$(rbenv init -)"; fi
-
-## NVM
-export NVM_DIR="$HOME/.nvm"
-[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
-
-## goenv
-export GOENV_ROOT="$HOME/.goenv"
-export PATH="$GOENV_ROOT/bin:$PATH"
-eval "$(goenv init -)"
-# export PATH="$GOROOT/bin:$PATH"
-# export PATH="$PATH:$GOPATH/bin"
-
-## pyenv
-export PYENV_ROOT="$HOME/.pyenv"
-command -v pyenv >/dev/null || export PATH="$PYENV_ROOT/bin:$PATH"
-eval "$(pyenv init -)"
-
-#gloud
-export GCLOUD="$HOME/dev/google-cloud-sdk"
-export PATH="$GCLOUD/bin:$PATH"
-source "$GCLOUD/completion.zsh.inc"
 
 
 ########## alias ##########
@@ -253,3 +218,39 @@ function peco-ssh () {
 }
 zle -N peco-ssh
 bindkey '^H' peco-ssh
+
+# マシン毎のローカルの設定読み込み
+[ -f ~/.zshrc.local ] && source ~/.zshrc.local
+
+
+
+########## PATH ##########
+export PGDATA=/usr/local/var/postgres
+export PATH="$PATH:$HOME/.bin"
+export PATH="/usr/local/opt/mysql@5.6/bin:$PATH"
+export PATH="/usr/local/opt/imagemagick@6/bin:$PATH"
+
+## rbenv
+if which rbenv > /dev/null; then eval "$(rbenv init -)"; fi
+
+## NVM
+export NVM_DIR="$HOME/.nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
+
+## goenv
+export GOENV_ROOT="$HOME/.goenv"
+export PATH="$GOENV_ROOT/bin:$PATH"
+eval "$(goenv init -)"
+
+## gvm`
+# [[ -s ~/.gvm/scripts/gvm ]] && source ~/.gvm/scripts/gvm
+
+## pyenv
+export PYENV_ROOT="$HOME/.pyenv"
+command -v pyenv >/dev/null || export PATH="$PYENV_ROOT/bin:$PATH"
+eval "$(pyenv init -)"
+
+#gloud
+export GCLOUD="$HOME/dev/google-cloud-sdk"
+export PATH="$GCLOUD/bin:$PATH"
+source "$GCLOUD/completion.zsh.inc"
