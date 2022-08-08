@@ -168,6 +168,10 @@ function gpush-u() {
     BRANCH=$(git symbolic-ref --short HEAD | tr -d '\n')
     git push -u origin $BRANCH
 }
+function gpush-tag() {
+    LATEST_TAG=$(git describe --tags --abbrev=0 | tr -d '\n')
+    git push origin $LATEST_TAG
+}
 
 disable r
 
