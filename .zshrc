@@ -161,12 +161,12 @@ alias gbrdelete='git branch | grep -v master | xargs git branch -d'
 alias gcb="git symbolic-ref --short HEAD | tr -d '\n' | pbcopy" # copy current branch
 alias gitalias="git config --list | grep '^alias\.'"
 function cdgroot() {
-    ROOTPATH=$(git rev-parse --show-toplevel| tr -d '\n')
-    cd $ROOTPATH
+    ROOT_PATH=$(git rev-parse --show-toplevel| tr -d '\n')
+    cd $ROOT_PATH
 }
 function gpush-u() {
-    BRANCH=$(git symbolic-ref --short HEAD | tr -d '\n')
-    git push -u origin $BRANCH
+    CURRENT_RANCH=$(git symbolic-ref --short HEAD | tr -d '\n')
+    git push -u origin $CURRENT_BRANCH
 }
 function gpush-tag() {
     LATEST_TAG=$(git describe --tags --abbrev=0 | tr -d '\n')
