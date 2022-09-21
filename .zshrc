@@ -127,7 +127,7 @@ alias pgres='pg_ctl restart'
 alias pgsts='pg_ctl status'
 
 # prezto update
-alias preup='cd ~/.zprezto && git pull && git submodule update --init --recursive ; cd -'
+alias preup='cd ~/.zprezto && git pull && git submodule sync --recursive && git submodule update --init --recursive ; cd -'
 
 # git
 alias gad='git add'
