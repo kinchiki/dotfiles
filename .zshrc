@@ -23,6 +23,8 @@ fi
 fpath=(/usr/local/share/zsh-completions $fpath)
 # fpath=(~/.zsh/completion $fpath)
 
+[[ $commands[kubectl] ]] && source <(kubectl completion zsh)
+
 # 実行 -u は compinitのテスト避ける
 # -i はいらない？
 autoload -Uz compinit # && compinit -i
@@ -95,6 +97,7 @@ alias rubocop='bundle exec rubocop'
 alias va=vagrant
 alias dk=docker
 alias dc='docker-compose'
+alias k=kubectl
 
 alias reload='exec $SHELL -l'
 
@@ -146,7 +149,6 @@ alias gd='git diff'
 alias gdw='git diff -w'
 alias gdc='git diff --cached'
 alias gdcw='git diff --color-words'
-alias gco='git checkout'
 alias gsta='git stash'
 alias gstalist='git stash list'
 alias gstalistp='git stash list -p'
@@ -165,7 +167,7 @@ function cdgroot() {
     cd $ROOT_PATH
 }
 function gpush-u() {
-    CURRENT_RANCH=$(git symbolic-ref --short HEAD | tr -d '\n')
+    CURRENT_BRANCH=$(git symbolic-ref --short HEAD | tr -d '\n')
     git push -u origin $CURRENT_BRANCH
 }
 function gpush-tag() {
@@ -258,3 +260,27 @@ eval "$(pyenv init -)"
 export GCLOUD="$HOME/dev/google-cloud-sdk"
 export PATH="$GCLOUD/bin:$PATH"
 source "$GCLOUD/completion.zsh.inc"
+export USE_GKE_GCLOUD_AUTH_PLUGIN=True
+
+# autoload -U +X bashcompinit && bashcompinit
+if type terraform &> /dev/null; then
+  complete -o nospace -C terraform terraform
+fi
+
+if [[ ! -n $TMUX && $- == *l* ]]; then
+  # get the IDs
+  ID="`tmux list-sessions`"
+  if [[ -z "$ID" ]]; then
+    tmux new-session
+  fi
+  create_new_session="Create New Session"
+  ID="$ID\n${create_new_session}:"
+  ID="`echo $ID | $PERCOL | cut -d: -f1`"
+  if [[ "$ID" = "${create_new_session}" ]]; then
+    tmux new-session
+  elif [[ -n "$ID" ]]; then
+    tmux attach-session -t "$ID"
+  else
+    :  # Start terminal normally
+  fi
+fi
