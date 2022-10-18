@@ -81,8 +81,20 @@ alias e=echo
 alias cn='cat -n'
 alias pb='pbcopy <'
 
-# utilty
+# config, utilty
 alias topc='top -o cpu -s 2'
+alias psg='ps aux | grep -v grep | grep -i'
+alias -g zrc='~/.zshrc'
+alias -g vrc='~/.vimrc'
+alias -g zpro='~/.zprofile'
+alias -g tmuxconf='~/.tmux.conf'
+alias -g sshconf='~/.ssh/config'
+alias vz='vim ~/.zshrc'
+alias vv='vim ~/.vimrc'
+alias sz='source ~/.zshrc'
+alias updatecompletion='rm -f ~/.zcompdump; compinit'
+alias sshlist="cat ~/.ssh/config | grep -e '^Host' | cut -d ' ' -f 2"
+alias reload='exec $SHELL -l'
 
 # sudo の後のコマンドでエイリアスを有効にする
 # alias sudo='sudo '
@@ -99,7 +111,6 @@ alias dk=docker
 alias dc='docker-compose'
 alias k=kubectl
 
-alias reload='exec $SHELL -l'
 
 # app lauch
 alias xcode='open -a /Applications/Xcode.app'
@@ -108,17 +119,6 @@ alias subl='/Applications/Sublime\ Text.app/Contents/SharedSupport/bin/subl'
 # ユニバーサルエイリアス
 alias -g C='| pbcopy'
 alias -g G='| grep -v grep | grep'
-
-# config file
-alias -g zrc='~/.zshrc'
-alias -g vrc='~/.vimrc'
-alias -g zpro='~/.zprofile'
-alias vz='vim ~/.zshrc'
-alias vv='vim ~/.vimrc'
-alias sz='source ~/.zshrc'
-alias updatecompletion='rm -f ~/.zcompdump; compinit'
-alias -g sshconf='~/.ssh/config'
-alias sshlist="cat ~/.ssh/config | grep -e '^Host' | cut -d ' ' -f 2"
 
 # PostgreSQL
 alias pgstt='pg_ctl start'
@@ -162,6 +162,7 @@ alias gfp='git fetch --prune'
 alias gbrdelete='git branch | grep -v master | xargs git branch -d'
 alias gcb="git symbolic-ref --short HEAD | tr -d '\n' | pbcopy" # copy current branch
 alias gitalias="git config --list | grep '^alias\.'"
+
 function cdgroot() {
     ROOT_PATH=$(git rev-parse --show-toplevel| tr -d '\n')
     cd $ROOT_PATH
