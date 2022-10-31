@@ -118,7 +118,7 @@ alias subl='/Applications/Sublime\ Text.app/Contents/SharedSupport/bin/subl'
 
 # ユニバーサルエイリアス
 alias -g C='| pbcopy'
-alias -g G='| grep -v grep | grep'
+alias -g G='| grep -v grep | grep -i'
 
 # PostgreSQL
 alias pgstt='pg_ctl start'
@@ -256,6 +256,7 @@ eval "$(goenv init -)"
 export PYENV_ROOT="$HOME/.pyenv"
 command -v pyenv >/dev/null || export PATH="$PYENV_ROOT/bin:$PATH"
 eval "$(pyenv init -)"
+alias brew='env PATH="${PATH//$(pyenv root)\/shims:/}" brew' # fix brew doctor warning
 
 #gloud
 export GCLOUD="$HOME/dev/google-cloud-sdk"
