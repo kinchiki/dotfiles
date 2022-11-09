@@ -123,7 +123,7 @@ nnoremap <CR> A<CR><ESC>
 nnoremap <space> i<space><esc>
 
 " rだけでリドゥ
-nnoremap r <C-r>
+" nnoremap r <C-r>
 
 " Yで行末までヤンク
 nnoremap Y y$
@@ -132,7 +132,7 @@ nnoremap Y y$
 nnoremap <silent><Esc><Esc> :<C-u>set nohlsearch!<CR>
 
 " pでヤンクした文字列をペースト（カットした文字を無視）
-nnoremap n "0p
+" nnoremap n "0p
 
 
 " ---------- other ---------- "

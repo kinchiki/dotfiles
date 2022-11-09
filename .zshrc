@@ -84,6 +84,7 @@ alias pb='pbcopy <'
 # config, utilty
 alias topc='top -o cpu -s 2'
 alias psg='ps aux | grep -v grep | grep -i'
+alias envg='env | grep -v grep | grep -i'
 alias -g zrc='~/.zshrc'
 alias -g vrc='~/.vimrc'
 alias -g zpro='~/.zprofile'
@@ -171,7 +172,7 @@ function gpush-u() {
     CURRENT_BRANCH=$(git symbolic-ref --short HEAD | tr -d '\n')
     git push -u origin $CURRENT_BRANCH
 }
-function gpush-tag() {
+function gtagpush() {
     LATEST_TAG=$(git describe --tags --abbrev=0 | tr -d '\n')
     git push origin $LATEST_TAG
 }
