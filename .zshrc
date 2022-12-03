@@ -27,7 +27,7 @@ fpath=(/usr/local/share/zsh-completions $fpath)
 
 # 実行 -u は compinitのテスト避ける
 # -i はいらない？
-autoload -Uz compinit # && compinit -i
+# autoload -Uz compinit && compinit #-i
 
 # Preztoで多分設定されていないもの
 
@@ -111,7 +111,8 @@ alias va=vagrant
 alias dk=docker
 alias dc='docker-compose'
 alias k=kubectl
-
+alias ter=terraform
+alias terp='terraform plan'
 
 # app lauch
 alias xcode='open -a /Applications/Xcode.app'

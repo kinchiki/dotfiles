@@ -11,7 +11,7 @@ set ruler
 set number
 
 " カラー
-" set background="dark"
+set background=dark
 let g:hybrid_use_iTerm_colors = 1
 colorscheme hybrid
 
