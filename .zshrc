@@ -54,6 +54,7 @@ setopt no_beep
 
 
 ########## env ##########
+eval "$(/opt/homebrew/bin/brew shellenv)"
 export LANG=en_US.UTF-8
 export LC_ALL=en_US.UTF-8
 export LESS='-i -g -s -F -M -R -X -W -N'
@@ -257,34 +258,39 @@ eval "$(goenv init -)"
 ## pyenv
 export PYENV_ROOT="$HOME/.pyenv"
 command -v pyenv >/dev/null || export PATH="$PYENV_ROOT/bin:$PATH"
-eval "$(pyenv init -)"
-alias brew='env PATH="${PATH//$(pyenv root)\/shims:/}" brew' # fix brew doctor warning
+# eval "$(pyenv init -)"
+# alias brew='env PATH="${PATH//$(pyenv root)\/shims:/}" brew' # fix brew doctor warning
 
 #gloud
 export GCLOUD="$HOME/dev/google-cloud-sdk"
 export PATH="$GCLOUD/bin:$PATH"
-source "$GCLOUD/completion.zsh.inc"
+# source "$GCLOUD/completion.zsh.inc"
 export USE_GKE_GCLOUD_AUTH_PLUGIN=True
 
-# autoload -U +X bashcompinit && bashcompinit
+autoload -U +X bashcompinit && bashcompinit
 if type terraform &> /dev/null; then
-  complete -o nospace -C terraform terraform
+  complete -o nospace -C /opt/homebrew/Cellar/tfenv/3.0.0/versions/1.3.8/terraform terraform
 fi
 
-if [[ ! -n $TMUX && $- == *l* ]]; then
-  # get the IDs
-  ID="`tmux list-sessions`"
-  if [[ -z "$ID" ]]; then
-    tmux new-session
-  fi
-  create_new_session="Create New Session"
-  ID="$ID\n${create_new_session}:"
-  ID="`echo $ID | $PERCOL | cut -d: -f1`"
-  if [[ "$ID" = "${create_new_session}" ]]; then
-    tmux new-session
-  elif [[ -n "$ID" ]]; then
-    tmux attach-session -t "$ID"
-  else
-    :  # Start terminal normally
-  fi
-fi
+# if [[ ! -n $TMUX && $- == *l* ]]; then
+#  # get the IDs
+#  ID="`tmux list-sessions`"
+#  if [[ -z "$ID" ]]; then
+#    tmux new-session
+#  fi
+#  create_new_session="Create New Session"
+#  ID="$ID\n${create_new_session}:"
+#  ID="`echo $ID | $PERCOL | cut -d: -f1`"
+#  if [[ "$ID" = "${create_new_session}" ]]; then
+#    tmux new-session
+#  elif [[ -n "$ID" ]]; then
+#    tmux attach-session -t "$ID"
+#  else
+#    :  # Start terminal normally
+#  fi
+#fi
+
+function kill-grep () {
+  target_process=$1
+  ps aux | grep -v grep | grep -i $target_process | awk '{ print "kill -9", $2 }' | sh
+}
