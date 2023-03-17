@@ -71,6 +71,10 @@ alias ll='ls -Ahl'
 alias ld='ls -dh .*'
 alias lld='ls -ldh .*'
 
+# grep
+export GREP_COLOR='01;31'
+alias -g grep='grep -i --color=auto'
+
 # 確認
 alias rm='rm -i'
 alias cp='cp -i'
