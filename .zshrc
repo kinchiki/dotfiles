@@ -64,6 +64,10 @@ export WORDCHARS="*?[]~;=!#$%^(){}<>"
 
 
 ########## alias ##########
+# ユニバーサルエイリアス
+alias -g C='| pbcopy'
+alias -g G='| grep -v grep | grep -i --color=auto'
+
 # ls
 alias la='ls -A'
 alias lg='ls -Agh'
@@ -97,6 +101,7 @@ alias -g tmuxconf='~/.tmux.conf'
 alias -g sshconf='~/.ssh/config'
 alias vz='vim ~/.zshrc'
 alias vv='vim ~/.vimrc'
+alias vaws='vim ~/.aws/config'
 alias sz='source ~/.zshrc'
 alias updatecompletion='rm -f ~/.zcompdump; compinit'
 alias sshlist="cat ~/.ssh/config | grep -e '^Host' | cut -d ' ' -f 2"
@@ -122,10 +127,6 @@ alias terp='terraform plan'
 # app lauch
 alias xcode='open -a /Applications/Xcode.app'
 alias subl='/Applications/Sublime\ Text.app/Contents/SharedSupport/bin/subl'
-
-# ユニバーサルエイリアス
-alias -g C='| pbcopy'
-alias -g G='| grep -v grep | grep -i'
 
 # PostgreSQL
 alias pgstt='pg_ctl start'
@@ -298,3 +299,4 @@ function kill-grep () {
   target_process=$1
   ps aux | grep -v grep | grep -i $target_process | awk '{ print "kill -9", $2 }' | sh
 }
+
