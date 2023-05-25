@@ -52,8 +52,10 @@
 [commit]
     template = ~/.stCommitMsg
 [credential]
-	helper = osxkeychain
+	helper = !aws codecommit --profile dev credential-helper $@
+	UseHttpPath = true
 [merge]
 	ff = false
 [pull]
 	ff = only
+	rebase = merges

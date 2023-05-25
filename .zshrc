@@ -118,15 +118,23 @@ alias ra='bundle exec rails'
 alias rubocop='bundle exec rubocop'
 # alias nb=nodebrew
 alias va=vagrant
-alias dk=docker
-alias dc='docker-compose'
 alias k=kubectl
 alias ter=terraform
 alias terp='terraform plan'
+alias co=copilot
 
 # app lauch
 alias xcode='open -a /Applications/Xcode.app'
 alias subl='/Applications/Sublime\ Text.app/Contents/SharedSupport/bin/subl'
+
+# Docker
+alias dk=docker
+alias dc='docker-compose'
+alias dkc='docker container'
+alias dk-rm-cache='docker buildx prune -f'
+alias dk-rm-image='docker image prune -af'
+#alias dk-rm-network='docker network prune -f'
+alias dc-local-up='docker-compose -f docker-compose.yml -f docker-compose.local.yml up'
 
 # PostgreSQL
 alias pgstt='pg_ctl start'
@@ -244,6 +252,14 @@ export PGDATA=/usr/local/var/postgres
 export PATH="$PATH:$HOME/.bin"
 export PATH="/usr/local/opt/mysql@5.6/bin:$PATH"
 export PATH="/usr/local/opt/imagemagick@6/bin:$PATH"
+
+## node
+export NVM_DIR="$HOME/.nvm"
+[ -s "/opt/homebrew/opt/nvm/nvm.sh" ] && \. "/opt/homebrew/opt/nvm/nvm.sh"  # This loads nvm
+#[ -s "/opt/homebrew/opt/nvm/etc/bash_completion.d/nvm" ] && \. "/opt/homebrew/opt/nvm/etc/bash_completion.d/nvm"  # This loads nvm bash_completion
+
+#export VOLTA_HOME="$HOME/.volta"
+#export PATH="$VOLTA_HOME/bin:$PATH"
 
 ## rbenv
 if which rbenv > /dev/null; then eval "$(rbenv init -)"; fi
