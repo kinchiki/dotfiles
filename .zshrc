@@ -31,8 +31,9 @@ fpath=(/usr/local/share/zsh-completions $fpath)
 
 # Preztoで多分設定されていないもの
 
-# 右に時間を表示
-RPROMPT=%*
+# 時間を表示
+# RPROMPT=%*
+export PROMPT="%* ${PROMPT}"
 
 # ../ の後は今いるディレクトリを補完しない
 zstyle ':completion:*' ignore-parents parent pwd ..
@@ -121,7 +122,10 @@ alias va=vagrant
 alias k=kubectl
 alias ter=terraform
 alias terp='terraform plan'
-alias co=copilot
+alias cop=copilot
+alias cops='copilot svc'
+alias cope='copilot env'
+alias copse='copilot svc exec'
 
 # app lauch
 alias xcode='open -a /Applications/Xcode.app'
@@ -129,12 +133,13 @@ alias subl='/Applications/Sublime\ Text.app/Contents/SharedSupport/bin/subl'
 
 # Docker
 alias dk=docker
-alias dc='docker-compose'
+alias dc='docker compose'
 alias dkc='docker container'
+alias dkn='docker network'
 alias dk-rm-cache='docker buildx prune -f'
 alias dk-rm-image='docker image prune -af'
 #alias dk-rm-network='docker network prune -f'
-alias dc-local-up='docker-compose -f docker-compose.yml -f docker-compose.local.yml up'
+#alias dc-local-up='docker compose -f docker-compose.yml -f docker-compose.local.yml up'
 
 # PostgreSQL
 alias pgstt='pg_ctl start'
@@ -168,27 +173,29 @@ alias gdcw='git diff --color-words'
 alias gsta='git stash'
 alias gstalist='git stash list'
 alias gstalistp='git stash list -p'
+alias gsi='git switch'
 alias gco='git checkout'
 alias gco.='git checkout .'
-alias gcoma='git checkout master'
+# alias gcoma='git checkout master'
 alias gpush='git push'
 alias gpl='git pull'
 alias gshow='git show'
+alias gtag='git tag'
 alias gfp='git fetch --prune'
 alias gbrdelete='git branch | grep -v master | xargs git branch -d'
 alias gcb="git symbolic-ref --short HEAD | tr -d '\n' | pbcopy" # copy current branch
 alias gitalias="git config --list | grep '^alias\.'"
 
 function cdgroot() {
-    ROOT_PATH=$(git rev-parse --show-toplevel| tr -d '\n')
+    local -r ROOT_PATH=$(git rev-parse --show-toplevel| tr -d '\n')
     cd $ROOT_PATH
 }
 function gpush-u() {
-    CURRENT_BRANCH=$(git symbolic-ref --short HEAD | tr -d '\n')
+    local -r CURRENT_BRANCH=$(git symbolic-ref --short HEAD | tr -d '\n')
     git push -u origin $CURRENT_BRANCH
 }
 function gtagpush() {
-    LATEST_TAG=$(git describe --tags --abbrev=0 | tr -d '\n')
+    local -r LATEST_TAG=$(git describe --tags --abbrev=0 | tr -d '\n')
     git push origin $LATEST_TAG
 }
 
@@ -203,8 +210,8 @@ bindkey ";5D" backward-word
 
 # peco history
 function peco-select-history() {
-    BUFFER="$(history -nr 1 | awk '!a[$0]++' | peco --query "$LBUFFER" | sed 's/\\n/\n/')"
-    CURSOR=$#BUFFER
+    local -r BUFFER="$(history -nr 1 | awk '!a[$0]++' | peco --query "$LBUFFER" | sed 's/\\n/\n/')"
+    local -r CURSOR=$#BUFFER
     zle -R -c
 }
 zle -N peco-select-history
@@ -212,9 +219,9 @@ bindkey '^R' peco-select-history
 
 # peco ghq
 function peco-src () {
-  local selected_dir=$(ghq list -p | peco --query "$LBUFFER")
+  local -r selected_dir=$(ghq list -p | peco --query "$LBUFFER")
   if [ -n "$selected_dir" ]; then
-    BUFFER="cd ${selected_dir}"
+    local -r BUFFER="cd ${selected_dir}"
     zle accept-line
   fi
   zle clear-screen
@@ -224,7 +231,7 @@ bindkey '^]' peco-src
 
 # peco ssh
 function peco-ssh () {
-  local selected_host=$(awk '
+  local -r selected_host=$(awk '
   tolower($1)=="host" {
     for (i=2; i<=NF; i++) {
       if ($i !~ "[*?]") {
@@ -234,7 +241,7 @@ function peco-ssh () {
   }
   ' ~/.ssh/config | sort | peco --query "$LBUFFER")
   if [ -n "$selected_host" ]; then
-    BUFFER="ssh ${selected_host}"
+    local -r BUFFER="ssh ${selected_host}"
     zle accept-line
   fi
   zle clear-screen
@@ -312,7 +319,19 @@ fi
 #fi
 
 function kill-grep () {
-  target_process=$1
+  local -r target_process=$1
   ps aux | grep -v grep | grep -i $target_process | awk '{ print "kill -9", $2 }' | sh
+}
+
+function cop-deoloy () {
+  local -r target_svc=$1
+  local -r target_env=$2
+  local env_option=""
+  [ -n "$target_env" ] && env_option="--env ${target_env}"
+  echo $target_env
+  echo "run command: 'copilot svc deploy -n ${target_svc} ${env_option}'"
+  #copilot svc deploy -n $target_svc $env_option
+  #copilot svc deploy $env_option -n $target_svc
+  #svc deploy --env stg-container -n backend
 }
 
