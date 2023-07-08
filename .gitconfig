@@ -53,7 +53,7 @@
     template = ~/.stCommitMsg
 [credential]
 	helper = !aws codecommit --profile dev credential-helper $@
-	UseHttpPath = true
+#	UseHttpPath = true
 [merge]
 	ff = false
 [pull]
