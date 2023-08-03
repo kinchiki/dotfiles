@@ -12,9 +12,8 @@
     branch = auto
     ui     = auto
 [alias]
-    ad  = add
-    adu = add -u
-    ada = add -A
+    addu = add -u
+    adda = add -A
     ci  = commit
     cim = commit -m
     cia = commit --amend
@@ -32,6 +31,7 @@
     gi  = grep -i
     gc  = grep -C
     gci = grep -i -C
+    si  = switch
     sta = stash
     stal = stash list
     stalp = stash list -p
