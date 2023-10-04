@@ -182,7 +182,7 @@ alias gpl='git pull'
 alias gshow='git show'
 alias gtag='git tag'
 alias gfp='git fetch --prune'
-alias gbrdelete='git branch | grep -v master | xargs git branch -d'
+alias gbrdelete='git branch | grep -v master | grep -v main | xargs git branch -d'
 alias gcb="git symbolic-ref --short HEAD | tr -d '\n' | pbcopy" # copy current branch
 alias gitalias="git config --list | grep '^alias\.'"
 
