@@ -102,7 +102,8 @@ alias -g tmuxconf='~/.tmux.conf'
 alias -g sshconf='~/.ssh/config'
 alias vz='vim ~/.zshrc'
 alias vv='vim ~/.vimrc'
-alias vaws='vim ~/.aws/config'
+alias vaws='vim ~/.aws/'
+alias vzlocal='vim ~/.zshrc.local'
 alias sz='source ~/.zshrc'
 alias updatecompletion='rm -f ~/.zcompdump; compinit'
 alias sshlist="cat ~/.ssh/config | grep -e '^Host' | cut -d ' ' -f 2"
@@ -125,6 +126,7 @@ alias terp='terraform plan'
 alias cop=copilot
 alias cops='copilot svc'
 alias cope='copilot env'
+alias copsd='copilot svc deploy'
 alias copse='copilot svc exec'
 
 # app lauch
@@ -132,6 +134,7 @@ alias xcode='open -a /Applications/Xcode.app'
 alias subl='/Applications/Sublime\ Text.app/Contents/SharedSupport/bin/subl'
 
 # Docker
+export DOCKER_BUILDKIT=1
 alias dk=docker
 alias dc='docker compose'
 alias dkc='docker container'
@@ -151,14 +154,11 @@ alias pgsts='pg_ctl status'
 alias preup='cd ~/.zprezto && git pull && git submodule sync --recursive && git submodule update --init --recursive ; cd -'
 
 # git
-alias gad='git add'
 alias gau='git add -u'
 alias gaa='git add -A'
-alias gc='git commit'
 alias gcm='git commit -m'
 alias gca='git commit --amend'
 alias gbr='git branch'
-alias gbrd='git branch -d'
 alias gl='git log --oneline'
 alias glg='git log --graph --decorate --oneline'
 alias gs='git status -sb'
@@ -171,11 +171,8 @@ alias gdw='git diff -w'
 alias gdc='git diff --cached'
 alias gdcw='git diff --color-words'
 alias gsta='git stash'
-alias gstalist='git stash list'
-alias gstalistp='git stash list -p'
 alias gsi='git switch'
 alias gco='git checkout'
-alias gco.='git checkout .'
 # alias gcoma='git checkout master'
 alias gpush='git push'
 alias gpl='git pull'
@@ -324,15 +321,10 @@ function kill-grep () {
   ps aux | grep -v grep | grep -i $target_process | awk '{ print "kill -9", $2 }' | sh
 }
 
-function cop-deoloy () {
+function copdep () {
   local -r target_svc=$1
   local -r target_env=$2
-  local env_option=""
-  [ -n "$target_env" ] && env_option="--env ${target_env}"
-  echo $target_env
-  echo "run command: 'copilot svc deploy -n ${target_svc} ${env_option}'"
-  #copilot svc deploy -n $target_svc $env_option
-  #copilot svc deploy $env_option -n $target_svc
-  #svc deploy --env stg-container -n backend
+  echo "run command: 'copilot svc deploy -n ${target_svc} ${target_env}'"
+  copilot svc deploy -n $target_svc -e $target_env
 }
 
