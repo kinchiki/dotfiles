@@ -121,6 +121,9 @@ alias rubocop='bundle exec rubocop'
 # alias nb=nodebrew
 alias va=vagrant
 alias k=kubectl
+alias kg='kubectl get'
+alias kd='kubectl describe'
+alias mk=minikube
 alias ter=terraform
 alias terp='terraform plan'
 alias cop=copilot
@@ -172,7 +175,10 @@ alias gdc='git diff --cached'
 alias gdcw='git diff --color-words'
 alias gsta='git stash'
 alias gsi='git switch'
+alias gsic='git switch -c'
+alias gsi-='git switch -'
 alias gco='git checkout'
+alias gcp='git cherry-pick'
 # alias gcoma='git checkout master'
 alias gpush='git push'
 alias gpl='git pull'
@@ -253,7 +259,7 @@ bindkey '^H' peco-ssh
 
 ########## PATH ##########
 export PGDATA=/usr/local/var/postgres
-export PATH="$PATH:$HOME/.bin"
+export PATH="$PATH:$HOME/bin"
 export PATH="/usr/local/opt/mysql@5.6/bin:$PATH"
 export PATH="/usr/local/opt/imagemagick@6/bin:$PATH"
 
@@ -327,4 +333,3 @@ function copdep () {
   echo "run command: 'copilot svc deploy -n ${target_svc} ${target_env}'"
   copilot svc deploy -n $target_svc -e $target_env
 }
-
