@@ -126,7 +126,7 @@ nnoremap <space> i<space><esc>
 " nnoremap r <C-r>
 
 " Yで行末までヤンク
-nnoremap Y y$
+" nnoremap Y y$
 
 " ESCキー2度押しでハイライトの切り替え
 nnoremap <silent><Esc><Esc> :<C-u>set nohlsearch!<CR>
@@ -151,10 +151,31 @@ if &term =~ "xterm"
 endif
 
 " 前回のカーソル位置で開く
-augroup vimrcEx
-  au BufRead * if line("'\"") > 0 && line("'\"") <= line("$") |
-  \ exe "normal g`\"" | endif
-augroup END
+" autocmd BufWinLeave ?* silent mkview
+" autocmd BufWinEnter ?* silent loadview
+
+" set autoread
+
+"augroup vimrcEx
+"    au BufRead * if line("'\"") > 0 && line("'\"") <= line("$") |
+"    \ exe "normal g`\"" | endif
+"augroup END
+"if has("autocmd")
+"  augroup redhat
+    " In text files, always limit the width of text to 78 characters
+"    autocmd BufRead *.txt set tw=78
+    " When editing a file, always jump to the last cursor position
+"    autocmd BufReadPost *
+"    \ if line("'\"") > 0 && line ("'\"") <= line("$") |
+"    \   exe "normal! g'\"" |
+"    \ endif
+"  augroup END
+"endif
+
+"augroup restore_cursor
+"    autocmd BufReadPost * if exists("b:prev_cursor") | call cursor(b:prev_cursor) | endif
+"augroup END
+
 
 " 改行時の自動コメント無効化
 augroup auto_comment_off
