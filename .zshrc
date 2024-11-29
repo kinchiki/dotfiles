@@ -24,6 +24,7 @@ fpath=(/usr/local/share/zsh-completions $fpath)
 # fpath=(~/.zsh/completion $fpath)
 
 [[ $commands[kubectl] ]] && source <(kubectl completion zsh)
+[[ $commands[docker] ]] && source <(docker completion zsh)
 
 # 実行 -u は compinitのテスト避ける
 # -i はいらない？
@@ -299,9 +300,9 @@ export PATH="$GCLOUD/bin:$PATH"
 # source "$GCLOUD/completion.zsh.inc"
 export USE_GKE_GCLOUD_AUTH_PLUGIN=True
 
-autoload -U +X bashcompinit && bashcompinit
+# autoload -U +X bashcompinit && bashcompinit
 if type terraform &> /dev/null; then
-  complete -o nospace -C /opt/homebrew/Cellar/tfenv/3.0.0/versions/1.3.8/terraform terraform
+  complete -o nospace -C /opt/homebrew/Cellar/tfenv/3.0.0/versions/1.6.4/terraform terraform
 fi
 
 # if [[ ! -n $TMUX && $- == *l* ]]; then
