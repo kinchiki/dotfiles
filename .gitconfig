@@ -19,6 +19,7 @@
     cia = commit --amend
     co  = checkout
     coma = checkout master
+    cp  = cherry-pick
     st  = status -sb
     br  = branch
     l   = log --oneline
@@ -41,21 +42,19 @@
     lineNumber = true
 [push]
     default = simple
-[difftool "sourcetree"]
-	cmd = opendiff \"$LOCAL\" \"$REMOTE\"
-	path =
-[mergetool "sourcetree"]
-	cmd = /Applications/SourceTree.app/Contents/Resources/opendiff-w.sh \"$LOCAL\" \"$REMOTE\" -ancestor \"$BASE\" -merge \"$MERGED\"
-	trustExitCode = true
 [ghq]
     root = ~/src
 [commit]
     template = ~/.stCommitMsg
 [credential]
 	helper = !aws codecommit --profile dev credential-helper $@
+	helper =
+	helper = /usr/local/share/gcm-core/git-credential-manager
 #	UseHttpPath = true
 [merge]
 	ff = false
 [pull]
 	ff = only
 	rebase = merges
+[credential "https://dev.azure.com"]
+	useHttpPath = true
