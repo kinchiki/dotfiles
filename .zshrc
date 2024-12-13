@@ -301,9 +301,9 @@ export PATH="$GCLOUD/bin:$PATH"
 export USE_GKE_GCLOUD_AUTH_PLUGIN=True
 
 # autoload -U +X bashcompinit && bashcompinit
-if type terraform &> /dev/null; then
-  complete -o nospace -C /opt/homebrew/Cellar/tfenv/3.0.0/versions/1.6.4/terraform terraform
-fi
+# if type terraform &> /dev/null; then
+#  complete -o nospace -C /opt/homebrew/Cellar/tfenv/3.0.0/versions/1.3.9/terraform terraform
+# fi
 
 # if [[ ! -n $TMUX && $- == *l* ]]; then
 #  # get the IDs
