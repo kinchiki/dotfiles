@@ -327,10 +327,3 @@ function kill-grep () {
   local -r target_process=$1
   ps aux | grep -v grep | grep -i $target_process | awk '{ print "kill -9", $2 }' | sh
 }
-
-function copdep () {
-  local -r target_svc=$1
-  local -r target_env=$2
-  echo "run command: 'copilot svc deploy -n ${target_svc} ${target_env}'"
-  copilot svc deploy -n $target_svc -e $target_env
-}
