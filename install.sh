@@ -7,7 +7,7 @@ DOT_DIRECTORY="${HOME}/src/dotfiles"
 cd ${DOT_DIRECTORY}
 
 echo "start making link..."
-echo
+echo "===================="
 
 # ./ ../ を除いて .から始まるファイルを対象にループ
 for file in .??* ; do
@@ -17,8 +17,8 @@ for file in .??* ; do
     [[ "$file" == ".zshrc_old" ]] && continue
 
     ln -snfv ${DOT_DIRECTORY}/${file} ${HOME}/${file}
-    echo "$file"
+    echo ${file}
 done
 
-echo
+echo "===================="
 echo "complete!"
