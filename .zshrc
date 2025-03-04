@@ -238,13 +238,13 @@ bindkey '^]' select-src
 # select ssh
 function select-ssh () {
   local -r selected_host=$(awk '
-  tolower($1)=="host" {
-    for (i=2; i<=NF; i++) {
-      if ($i !~ "[*?]") {
-        print $i
+    tolower($1)=="host" {
+      for (i=2; i<=NF; i++) {
+        if ($i !~ "[*?]" && $i !~ /ap-northeast-1/) {
+          print $i
+        }
       }
     }
-  }
   ' ~/.ssh/config | sort | fzf --query "$LBUFFER")
   if [ -n "$selected_host" ]; then
     local -r BUFFER="ssh ${selected_host}"
