@@ -25,6 +25,8 @@ fpath=(/usr/local/share/zsh-completions $fpath)
 
 [[ $commands[kubectl] ]] && source <(kubectl completion zsh)
 [[ $commands[docker] ]] && source <(docker completion zsh)
+[[ $commands[helm] ]] && source <(helm completion zsh)
+[[ $commands[fzf] ]] && source <(fzf --zsh)
 
 # 実行 -u は compinitのテスト避ける
 # -i はいらない？
@@ -212,29 +214,29 @@ bindkey '^[\e[D' backward-word
 bindkey ";5C" forward-word
 bindkey ";5D" backward-word
 
-# peco history
-function peco-select-history() {
-    local -r BUFFER="$(history -nr 1 | awk '!a[$0]++' | peco --query "$LBUFFER" | sed 's/\\n/\n/')"
+# select history
+function select-history() {
+    local -r BUFFER="$(history -nr 1 | awk '!a[$0]++' | fzf --query "$LBUFFER" | sed 's/\\n/\n/')"
     local -r CURSOR=$#BUFFER
     zle -R -c
 }
-zle -N peco-select-history
-bindkey '^R' peco-select-history
+zle -N select-history
+bindkey '^R' select-history
 
-# peco ghq
-function peco-src () {
-  local -r selected_dir=$(ghq list -p | peco --query "$LBUFFER")
+# select ghq
+function select-src () {
+  local -r selected_dir=$(ghq list -p | fzf --query "$LBUFFER")
   if [ -n "$selected_dir" ]; then
     local -r BUFFER="cd ${selected_dir}"
     zle accept-line
   fi
   zle clear-screen
 }
-zle -N peco-src
-bindkey '^]' peco-src
+zle -N select-src
+bindkey '^]' select-src
 
-# peco ssh
-function peco-ssh () {
+# select ssh
+function select-ssh () {
   local -r selected_host=$(awk '
   tolower($1)=="host" {
     for (i=2; i<=NF; i++) {
@@ -243,15 +245,15 @@ function peco-ssh () {
       }
     }
   }
-  ' ~/.ssh/config | sort | peco --query "$LBUFFER")
+  ' ~/.ssh/config | sort | fzf --query "$LBUFFER")
   if [ -n "$selected_host" ]; then
     local -r BUFFER="ssh ${selected_host}"
     zle accept-line
   fi
   zle clear-screen
 }
-zle -N peco-ssh
-bindkey '^H' peco-ssh
+zle -N select-ssh
+bindkey '^H' select-ssh
 
 # マシン毎のローカルの設定読み込み
 [ -f ~/.zshrc.local ] && source ~/.zshrc.local
