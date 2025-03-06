@@ -10,6 +10,7 @@ if [[ -s "${ZDOTDIR:-$HOME}/.zprezto/init.zsh" ]]; then
   source "${ZDOTDIR:-$HOME}/.zprezto/init.zsh"
 fi
 
+# 補完はpreztoで設定されているため、コメントアウト
 
 # Customize to your needs...
 
@@ -20,13 +21,13 @@ fi
 # autoload 探索するディレクトリは FPATH に入っている
 # -U は alias の展開を「しない」ためのオプション
 # -z は関数を zsh 形式で読み込むというオプション
-fpath=(/usr/local/share/zsh-completions $fpath)
+# fpath=(/usr/local/share/zsh-completions $fpath)
 # fpath=(~/.zsh/completion $fpath)
 
-[[ $commands[kubectl] ]] && source <(kubectl completion zsh)
-[[ $commands[docker] ]] && source <(docker completion zsh)
-[[ $commands[helm] ]] && source <(helm completion zsh)
-[[ $commands[fzf] ]] && source <(fzf --zsh)
+# [[ $commands[kubectl] ]] && source <(kubectl completion zsh)
+# [[ $commands[docker] ]] && source <(docker completion zsh)
+# [[ $commands[helm] ]] && source <(helm completion zsh)
+# [[ $commands[fzf] ]] && source <(fzf --zsh)
 
 # 実行 -u は compinitのテスト避ける
 # -i はいらない？
