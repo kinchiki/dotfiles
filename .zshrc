@@ -66,7 +66,6 @@ export LESS='-i -g -s -F -M -R -X -W -N'
 export EDITOR=vim
 #export ARCHFLAGS='-arch x86_64'
 export WORDCHARS="*?[]~;=!#$%^(){}<>"
-export FZF_CTRL_R_OPTS="--tac" # 意味ない？
 
 ########## alias ##########
 # ユニバーサルエイリアス
@@ -217,14 +216,17 @@ bindkey ";5C" forward-word
 bindkey ";5D" backward-word
 
 # select history
-function select-history() {
-    # local -r BUFFER="$(history -nr 1 | awk '!a[$0]++' | fzf --query "$LBUFFER" | sed 's/\\n/\n/')"
-    local -r BUFFER="$(history -nr 1 | awk '!a[$0]++' | peco --query "$LBUFFER" | sed 's/\\n/\n/')"
-    local -r CURSOR=$#BUFFER
-    zle -R -c
-}
-zle -N select-history
-bindkey '^R' select-history
+# function select-history() {
+#     # local -r BUFFER="$(history -nr 1 | awk '!a[$0]++' | fzf --query "$LBUFFER" | sed 's/\\n/\n/')"
+#     local -r BUFFER="$(history -nr 1 | awk '!a[$0]++' | peco --query "$LBUFFER" | sed 's/\\n/\n/')"
+#     local -r CURSOR=$#BUFFER
+#     zle -R -c
+# }
+# zle -N select-history
+# bindkey '^R' select-history
+
+export FZF_CTRL_R_OPTS="--no-sort --layout=reverse --preview 'echo {}' --preview-window 'up:3:wrap'"
+[ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
 
 # select ghq
 function select-src () {
@@ -286,9 +288,6 @@ export GOENV_ROOT="$HOME/.goenv"
 export PATH="$GOENV_ROOT/bin:$PATH"
 eval "$(goenv init -)"
 
-## gvm`
-# [[ -s ~/.gvm/scripts/gvm ]] && source ~/.gvm/scripts/gvm
-
 ## pyenv
 export PYENV_ROOT="$HOME/.pyenv"
 command -v pyenv >/dev/null || export PATH="$PYENV_ROOT/bin:$PATH"
@@ -329,5 +328,3 @@ function kill-grep () {
   local -r target_process=$1
   ps aux | grep -v grep | grep -i $target_process | awk '{ print "kill -9", $2 }' | sh
 }
-
-# [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
