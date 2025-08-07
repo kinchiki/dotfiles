@@ -225,7 +225,7 @@ bindkey ";5D" backward-word
 # zle -N select-history
 # bindkey '^R' select-history
 
-export FZF_CTRL_R_OPTS="--no-sort --layout=reverse --preview 'echo {}' --preview-window 'up:3:wrap'"
+export FZF_CTRL_R_OPTS="--no-sort --layout=reverse --preview 'echo {}' --preview-window 'up:2:wrap'"
 [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
 
 # select ghq
