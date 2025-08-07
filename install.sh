@@ -3,8 +3,8 @@
 # 未定義変数を使おうとしたらエラーにする
 set -u
 
-DOT_DIRECTORY="${HOME}/src/dotfiles"
-cd ${DOT_DIRECTORY}
+DOT_FILES_DIRECTORY="${HOME}/src/dotfiles"
+cd ${DOT_FILES_DIRECTORY}
 
 echo "start making link..."
 echo "===================="
@@ -16,7 +16,7 @@ for file in .??* ; do
     [[ "$file" == ".DS_Store" ]] && continue
     [[ "$file" == ".zshrc_old" ]] && continue
 
-    ln -snfv ${DOT_DIRECTORY}/${file} ${HOME}/${file}
+    ln -snfv ${DOT_FILES_DIRECTORY}/${file} ${HOME}/${file}
     echo ${file}
 done
 
