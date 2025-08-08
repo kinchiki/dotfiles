@@ -58,3 +58,5 @@
 	rebase = merges
 [credential "https://dev.azure.com"]
 	useHttpPath = true
+[include]
+    path = .gitconfig.local
