@@ -42,6 +42,7 @@
     lineNumber = true
 [push]
     default = simple
+    autoSetupRemote = true
 [ghq]
     root = ~/src
 [commit]
