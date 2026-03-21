@@ -46,11 +46,6 @@
     root = ~/src
 [commit]
     template = ~/.stCommitMsg
-[credential]
-	helper = !aws codecommit --profile dev credential-helper $@
-	helper =
-	helper = /usr/local/share/gcm-core/git-credential-manager
-#	UseHttpPath = true
 [merge]
 	ff = false
 [pull]
@@ -60,3 +55,8 @@
 	useHttpPath = true
 [include]
     path = .gitconfig.local
+# local には email や以下を設定しておく
+# Mac
+# helper = /usr/local/share/gcm-core/git-credential-manager
+# Windows(wsl)
+# helper = /mnt/c/Program\\ Files/Git/mingw64/bin/git-credential-manager.exe
