@@ -1,6 +1,6 @@
 [user]
     name = Akito Naito
-    email = REDACTED_EMAIL
+    email = 17106187+kinchiki@users.noreply.github.com
 [core]
     excludesfile = ~/.gitignore_global
     editor = vim -c \"set fenc=utf-8\"
