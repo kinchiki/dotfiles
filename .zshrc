@@ -295,7 +295,7 @@ fi
 # eval "$(pyenv init --path)"
 # alias brew='env PATH="${PATH//$(pyenv root)\/shims:/}" brew' # fix brew doctor warning
 
-#gloud
+## gcloud
 export GCLOUD="$HOME/dev/google-cloud-sdk"
 export PATH="$GCLOUD/bin:$PATH"
 # source "$GCLOUD/completion.zsh.inc"
