@@ -121,7 +121,6 @@ alias rails='bundle exec rails'
 alias be='bundle exec'
 alias ra='bundle exec rails'
 alias rubocop='bundle exec rubocop'
-# alias nb=nodebrew
 alias va=vagrant
 alias k=kubectl
 alias kg='kubectl get'
@@ -129,15 +128,6 @@ alias kd='kubectl describe'
 alias mk=minikube
 alias ter=terraform
 alias terp='terraform plan'
-alias cop=copilot
-alias cops='copilot svc'
-alias cope='copilot env'
-alias copsd='copilot svc deploy'
-alias copse='copilot svc exec'
-
-# app lauch
-alias xcode='open -a /Applications/Xcode.app'
-alias subl='/Applications/Sublime\ Text.app/Contents/SharedSupport/bin/subl'
 
 # Docker
 export DOCKER_BUILDKIT=1
@@ -194,16 +184,16 @@ alias gcb="git symbolic-ref --short HEAD | tr -d '\n' | pbcopy" # copy current b
 alias gitalias="git config --list | grep '^alias\.'"
 
 function cdgroot() {
-    local -r ROOT_PATH=$(git rev-parse --show-toplevel| tr -d '\n')
-    cd $ROOT_PATH
+  local -r ROOT_PATH=$(git rev-parse --show-toplevel| tr -d '\n')
+  cd $ROOT_PATH
 }
-function gpush-u() {
-    local -r CURRENT_BRANCH=$(git symbolic-ref --short HEAD | tr -d '\n')
-    git push -u origin $CURRENT_BRANCH
-}
+# function gpush-u() {
+#   local -r CURRENT_BRANCH=$(git symbolic-ref --short HEAD | tr -d '\n')
+#   git push -u origin $CURRENT_BRANCH
+# }
 function gtagpush() {
-    local -r LATEST_TAG=$(git describe --tags --abbrev=0 | tr -d '\n')
-    git push origin $LATEST_TAG
+  local -r LATEST_TAG=$(git describe --tags --abbrev=0 | tr -d '\n')
+  git push origin $LATEST_TAG
 }
 
 disable r
