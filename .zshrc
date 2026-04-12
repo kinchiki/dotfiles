@@ -226,7 +226,19 @@ bindkey ";5D" backward-word
 # bindkey '^R' select-history
 
 export FZF_CTRL_R_OPTS="--no-sort --layout=reverse --preview 'echo {}' --preview-window 'up:2:wrap'"
-[ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
+# [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
+
+# GitHub版
+if [ -d ~/.fzf/shell ]; then
+  [ -f ~/.fzf/shell/completion.zsh ] && source ~/.fzf/shell/completion.zsh
+  [ -f ~/.fzf/shell/key-bindings.zsh ] && source ~/.fzf/shell/key-bindings.zsh
+# apt版など
+elif [ -d /usr/share/doc/fzf/examples ]; then
+  [ -f /usr/share/doc/fzf/examples/completion.zsh ] && source /usr/share/doc/fzf/examples/completion.zsh
+  [ -f /usr/share/doc/fzf/examples/key-bindings.zsh ] && source /usr/share/doc/fzf/examples/key-bindings.zsh
+elif [ -f ~/.fzf.zsh ]; then
+  source ~/.fzf.zsh
+fi
 
 # select ghq
 function select-src () {
@@ -266,30 +278,26 @@ bindkey '^H' select-ssh
 
 
 ########## PATH ##########
-export PGDATA=/usr/local/var/postgres
 export PATH="$PATH:$HOME/bin"
 
 ## node
 export NVM_DIR="$([ -z "${XDG_CONFIG_HOME-}" ] && printf %s "${HOME}/.nvm" || printf %s "${XDG_CONFIG_HOME}/nvm")"
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh" # This loads nvm
 
-#export VOLTA_HOME="$HOME/.volta"
-#export PATH="$VOLTA_HOME/bin:$PATH"
-
 ## rbenv
 if which rbenv > /dev/null; then eval "$(rbenv init -)"; fi
 
 ## goenv
+export GOENV_ROOT="$HOME/.goenv"
+export PATH="$GOENV_ROOT/bin:$PATH"
 if command -v goenv > /dev/null 2>&1; then
-  export GOENV_ROOT="$HOME/.goenv"
-  export PATH="$GOENV_ROOT/bin:$PATH"
   eval "$(goenv init -)"
 fi
 
 ## pyenv
+export PYENV_ROOT="$HOME/.pyenv"
+export PATH="$PYENV_ROOT/bin:$PATH"
 if command -v pyenv > /dev/null 2>&1; then
-  export PYENV_ROOT="$HOME/.pyenv"
-  export PATH="$PYENV_ROOT/bin:$PATH"
   eval "$(pyenv init -)"
 fi
 # eval "$(pyenv init --path)"
