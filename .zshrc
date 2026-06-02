@@ -38,6 +38,8 @@ fi
 # 時間を表示
 # RPROMPT=%*
 export PROMPT="%* ${PROMPT}"
+# プロンプトを変える
+export PURE_PROMPT_SYMBOL='$'
 
 # ../ の後は今いるディレクトリを補完しない
 zstyle ':completion:*' ignore-parents parent pwd ..
@@ -148,7 +150,7 @@ alias pgres='pg_ctl restart'
 alias pgsts='pg_ctl status'
 
 # prezto update
-alias preup='cd ~/.zprezto && git pull && git submodule sync --recursive && git submodule update --init --recursive ; cd -'
+alias preup='cd $ZPREZTODIR && git pull && git submodule sync --recursive && git submodule update --init --recursive ; cd -'
 
 # git
 alias gau='git add -u'
