@@ -1,0 +1,7 @@
+# Ghostty インストール後に以下を実行する
+# ln -s ~/src/dotfiles/config.ghostty ~/Library/Application\ Support/com.mitchellh.ghostty/config.ghostty
+
+font-family = "Bizin Gothic NF Regular"
+font-family-bold = "Bizin Gothic NF Bold"
+font-size = 20
+cursor-style = bar
