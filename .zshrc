@@ -216,16 +216,29 @@ FZF_CTRL_R_OPTS="--no-sort --layout=reverse --preview 'echo {}' --preview-window
 # [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
 
 # GitHub版
-if [ -d ~/.fzf/shell ]; then
+
+# fzf
+# Homebrew版
+fzf_base=""
+if command -v brew >/dev/null 2>&1; then
+  fzf_base="$(brew --prefix fzf 2>/dev/null)"
+fi
+if [ -n "$fzf_base" ] && [ -d "$fzf_base/shell" ]; then
+  source "$fzf_base/shell/completion.zsh"
+  source "$fzf_base/shell/key-bindings.zsh"
+# GitHub版
+elif [ -d ~/.fzf/shell ]; then
   [ -f ~/.fzf/shell/completion.zsh ] && source ~/.fzf/shell/completion.zsh
   [ -f ~/.fzf/shell/key-bindings.zsh ] && source ~/.fzf/shell/key-bindings.zsh
 # apt版など
 elif [ -d /usr/share/doc/fzf/examples ]; then
   [ -f /usr/share/doc/fzf/examples/completion.zsh ] && source /usr/share/doc/fzf/examples/completion.zsh
   [ -f /usr/share/doc/fzf/examples/key-bindings.zsh ] && source /usr/share/doc/fzf/examples/key-bindings.zsh
+# 旧インストール方式
 elif [ -f ~/.fzf.zsh ]; then
   source ~/.fzf.zsh
 fi
+unset fzf_base
 
 # select ghq
 function select-src () {
