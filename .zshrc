@@ -37,9 +37,9 @@ fi
 
 # 時間を表示
 # RPROMPT=%*
-export PROMPT="%* ${PROMPT}"
+PROMPT="%* ${PROMPT}"
 # プロンプトを変える
-export PURE_PROMPT_SYMBOL='$'
+PURE_PROMPT_SYMBOL='$'
 
 # ../ の後は今いるディレクトリを補完しない
 zstyle ':completion:*' ignore-parents parent pwd ..
@@ -62,12 +62,7 @@ setopt no_beep
 
 ########## env ##########
 [[ -x /opt/homebrew/bin/brew ]] && eval "$(/opt/homebrew/bin/brew shellenv)"
-export LANG=en_US.UTF-8
-export LC_ALL=en_US.UTF-8
-export LESS='-i -g -s -F -M -R -X -W -N'
-export EDITOR=vim
-#export ARCHFLAGS='-arch x86_64'
-export WORDCHARS="*?[]~;=!#$%^(){}<>"
+WORDCHARS="*?[]~;=!#$%^(){}<>"
 
 ########## alias ##########
 # ユニバーサルエイリアス
@@ -82,8 +77,9 @@ alias ld='ls -dh .*'
 alias lld='ls -ldh .*'
 
 # grep
-export GREP_COLOR='01;31'
-alias -g grep='grep -i --color=auto'
+# export GREP_COLOR='mt01;31'
+# alias -g grep='grep -i --color=auto'
+alias -g grep='grep -i'
 
 # 確認
 alias rm='rm -i'
@@ -132,7 +128,6 @@ alias ter=terraform
 alias terp='terraform plan'
 
 # Docker
-export DOCKER_BUILDKIT=1
 alias dk=docker
 alias dc='docker compose'
 alias dcu='docker compose up'
@@ -217,7 +212,7 @@ bindkey ";5D" backward-word
 # zle -N select-history
 # bindkey '^R' select-history
 
-export FZF_CTRL_R_OPTS="--no-sort --layout=reverse --preview 'echo {}' --preview-window 'up:2:wrap'"
+FZF_CTRL_R_OPTS="--no-sort --layout=reverse --preview 'echo {}' --preview-window 'up:2:wrap'"
 # [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
 
 # GitHub版
@@ -269,38 +264,28 @@ bindkey '^H' select-ssh
 
 
 
-########## PATH ##########
-export PATH="$PATH:$HOME/bin"
-
 ## node
-export NVM_DIR="$([ -z "${XDG_CONFIG_HOME-}" ] && printf %s "${HOME}/.nvm" || printf %s "${XDG_CONFIG_HOME}/nvm")"
-[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh" # This loads nvm
-[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
+# export NVM_DIR="$HOME/.nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"
+[ -s "$NVM_DIR/bash_completion" ] && . "$NVM_DIR/bash_completion"
 
 ## rbenv
-if which rbenv > /dev/null; then eval "$(rbenv init -)"; fi
+if command -v rbenv > /dev/null 2>&1; then
+  eval "$(rbenv init - zsh)"
+fi
 
 ## goenv
-export GOENV_ROOT="$HOME/.goenv"
-export PATH="$GOENV_ROOT/bin:$PATH"
 if command -v goenv > /dev/null 2>&1; then
   eval "$(goenv init -)"
 fi
 
 ## pyenv
-export PYENV_ROOT="$HOME/.pyenv"
-export PATH="$PYENV_ROOT/bin:$PATH"
 if command -v pyenv > /dev/null 2>&1; then
-  eval "$(pyenv init -)"
+  eval "$(pyenv init - zsh)"
 fi
-# eval "$(pyenv init --path)"
-# alias brew='env PATH="${PATH//$(pyenv root)\/shims:/}" brew' # fix brew doctor warning
 
 ## gcloud
-export GCLOUD="$HOME/dev/google-cloud-sdk"
-export PATH="$GCLOUD/bin:$PATH"
 # source "$GCLOUD/completion.zsh.inc"
-export USE_GKE_GCLOUD_AUTH_PLUGIN=True
 
 # autoload -U +X bashcompinit && bashcompinit
 # if type terraform &> /dev/null; then
@@ -328,4 +313,8 @@ export USE_GKE_GCLOUD_AUTH_PLUGIN=True
 function kill-grep () {
   local -r target_process=$1
   ps aux | grep -v grep | grep -i $target_process | awk '{ print "kill -9", $2 }' | sh
+}
+
+function print-path () {
+  echo "$PATH" | tr ':' '\n'
 }
