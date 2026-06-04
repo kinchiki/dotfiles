@@ -108,6 +108,7 @@ alias vv='vim ~/.vimrc'
 alias vaws='vim ~/.aws/'
 alias vzlocal='vim ~/.zshrc.local'
 alias sz='source ~/.zshrc'
+alias tz='tmux source-file ~/.tmux.conf'
 alias updatecompletion='rm -f ~/.zcompdump; compinit'
 alias sshlist="cat ~/.ssh/config | grep -e '^Host' | cut -d ' ' -f 2"
 alias reload='exec $SHELL -l'
