@@ -4,4 +4,7 @@
 font-family = "Bizin Gothic NF Regular"
 font-family-bold = "Bizin Gothic NF Bold"
 font-size = 20
+
 cursor-style = bar
+# 点滅しなくなることがあったので明示する
+cursor-style-blink = true
