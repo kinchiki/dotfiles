@@ -15,23 +15,25 @@ fi
 # Customize to your needs...
 
 # 補完機能有効
-# autoload はシェル関数を自動読み込みするシェルの組み込み関数
-# compinit というシェル関数を自動読み込み
-# compinit は補完機能を引き出してくれるコマンド
-# autoload 探索するディレクトリは FPATH に入っている
-# -U は alias の展開を「しない」ためのオプション
-# -z は関数を zsh 形式で読み込むというオプション
+  # autoload はシェル関数を自動読み込みするシェルの組み込み関数
+  # compinit というシェル関数を自動読み込み
+  # compinit は補完機能を引き出してくれるコマンド
+  # autoload 探索するディレクトリは FPATH に入っている
+  # -U は alias の展開を「しない」ためのオプション
+  # -z は関数を zsh 形式で読み込むというオプション
+
 # fpath=(/usr/local/share/zsh-completions $fpath)
 # fpath=(~/.zsh/completion $fpath)
+
+# 実行 -u は compinitのテスト避ける
+# -i はいらない？
+autoload -Uz compinit && compinit #-i
 
 # [[ $commands[kubectl] ]] && source <(kubectl completion zsh)
 # [[ $commands[docker] ]] && source <(docker completion zsh)
 # [[ $commands[helm] ]] && source <(helm completion zsh)
 # [[ $commands[fzf] ]] && source <(fzf --zsh)
 
-# 実行 -u は compinitのテスト避ける
-# -i はいらない？
-# autoload -Uz compinit && compinit #-i
 
 # Preztoで多分設定されていないもの
 
@@ -328,6 +330,6 @@ function kill-grep () {
   ps aux | grep -v grep | grep -i $target_process | awk '{ print "kill -9", $2 }' | sh
 }
 
-function print-path () {
-  echo "$PATH" | tr ':' '\n'
+function split-colon () {
+  tr ':' '\n'
 }
