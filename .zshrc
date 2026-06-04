@@ -243,6 +243,8 @@ elif [ -f ~/.fzf.zsh ]; then
 fi
 unset fzf_base
 
+command -v direnv >/dev/null 2>&1 && eval "$(direnv hook zsh)"
+
 # select ghq
 function select-src () {
   local -r selected_dir=$(ghq list -p | fzf --query "$LBUFFER")
