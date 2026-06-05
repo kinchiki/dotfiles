@@ -19,20 +19,34 @@ fi
   # compinit というシェル関数を自動読み込み
   # compinit は補完機能を引き出してくれるコマンド
   # autoload 探索するディレクトリは FPATH に入っている
-  # -U は alias の展開を「しない」ためのオプション
+  # -U は alias の展開をしない＝元の文字列のまま補完？の関数定義を取り込む
+    # 補完読込み時に、aliasと同じのものがあったら、aliasに置き換わってしまうことを防ぐ
+    # 必ずつけるオプション
   # -z は関数を zsh 形式で読み込むというオプション
+  # -X は autoload された関数の中で、自分自身の本体をロードするためのオプション
+    # 基本使わない。
+    # 実行中の autoload 関数を展開するためのもの
+    # +X はその -X を明示的に無効にする
 
 # fpath=(/usr/local/share/zsh-completions $fpath)
 # fpath=(~/.zsh/completion $fpath)
 
-# 実行 -u は compinitのテスト避ける
-# -i はいらない？
-autoload -Uz compinit && compinit #-i
+# Bash用の補完も有効にする
+# compinit のオプション
+  # -i は insecure なものを無視＝警告を出さずに読み込まない
+  # -u は insecure なものも警告を出さずに使うため、危険
+autoload -Uz compinit bashcompinit
+compinit
+bashcompinit
 
-# [[ $commands[kubectl] ]] && source <(kubectl completion zsh)
-# [[ $commands[docker] ]] && source <(docker completion zsh)
-# [[ $commands[helm] ]] && source <(helm completion zsh)
-# [[ $commands[fzf] ]] && source <(fzf --zsh)
+command -v aws > /dev/null 2>&1 && complete -C '/usr/local/bin/aws_completer' aws
+
+# 消しても補完が動くかも
+# command -v kubectl > /dev/null 2>&1 && source <(kubectl completion zsh)
+# command -v docker > /dev/null 2>&1 && source <(docker completion zsh)
+# command -v helm > /dev/null 2>&1 && source <(helm completion zsh)
+# command -v fzf > /dev/null 2>&1 && source <(fzf --zsh)
+# command -v gcloud > /dev/null 2>&1 source "$GCLOUD/completion.zsh.inc"
 
 
 # Preztoで多分設定されていないもの
@@ -287,25 +301,11 @@ bindkey '^H' select-ssh
 [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"
 [ -s "$NVM_DIR/bash_completion" ] && . "$NVM_DIR/bash_completion"
 
-## rbenv
-if command -v rbenv > /dev/null 2>&1; then
-  eval "$(rbenv init - zsh)"
-fi
+## xxenv
+command -v rbenv > /dev/null 2>&1 && eval "$(rbenv init - zsh)"
+command -v goenv > /dev/null 2>&1 && eval "$(goenv init -)"
+command -v pyenv > /dev/null 2>&1 && eval "$(pyenv init - zsh)"
 
-## goenv
-if command -v goenv > /dev/null 2>&1; then
-  eval "$(goenv init -)"
-fi
-
-## pyenv
-if command -v pyenv > /dev/null 2>&1; then
-  eval "$(pyenv init - zsh)"
-fi
-
-## gcloud
-# source "$GCLOUD/completion.zsh.inc"
-
-# autoload -U +X bashcompinit && bashcompinit
 # if type terraform &> /dev/null; then
 #  complete -o nospace -C /opt/homebrew/Cellar/tfenv/3.0.0/versions/1.3.9/terraform terraform
 # fi
