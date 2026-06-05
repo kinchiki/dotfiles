@@ -44,6 +44,9 @@
       "Bash(nc:*)",
       "Bash(npm remove:*)",
       "Bash(npm uninstall:*)",
+      "Bash(op:*)",
+      "Bash(*/op *)",
+      "Bash(*/op)",
       "Bash(psql:*)",
       "Bash(rm -rf:*)",
       "Bash(rm:*)",
@@ -68,7 +71,7 @@
       "Write(**/secrets/**)",
       "Write(mise.local.toml)"
     ],
-        "ask": [
+    "ask": [
       "Bash(curl:*)",
       "Bash(wget:*)",
       "Bash(rm:*)",
