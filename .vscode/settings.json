@@ -3,6 +3,7 @@
     "gpush",
     "gtagpush",
     "LBUFFER",
+    "Notif",
     "Prezto",
     "RPROMPT",
     "tolower",

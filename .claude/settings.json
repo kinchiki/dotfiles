@@ -92,5 +92,7 @@
       "mcp__linear__update_issue",
       "mcp__linear__list_issue_statuses"
     ]
-  }
+  },
+  "theme": "dark",
+  "inputNeededNotifEnabled": true
 }
