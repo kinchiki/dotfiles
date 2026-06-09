@@ -336,3 +336,12 @@ function kill-grep () {
 function split-colon () {
   tr ':' '\n'
 }
+
+function find-duplicates () {
+  sed 's/[[:space:]]*,\?[[:space:]]*$//' |
+  tr '[:upper:]' '[:lower:]' |
+  sort |
+  uniq -c |
+  awk '$1 > 1' |
+  sort -nr
+}
