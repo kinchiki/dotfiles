@@ -17,41 +17,46 @@ fi
 # Editors
 #
 
-export EDITOR='nano'
-export VISUAL='nano'
 export PAGER='less'
 
 #
 # Language
 #
 
-if [[ -z "$LANG" ]]; then
-  export LANG='en_US.UTF-8'
-fi
+# if [[ -z "$LANG" ]]; then
+#   export LANG='en_US.UTF-8'
+# fi
 
 #
 # Paths
 #
 
 # Ensure path arrays do not contain duplicates.
-typeset -gU cdpath fpath mailpath path
+# -g
+  # global の意味
+  # ローカル関数内で使っても、変数をグローバルに宣言する
+  # .zprofile ではほぼ不要だが、明示的にグローバルにしたいときに使います
+# -U
+  # unique の意味
+  # 配列に重複が入らないようにする
+  # path 配列や PATH 変数に同じディレクトリが複数回入ったとき、自動で1つにする
+typeset -U cdpath fpath mailpath path PATH
 
 # Set the the list of directories that cd searches.
 # cdpath=(
 #   $cdpath
 # )
 
-# PATHの重複解除のために追加
-typeset -U path PATH
-
 # Set the list of directories that Zsh searches for programs.
 path=(
-  $HOME/dev/google-cloud-sdk/bin
+  # $HOME/dev/google-cloud-sdk/bin
   $HOME/.pyenv/bin
   $HOME/.goenv/bin
-  $HOME/bin
-  /opt/homebrew/{bin,sbin}
-  /usr/local/{bin,sbin}
+  $HOME/.local/bin
+  /opt/homebrew/bin
+  /opt/homebrew/sbin
+  /usr/local/bin
+  /usr/local/sbin
   $path
 )
 
@@ -87,6 +92,7 @@ fi
 export LANG=en_US.UTF-8
 export LC_ALL=en_US.UTF-8
 export EDITOR=vim
+export VISUAL=$EDITOR
 export LESS='-i -g -s -F -M -R -X -W -N'
 
 ## dev
