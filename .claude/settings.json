@@ -93,9 +93,11 @@
       "mcp__linear__list_issue_statuses"
     ]
   },
-  "theme": "dark",
-  "inputNeededNotifEnabled": true,
   "statusLine": {
     "type": "command",
     "command": "~/.claude/statusline.sh"
-  }}
+  },
+  "theme": "dark",
+  "inputNeededNotifEnabled": true,
+  "agentPushNotifEnabled": true
+}
