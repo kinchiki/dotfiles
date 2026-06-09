@@ -18,6 +18,7 @@ echo "===================="
 declare -a SKIP_FILES=(
   ".DS_Store"
   ".gitignore"
+  ".claude/settings.local.json"
 )
 
 # symlink を張らないディレクトリ
@@ -96,6 +97,7 @@ for dir in .??*/; do
   # ファイルを symlink（SKIP_DIRS と SKIP_FILES の除外）
   find "$dir" -type f $(build_skip_dir_path_conditions) $(build_skip_file_conditions) -print0 |
     while IFS= read -r -d '' f; do
+      should_skip_file "$f" && continue
       ln -snfv "${DOT_FILES_DIRECTORY}/${f}" "${HOME}/${f}"
     done
 done
