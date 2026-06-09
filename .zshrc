@@ -280,6 +280,7 @@ command -v pyenv > /dev/null 2>&1 && eval "$(pyenv init - zsh)"
 
 ########## 長めのaliasや関数群 ##########
 alias -g C='| pbcopy'
+alias -g F='| fzf'
 alias -g G='| grep -v grep | grep -i --color=auto'
 alias -g SC="| tr ':' '\n'"
 
