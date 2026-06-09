@@ -81,10 +81,6 @@ setopt no_beep
 WORDCHARS="*?[]~;=!#$%^(){}<>"
 
 ########## alias ##########
-# ユニバーサルエイリアス
-alias -g C='| pbcopy'
-alias -g G='| grep -v grep | grep -i --color=auto'
-
 # ls
 alias la='ls -A'
 alias lg='ls -Agh'
@@ -105,10 +101,8 @@ alias mv='mv -i'
 # abridgement
 alias g=git
 alias e=echo
-alias cn='cat -n'
-alias pb='pbcopy <'
 
-# config, utilty
+# config, utility
 alias topc='top -o cpu -s 2'
 alias psg='ps aux | grep -v grep | grep -i'
 alias envg='env | grep -v grep | grep -i'
@@ -123,8 +117,6 @@ alias vaws='vim ~/.aws/'
 alias vzlocal='vim ~/.zshrc.local'
 alias sz='source ~/.zshrc'
 alias tz='tmux source-file ~/.tmux.conf'
-alias updatecompletion='rm -f ~/.zcompdump; compinit'
-alias sshlist="cat ~/.ssh/config | grep -e '^Host' | cut -d ' ' -f 2"
 alias reload='exec $SHELL -l'
 
 # sudo の後のコマンドでエイリアスを有効にする
@@ -161,9 +153,6 @@ alias pgstp='pg_ctl stop'
 alias pgres='pg_ctl restart'
 alias pgsts='pg_ctl status'
 
-# prezto update
-alias preup='cd $ZPREZTODIR && git pull && git submodule sync --recursive && git submodule update --init --recursive ; cd -'
-
 # git
 alias gau='git add -u'
 alias gaa='git add -A'
@@ -196,19 +185,6 @@ alias gfp='git fetch --prune'
 alias gbrdelete='git branch | grep -v master | grep -v main | xargs git branch -d'
 alias gcb="git symbolic-ref --short HEAD | tr -d '\n' | pbcopy" # copy current branch
 alias gitalias="git config --list | grep '^alias\.'"
-
-function cdgroot() {
-  local -r ROOT_PATH=$(git rev-parse --show-toplevel| tr -d '\n')
-  cd $ROOT_PATH
-}
-# function gpush-u() {
-#   local -r CURRENT_BRANCH=$(git symbolic-ref --short HEAD | tr -d '\n')
-#   git push -u origin $CURRENT_BRANCH
-# }
-function gtagpush() {
-  local -r LATEST_TAG=$(git describe --tags --abbrev=0 | tr -d '\n')
-  git push origin $LATEST_TAG
-}
 
 disable r
 
@@ -328,13 +304,36 @@ command -v pyenv > /dev/null 2>&1 && eval "$(pyenv init - zsh)"
 #  fi
 #fi
 
+########## 長めのaliasや関数群 ##########
+alias -g C='| pbcopy'
+alias -g G='| grep -v grep | grep -i --color=auto'
+alias -g SC="| tr ':' '\n'"
+
+alias pb='pbcopy <'
+alias updatecompletion='rm -f ~/.zcompdump; compinit'
+alias sshlist="cat ~/.ssh/config | grep -e '^Host' | cut -d ' ' -f 2"
+# prezto update
+alias preup='cd $ZPREZTODIR && git pull && git submodule sync --recursive && git submodule update --init --recursive ; cd -'
+
+function cdgroot() {
+  local -r ROOT_PATH=$(git rev-parse --show-toplevel| tr -d '\n')
+  cd $ROOT_PATH
+}
+
+# autoSetupRemote = true の設定があれば不要
+# function gpush-u() {
+#   local -r CURRENT_BRANCH=$(git symbolic-ref --short HEAD | tr -d '\n')
+#   git push -u origin $CURRENT_BRANCH
+# }
+
+function gtagpush() {
+  local -r LATEST_TAG=$(git describe --tags --abbrev=0 | tr -d '\n')
+  git push origin $LATEST_TAG
+}
+
 function kill-grep () {
   local -r target_process=$1
   ps aux | grep -v grep | grep -i $target_process | awk '{ print "kill -9", $2 }' | sh
-}
-
-function split-colon () {
-  tr ':' '\n'
 }
 
 function find-duplicates () {
@@ -344,4 +343,8 @@ function find-duplicates () {
   uniq -c |
   awk '$1 > 1' |
   sort -nr
+}
+
+function print-symlink () {
+  find . -maxdepth 1 -type l -exec sh -c 'for p; do printf "%s\t-> %s\n" "$p" "$(readlink "$p")"; done' sh {} +
 }
