@@ -6,6 +6,7 @@
     "Notif",
     "Prezto",
     "RPROMPT",
+    "statusline",
     "tolower",
     "toplevel",
     "vimrc",

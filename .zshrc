@@ -136,6 +136,10 @@ alias mk=minikube
 alias ter=terraform
 alias terp='terraform plan'
 
+# AI
+alias cc='claude'
+alias co='codex'
+
 # Docker
 alias dk=docker
 alias dc='docker compose'
