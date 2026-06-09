@@ -23,6 +23,7 @@ declare -a SKIP_FILES=(
 # symlink を張らないディレクトリ
 declare -a SKIP_DIRS=(
   ".git"
+  ".vscode"
   "archive"
 )
 
