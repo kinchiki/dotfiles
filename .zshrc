@@ -76,9 +76,14 @@ setopt hist_reduce_blanks
 setopt no_beep
 
 
+# '' と "" の使い分け
+  # 代入時に $VAR を展開したいなら ""
+  # 完全な文字列として固定したいなら ''
+  # ただし値に '' を多く含むなら、可読性優先で ""
+
 ########## env ##########
 [[ -x /opt/homebrew/bin/brew ]] && eval "$(/opt/homebrew/bin/brew shellenv)"
-WORDCHARS="*?[]~;=!#$%^(){}<>"
+WORDCHARS='*?[]~;=!#$%^(){}<>'
 
 ########## alias ##########
 # ls
@@ -123,17 +128,17 @@ alias reload='exec $SHELL -l'
 # alias sudo='sudo '
 
 # development
-alias rb=ruby
+alias rb='ruby'
 alias rails='bundle exec rails'
 alias be='bundle exec'
 alias ra='bundle exec rails'
 alias rubocop='bundle exec rubocop'
-alias va=vagrant
-alias k=kubectl
+alias va='vagrant'
+alias k='kubectl'
 alias kg='kubectl get'
 alias kd='kubectl describe'
-alias mk=minikube
-alias ter=terraform
+alias mk='minikube'
+alias ter='terraform'
 alias terp='terraform plan'
 
 # AI
@@ -141,7 +146,7 @@ alias cc='claude'
 alias co='codex'
 
 # Docker
-alias dk=docker
+alias dk='docker'
 alias dc='docker compose'
 alias dcu='docker compose up'
 alias dkc='docker container'
@@ -203,7 +208,7 @@ FZF_CTRL_R_OPTS="--no-sort --layout=reverse --preview 'echo {}' --preview-window
 
 # fzf
 # Homebrew版
-fzf_base=""
+fzf_base=''
 if command -v brew >/dev/null 2>&1; then
   fzf_base="$(brew --prefix fzf 2>/dev/null)"
 fi
@@ -227,7 +232,7 @@ unset fzf_base
 command -v direnv >/dev/null 2>&1 && eval "$(direnv hook zsh)"
 
 # select ghq
-function select-src () {
+select-src() {
   local -r selected_dir=$(ghq list -p | fzf --query "$LBUFFER")
   if [ -n "$selected_dir" ]; then
     local -r BUFFER="cd ${selected_dir}"
@@ -239,7 +244,7 @@ zle -N select-src
 bindkey '^]' select-src
 
 # select ssh
-function select-ssh () {
+select-ssh() {
   local -r selected_host=$(awk '
     tolower($1)=="host" {
       for (i=2; i<=NF; i++) {
@@ -302,28 +307,28 @@ alias sshlist="cat ~/.ssh/config | grep -e '^Host' | cut -d ' ' -f 2"
 # prezto update
 alias preup='cd $ZPREZTODIR && git pull && git submodule sync --recursive && git submodule update --init --recursive ; cd -'
 
-function cdgroot() {
+cdgroot() {
   local -r ROOT_PATH=$(git rev-parse --show-toplevel| tr -d '\n')
   cd $ROOT_PATH
 }
 
 # autoSetupRemote = true の設定があれば不要
-# function gpush-u() {
+# gpush-u() {
 #   local -r CURRENT_BRANCH=$(git symbolic-ref --short HEAD | tr -d '\n')
 #   git push -u origin $CURRENT_BRANCH
 # }
 
-function gtagpush() {
+gtagpush() {
   local -r LATEST_TAG=$(git describe --tags --abbrev=0 | tr -d '\n')
   git push origin $LATEST_TAG
 }
 
-function kill-grep () {
+kill-grep() {
   local -r target_process=$1
   ps aux | grep -v grep | grep -i $target_process | awk '{ print "kill -9", $2 }' | sh
 }
 
-function find-duplicates () {
+find-duplicates() {
   sed 's/[[:space:]]*,\?[[:space:]]*$//' |
   tr '[:upper:]' '[:lower:]' |
   sort |
@@ -332,6 +337,6 @@ function find-duplicates () {
   sort -nr
 }
 
-function print-symlink () {
+print-symlink() {
   find . -maxdepth 1 -type l -exec sh -c 'for p; do printf "%s\t-> %s\n" "$p" "$(readlink "$p")"; done' sh {} +
 }
