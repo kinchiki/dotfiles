@@ -8,3 +8,6 @@ font-size = 24
 cursor-style = bar
 # 点滅しなくなることがあったので明示する
 cursor-style-blink = true
+
+# Option キーを Alt として扱う（tmux の M-* キーバインドを使うため）
+macos-option-as-alt = true
