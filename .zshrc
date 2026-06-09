@@ -176,7 +176,6 @@ alias gsic='git switch -c'
 alias gsi-='git switch -'
 alias gco='git checkout'
 alias gcp='git cherry-pick'
-# alias gcoma='git checkout master'
 alias gpush='git push'
 alias gpl='git pull'
 alias gshow='git show'
@@ -195,20 +194,8 @@ bindkey '^[\e[D' backward-word
 bindkey ";5C" forward-word
 bindkey ";5D" backward-word
 
-# select history
-# function select-history() {
-#     # local -r BUFFER="$(history -nr 1 | awk '!a[$0]++' | fzf --query "$LBUFFER" | sed 's/\\n/\n/')"
-#     local -r BUFFER="$(history -nr 1 | awk '!a[$0]++' | peco --query "$LBUFFER" | sed 's/\\n/\n/')"
-#     local -r CURSOR=$#BUFFER
-#     zle -R -c
-# }
-# zle -N select-history
-# bindkey '^R' select-history
-
 FZF_CTRL_R_OPTS="--no-sort --layout=reverse --preview 'echo {}' --preview-window 'up:2:wrap'"
 # [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
-
-# GitHub版
 
 # fzf
 # Homebrew版
@@ -277,14 +264,10 @@ bindkey '^H' select-ssh
 [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"
 [ -s "$NVM_DIR/bash_completion" ] && . "$NVM_DIR/bash_completion"
 
-## xxenv
+## x env
 command -v rbenv > /dev/null 2>&1 && eval "$(rbenv init - zsh)"
 command -v goenv > /dev/null 2>&1 && eval "$(goenv init -)"
 command -v pyenv > /dev/null 2>&1 && eval "$(pyenv init - zsh)"
-
-# if type terraform &> /dev/null; then
-#  complete -o nospace -C /opt/homebrew/Cellar/tfenv/3.0.0/versions/1.3.9/terraform terraform
-# fi
 
 # if [[ ! -n $TMUX && $- == *l* ]]; then
 #  # get the IDs
