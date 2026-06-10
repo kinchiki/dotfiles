@@ -1,14 +1,17 @@
 ---
 name: address-pr-comments
 description: >-
-  Triage a GitHub PR's review comments with the strongest model reading the actual code, then fix
-  them in parallel. Fetches unresolved review comments + review bodies (bots included, resolved
-  threads excluded), judges each as must-fix / recommend-fix / recommend-skip, auto-starts the
-  must-fix set while asking the user about the discretionary ones, implements approved items in
-  parallel via the task-implementer worker (Sonnet), and drives lint/test to green. Triggers when
-  the user wants PR review feedback handled — e.g. "PRのコメントに対応して", "レビュー指摘を直して",
-  "このPRの指摘を処理して", "PR #123 のレビューを反映して", "address the PR review comments". It stops
-  at a green working tree — it does NOT commit, push, or write back to GitHub.
+  GitHub PR のレビューコメントを、最強モデルが実コードを読んでトリアージし、並列で修正する。
+  未解決のレビューコメント＋レビュー本文を取得し（bot 含む、解決済みスレッドは除外）、各コメントを must-fix / recommend-fix / recommend-skip に判定する。
+  must-fix は自動で着手しつつ、任意のものはユーザーに確認し、承認された項目を task-implementer ワーカーで並列実装、lint/test を緑にする。
+  PR のレビュー指摘を処理したいときに発火する。
+  例:
+    「PRのコメントに対応して」
+    「レビュー対応」
+    「PRの指摘を直して」
+    「レビューを反映」
+  作業ツリーが緑になった時点で止まる。
+  commit / push / GitHub への書き戻しはしない。
 ---
 
 # address-pr-comments

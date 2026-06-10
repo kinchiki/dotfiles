@@ -1,13 +1,15 @@
 ---
 name: ticket-to-plan
 description: >-
-  Turn a GitHub or Linear ticket into a thoroughly-researched implementation plan, then hand
-  implementation off to a separate session. Triggers whenever the user points at a ticket and
-  wants a plan before coding — e.g. "plan ENG-1234", "このissueの実装プランを立てて",
-  "github.com/foo/bar/issues/42 を読んでプランを作って", "このチケットから設計して別セッションで実装",
-  or any time they reference an issue/PR/Linear ID and ask to design, scope, or plan the work
-  rather than implement it immediately. Use it even when the user doesn't say the word "plan"
-  but clearly wants the ticket understood and broken down before any code is written.
+  GitHub または Linear のチケットを、十分に調査した実装プランに変換し、実装は別セッションへ引き継ぐ。
+  ユーザーがチケットを指しただけまたはインポートしただけのときと、コーディング前にプランを求めたときに発火する。
+  例:
+    「https://github.com/foo/bar/issues/42」
+    「plan ENG-1234」
+    「このissueの実装計画」
+    「github.com/foo/bar/issues/42 のプラン」
+  または issue/PR/Linear ID を参照して、すぐ実装するのではなく設計・スコープ確定・計画を求めるとき全般。
+  「plan」「計画」という語を使っていなくても、コードを書く前にチケットを理解して分解したい意図が明らかなら使う。
 ---
 
 # ticket-to-plan
@@ -95,14 +97,14 @@ session can pick up directly. Give each task: the **files** it touches, its prer
 (**depends_on**), whether it can run in **parallel**, the command(s) that **test** it, and a
 **done_when** condition. A task may be marked `parallel: yes` only when its files don't overlap
 with other tasks that could run at the same time — overlapping files force sequential execution.
-This decomposition is written verbatim into the `## Tasks` section of the plan file (Step 4), and
+This decomposition is written verbatim into the `## タスク` section of the plan file (Step 4), and
 it is part of what the user approves in Step 3.
 
 ## Step 3 — Present the plan and iterate until approved
 
 Present the plan — **including the task breakdown** — with `ExitPlanMode` (find it via ToolSearch
 if deferred). This gives the user the native approve / reject affordance and keeps the loop crisp.
-The user is approving both the approach *and* how it is sliced into tasks, so make the `## Tasks`
+The user is approving both the approach *and* how it is sliced into tasks, so make the `## タスク`
 list visible in what you present.
 
 - If the user **rejects or gives feedback**, treat their comments as the spec. Stay in plan mode,
@@ -138,52 +140,52 @@ convention, follow that instead and tell the user where you put it.
 **Use this template** — fill every section; omit one only if truly N/A and say why:
 
 ```markdown
-# <Ticket title>
+# <チケットのタイトル>
 
-- **Ticket:** <full URL or ID>
-- **Source:** GitHub | Linear
-- **Planned by:** <model id, e.g. claude-opus-4-8>
-- **Date:** <YYYY-MM-DD>
-- **Status:** Approved — ready to implement
+- **チケット:** <完全な URL または ID>
+- **ソース:** GitHub | Linear
+- **計画者:** <モデル ID、例: claude-opus-4-8>
+- **日付:** <YYYY-MM-DD>
+- **ステータス:** 承認済み — 実装可能
 
-## Goal
-<1–3 sentences: what done looks like, in plain terms.>
+## ゴール
+<1〜3文: 完了状態を平易な言葉で。>
 
-## Acceptance criteria
-- [ ] <observable, testable outcomes — pulled from the ticket where possible>
+## 受入基準
+- [ ] <観測可能でテスト可能な成果。可能ならチケットから引く>
 
-## Context & affected code
-<Key files/modules with paths and a one-line note on each, e.g.
-`app/interactions/resources/foo.rb` — service object to extend.
-Include the existing patterns to mirror so the implementer matches the codebase.>
+## 背景・影響するコード
+<主要なファイル/モジュールをパス付きで、各1行メモを添えて。例:
+`app/interactions/resources/foo.rb` — 拡張する service object。
+実装者がコードベースに合わせられるよう、踏襲すべき既存パターンも含める。>
 
-## Tasks
-<Ordered tasks. The implementation session updates these checkboxes as it progresses —
-this file is the single source of truth for progress, so a fresh session can resume from it.
-Only the orchestrator updates the checkboxes (parallel workers do not touch this file).>
+## タスク
+<順序付きタスク。実装セッションが進捗に応じてこのチェックボックスを更新する——
+このファイルが進捗の単一の真実なので、新しいセッションでもここから再開できる。
+チェックボックスを更新するのはオーケストレーターのみ（並列ワーカーはこのファイルに触れない）。>
 
-- [ ] **T1** <task name>
-  - files: `path/a.rb`, `path/b.rb`   # files this task touches (used for parallel-conflict detection)
-  - depends_on: -                      # prerequisite task IDs, or - if none
-  - parallel: no                       # yes only if `files` don't overlap with other concurrent tasks
-  - test: `dip rspec spec/a_spec.rb`   # command(s) that verify this task
-  - done_when: <observable completion condition>
-- [ ] **T2** <task name>
+- [ ] **T1** <タスク名>
+  - files: `path/a.rb`, `path/b.rb`   # このタスクが触れるファイル（並列衝突の検出に使う）
+  - depends_on: -                      # 前提タスクの ID、無ければ -
+  - parallel: no                       # 同時実行する他タスクと `files` が重ならない場合のみ yes
+  - test: `dip rspec spec/a_spec.rb`   # このタスクを検証するコマンド
+  - done_when: <観測可能な完了条件>
+- [ ] **T2** <タスク名>
   - files: `...`
   - depends_on: T1
   - parallel: yes
   - test: `...`
   - done_when: <...>
 
-## Testing strategy
-<Which specs to add/update, how to run them (e.g. `dip rspec spec/...`), edge cases to cover.
-Name the lint command too (e.g. `dip rubocop`) so the implementation gate knows what to run.>
+## テスト方針
+<追加/更新する spec、その実行方法（例: `dip rspec spec/...`）、カバーすべきエッジケース。
+実装ゲートが何を走らせるか分かるよう、lint コマンド（例: `dip rubocop`）も明記する。>
 
-## Risks & open questions
-<Things to watch, decisions deferred, anything the implementer should confirm.>
+## リスク・未解決の論点
+<注意点、先送りした判断、実装者が確認すべきこと。>
 
-## Out of scope
-<Explicitly what NOT to do, to stop scope creep in the implementation session.>
+## スコープ外
+<やらないことを明示し、実装セッションでのスコープ膨張を防ぐ。>
 ```
 
 Keep the ticket summary in the file so the implementer doesn't have to re-fetch — but still link
@@ -197,7 +199,7 @@ worktree — isolated from this planning session's context.
 Use the `spawn_task` tool with a **self-contained** prompt: the spawned session has no memory of
 this conversation, so include the absolute plan-file path, the ticket reference, and the working
 directory. The implementation session should drive the work with the **`implement-plan` skill**,
-which owns the whole pipeline (feature branch → implement `## Tasks` with tests → lint/test gate →
+which owns the whole pipeline (feature branch → implement `## タスク` with tests → lint/test gate →
 Codex review → PR). Recommend the orchestrator run on **Opus**. Write the prompt in Japanese (the
 user's preference) unless they indicate otherwise.
 
@@ -207,7 +209,7 @@ Suggested call:
 - **prompt:** something like —
   > `<repo>` の実装タスクです。承認済みプランが `<absolute path to plan file>` にあります。
   > **`implement-plan` スキルを使って**実装してください（オーケストレーターは Opus 推奨）。
-  > このスキルが、プラン読込 → feature ブランチ作成 → `## Tasks` を依存順に実装（テスト込み）→
+  > このスキルが、プラン読込 → feature ブランチ作成 → `## タスク` を依存順に実装（テスト込み）→
   > lint / test を緑にする → Codex でレビュー → PR 作成、まで面倒を見ます。
   > 元チケット: `<URL/ID>`。プランから逸脱が必要になったら、勝手に進めず理由を添えて確認してください。
 
@@ -229,5 +231,5 @@ give them the manual command). Stop there — do not implement in this session.
 | 1 | Fetch full ticket context | `gh` CLI / GitHub MCP / Linear MCP |
 | 2 | Deep plan + break into tasks, max effort | plan mode + ultrathink |
 | 3 | Approve loop (plan + task breakdown) | `ExitPlanMode` |
-| 4 | Write plan file (with `## Tasks`) | `docs/plans/<date>-<src>-<id>-<slug>.md` |
+| 4 | Write plan file (with `## タスク`) | `docs/plans/<date>-<src>-<id>-<slug>.md` |
 | 5 | Hand off implementation | `spawn_task` → `implement-plan` skill |

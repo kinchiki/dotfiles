@@ -1,11 +1,14 @@
 ---
 name: create-pr
 description: >-
-  Commit the current change, push the branch, open a GitHub PR, and assign reviewers — following
-  team conventions. Triggers when the user wants a pull request opened — e.g. "PR作って",
-  "プルリク出して", "create a PR", "この変更でPRを開いて", or when the implement-plan skill finishes
-  and hands off PR creation. The outward-facing actions (commit / push / gh pr create / reviewer
-  assignment) are confirmed before running.
+  現在の変更をコミットし、ブランチを push して GitHub PR を作成、チーム規約に従ってレビュアーを割り当てる。
+  PR を開きたいときに発火する。
+  例:
+    「PR作成」
+    「PR作って」
+    「プルリク」
+  または implement-plan スキル完了後の PR 作成引き継ぎ。
+  外向きの操作( commit / push / gh pr create / レビュアー割当 )は実行前に確認する。
 ---
 
 # create-pr

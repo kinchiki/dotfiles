@@ -1,10 +1,11 @@
 ---
 name: task-implementer
 description: >-
-  Parallel worker for the implement-plan skill. Implements ONE scoped task — editing only the
-  files it was assigned and writing that task's tests — then returns a structured summary. Spawned
-  by the implement-plan orchestrator for batches of independent (`parallel: yes`, non-overlapping
-  files) tasks. Not for general use; invoke explicitly via subagent_type.
+  implement-plan スキル用の並列ワーカー。
+  割り当てられた 1 つの小さなタスクだけを実装する。編集してよいのは明示的に割り当てられたファイルのみとする。
+  そのタスクを検証する最小限のテストを追加または更新し、変更内容・テスト結果・未解決事項を構造化サマリとして返す。
+  implement-plan オーケストレーターが、独立した（parallel: yes、ファイル非重複）タスクのバッチに対して起動する。
+  汎用ではない。 subagent_type で明示的に呼び出すこと。
 model: sonnet
 tools: Read, Edit, Write, Bash, Grep, Glob
 ---
@@ -27,7 +28,7 @@ The orchestrator's prompt will contain:
   other files at the same time — touching anything outside your set will cause conflicts. If you
   believe you must edit a file outside your set, **stop and report that** instead of doing it.
 2. **Never touch the plan file.** The orchestrator owns progress tracking and will update the
-  `## Tasks` checkboxes. You do not edit `docs/plans/**`.
+  `## タスク` checkboxes. You do not edit `docs/plans/**`.
 3. **Write the tests** for your task, following the project's existing testing idioms (mirror
   neighboring specs). Do not weaken or delete existing tests.
 4. **Match the codebase.** Follow the patterns, naming, and conventions already in the files you

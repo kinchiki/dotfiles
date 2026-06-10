@@ -1,19 +1,20 @@
 ---
 name: implement-plan
 description: >-
-  Execute an approved implementation plan file end-to-end in a fresh session: create a feature
-  branch, work through the plan's `## Tasks` (writing tests), drive lint/test to green, get an
-  independent code review from Codex (a different AI), then open a PR. Triggers when a session is
-  handed an approved plan to build — e.g. "implement-plan スキルで実装して",
-  "プラン docs/plans/....md を実装して", "このプランを実装して", or when the ticket-to-plan skill
-  spawns an implementation session pointing at a plan file. This is the implementation half of the
-  ticket-to-plan → implement-plan → create-pr pipeline.
+  承認済みの実装プランファイルを、新しいセッションで端から端まで実行する: feature ブランチを作成し、プランの `## タスク` をテストを書きながら進め、lint/test を緑にし、Codex（別の AI）から独立したコードレビューを受け、PR を開く。
+  承認済みプランを渡されて実装を始めるときに発火する。
+  例:
+    「implement-plan スキルで実装して」
+    「プラン docs/plans/....md を実装して」
+    「このプランを実装して」
+  または ticket-to-plan スキルがプランファイルを指す実装セッションを起動したとき。
+  これは ticket-to-plan → implement-plan → create-pr パイプラインの実装フェーズ。
 ---
 
 # implement-plan
 
 This skill drives a single approved plan to a finished PR, autonomously, in one session. It is the
-back half of the pipeline: `ticket-to-plan` produced a plan file with a `## Tasks` list; this skill
+back half of the pipeline: `ticket-to-plan` produced a plan file with a `## タスク` list; this skill
 executes it, and calls `create-pr` at the end. Human checkpoints are deliberately minimal — the
 approved plan is the contract. The session only stops when (a) a quality gate fails after its retry
 budget, (b) the plan would have to be deviated from, or (c) it reaches the outward-facing PR step.
@@ -27,9 +28,9 @@ Codex review → report → create-pr.**
   own model; if you are not on Opus, say so and recommend `/model opus`. (Parallel sub-workers run
   on Sonnet — see Step 2 — so only the orchestrator needs Opus.) If the user explicitly wants to
   proceed on a weaker model, you may, but flag the trade-off.
-- **Read the plan file** at the absolute path you were given. Internalize `## Goal`,
-  `## Acceptance criteria`, `## Context & affected code`, `## Tasks`, `## Testing strategy`, and
-  `## Out of scope`. The `## Tasks` checkboxes are your single source of truth for progress.
+- **Read the plan file** at the absolute path you were given. Internalize `## ゴール`,
+  `## 受入基準`, `## 背景・影響するコード`, `## タスク`, `## テスト方針`, and
+  `## スコープ外`. The `## タスク` checkboxes are your single source of truth for progress.
 - **Read the repo's `CLAUDE.md`** and note the project's conventions and the exact lint/test
   commands (e.g. `dip rubocop`, `dip rspec`). If the plan names commands, prefer those.
 - If the plan file is missing, ambiguous, or already partially checked off, resolve that first
@@ -50,8 +51,8 @@ just carry it onto the new branch.
 
 ## Step 2 — Work through the tasks
 
-Execute `## Tasks` **in dependency order** (respect `depends_on`). For each task: implement the
-change in the listed `files` **and write/extend its tests** per the plan's `## Testing strategy`.
+Execute `## タスク` **in dependency order** (respect `depends_on`). For each task: implement the
+change in the listed `files` **and write/extend its tests** per the plan's `## テスト方針`.
 When a task is done, flip its checkbox to `- [x]` in the plan file. **Only you (the orchestrator)
 edit the plan file** — this keeps progress consistent.
 
@@ -71,7 +72,7 @@ not overlap, run them concurrently to save wall-clock:
 - Reserve git worktrees for the rare case where parallel tasks genuinely cannot share a working
   tree (conflicting global state). The default — disjoint files in one tree — needs no merge.
 
-**Guardrails.** Stay inside `## Out of scope`. If you discover the plan is wrong or incomplete and
+**Guardrails.** Stay inside `## スコープ外`. If you discover the plan is wrong or incomplete and
 must deviate, **stop and ask the user** with the reason — don't silently improvise.
 
 ## Step 3 — Quality gate: lint + test until green
@@ -113,7 +114,7 @@ echo "Codex review written to $REVIEW_OUT"
 Then **Read `$REVIEW_OUT`** and act on it (it's markdown; Codex tags findings `[P1]`/`[P2]`/`[P3]`):
 
 - **Acceptance is your job, not Codex's.** The range flag blocks a custom prompt, so Codex uses
-  default criteria. Separately confirm the change meets the plan's `## Acceptance criteria`; treat an
+  default criteria. Separately confirm the change meets the plan's `## 受入基準`; treat an
   unmet criterion as blocking.
 - Treat **`[P1]`/`[P2]`** findings as **blocking**: fix them, re-run **Step 3** (lint/test), then
   **re-run this Codex review**. Repeat up to **3 rounds**. If P1/P2 findings remain after 3 rounds,
@@ -143,7 +144,7 @@ push here — let `create-pr` handle it.
 
 | Step | Action | Notes |
 |------|--------|-------|
-| 0 | Confirm Opus, read plan + CLAUDE.md | `## Tasks` = progress source of truth |
+| 0 | Confirm Opus, read plan + CLAUDE.md | `## タスク` = progress source of truth |
 | 1 | `git switch -c <type>/<id>-<slug>` | never the default branch |
 | 2 | Implement tasks (+ tests), in dep order | parallel via `task-implementer` (Sonnet), disjoint files only |
 | 3 | lint + test until green | cap 3 rounds; never weaken tests |
