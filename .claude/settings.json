@@ -4,6 +4,7 @@
       "Bash(cat:*)",
       "Bash(cp:*)",
       "Bash(find:*)",
+      "Bash(grep:*)",
       "Bash(jq:*)",
       "Bash(ls:*)",
       "Bash(rg:*)",
@@ -107,12 +108,11 @@
       }
     ]
   },
-  "model": "opus[1m]",
   "statusLine": {
     "type": "command",
     "command": "~/.claude/statusline.sh"
   },
-  "effortLevel": "max",
+  "effortLevel": "high",
   "theme": "dark",
   "inputNeededNotifEnabled": true,
   "agentPushNotifEnabled": true,
