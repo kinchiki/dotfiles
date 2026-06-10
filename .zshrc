@@ -269,9 +269,6 @@ bindkey '^H' select-ssh
 # [ -s "$NVM_DIR/bash_completion" ] && . "$NVM_DIR/bash_completion"
 
 ## x env
-# memo mise 公式は mise と direnv を一緒に使うことは推奨しない
-# https://mise.jdx.dev/direnv.html
-command -v direnv >/dev/null 2>&1 && eval "$(direnv hook zsh)"
 # mise を使うためコメントアウト
 # command -v rbenv > /dev/null 2>&1 && eval "$(rbenv init - zsh)"
 # command -v goenv > /dev/null 2>&1 && eval "$(goenv init -)"
@@ -328,3 +325,9 @@ command -v mise > /dev/null 2>&1 && eval "$(mise activate zsh)"
 
 # マシン毎のローカルの設定読み込み
 [ -f ~/.zshrc.local ] && source ~/.zshrc.local
+
+# memo mise 公式は mise と direnv を一緒に使うことは推奨しない
+  # https://mise.jdx.dev/direnv.html
+# 末尾の記載がよい？
+  # https://direnv.net/docs/hook.html
+command -v direnv >/dev/null 2>&1 && eval "$(direnv hook zsh)"
