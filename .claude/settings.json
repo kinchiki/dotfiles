@@ -4,6 +4,7 @@
       "Bash(cat:*)",
       "Bash(cp:*)",
       "Bash(find:*)",
+      "Bash(jq:*)",
       "Bash(ls:*)",
       "Bash(rg:*)",
       "Bash(touch:*)",
@@ -111,7 +112,7 @@
     "type": "command",
     "command": "~/.claude/statusline.sh"
   },
-  "effortLevel": "xhigh",
+  "effortLevel": "max",
   "theme": "dark",
   "inputNeededNotifEnabled": true,
   "agentPushNotifEnabled": true,
