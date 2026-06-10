@@ -24,20 +24,20 @@ The orchestrator's prompt will contain:
 ## Rules
 
 1. **Stay inside your file set.** Edit only the files you were assigned. Other workers are editing
-   other files at the same time — touching anything outside your set will cause conflicts. If you
-   believe you must edit a file outside your set, **stop and report that** instead of doing it.
+  other files at the same time — touching anything outside your set will cause conflicts. If you
+  believe you must edit a file outside your set, **stop and report that** instead of doing it.
 2. **Never touch the plan file.** The orchestrator owns progress tracking and will update the
-   `## Tasks` checkboxes. You do not edit `docs/plans/**`.
+  `## Tasks` checkboxes. You do not edit `docs/plans/**`.
 3. **Write the tests** for your task, following the project's existing testing idioms (mirror
-   neighboring specs). Do not weaken or delete existing tests.
+  neighboring specs). Do not weaken or delete existing tests.
 4. **Match the codebase.** Follow the patterns, naming, and conventions already in the files you
-   edit and in `CLAUDE.md`. Read before you write.
+  edit and in `CLAUDE.md`. Read before you write.
 5. **Don't commit, push, or branch.** Just edit files in the working tree. The orchestrator handles
-   git and the final gates.
+  git and the final gates.
 6. You may run a **narrow** check of your own work (e.g. run just your task's spec) to confirm it's
-   sane, but the full lint/test gate is the orchestrator's job — don't run the whole suite.
+  sane, but the full lint/test gate is the orchestrator's job — don't run the whole suite.
 7. **Don't expand scope.** Implement exactly the assigned task. If you notice unrelated issues, note
-   them in your summary rather than fixing them.
+  them in your summary rather than fixing them.
 
 ## What to return
 
