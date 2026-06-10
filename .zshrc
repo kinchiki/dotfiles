@@ -229,8 +229,6 @@ elif [ -f ~/.fzf.zsh ]; then
 fi
 unset fzf_base
 
-command -v direnv >/dev/null 2>&1 && eval "$(direnv hook zsh)"
-
 # select ghq
 select-src() {
   local -r selected_dir=$(ghq list -p | fzf --query "$LBUFFER")
@@ -263,20 +261,21 @@ select-ssh() {
 zle -N select-ssh
 bindkey '^H' select-ssh
 
-# マシン毎のローカルの設定読み込み
-[ -f ~/.zshrc.local ] && source ~/.zshrc.local
-
-
 
 ## node
+# mise を使うためコメントアウト
 # export NVM_DIR="$HOME/.nvm"
-[ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"
-[ -s "$NVM_DIR/bash_completion" ] && . "$NVM_DIR/bash_completion"
+# [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"
+# [ -s "$NVM_DIR/bash_completion" ] && . "$NVM_DIR/bash_completion"
 
 ## x env
-command -v rbenv > /dev/null 2>&1 && eval "$(rbenv init - zsh)"
-command -v goenv > /dev/null 2>&1 && eval "$(goenv init -)"
-command -v pyenv > /dev/null 2>&1 && eval "$(pyenv init - zsh)"
+# memo mise 公式は mise と direnv を一緒に使うことは推奨しない
+# https://mise.jdx.dev/direnv.html
+command -v direnv >/dev/null 2>&1 && eval "$(direnv hook zsh)"
+# mise を使うためコメントアウト
+# command -v rbenv > /dev/null 2>&1 && eval "$(rbenv init - zsh)"
+# command -v goenv > /dev/null 2>&1 && eval "$(goenv init -)"
+# command -v pyenv > /dev/null 2>&1 && eval "$(pyenv init - zsh)"
 
 ########## 長めのaliasや関数群 ##########
 alias -g C='| pbcopy'
@@ -323,3 +322,9 @@ find-duplicates() {
 print-symlink() {
   find . -maxdepth 1 -type l -exec sh -c 'for p; do printf "%s\t-> %s\n" "$p" "$(readlink "$p")"; done' sh {} +
 }
+
+# mise
+command -v mise > /dev/null 2>&1 && eval "$(mise activate zsh)"
+
+# マシン毎のローカルの設定読み込み
+[ -f ~/.zshrc.local ] && source ~/.zshrc.local

@@ -49,9 +49,6 @@ typeset -U cdpath fpath mailpath path PATH
 
 # Set the list of directories that Zsh searches for programs.
 path=(
-  # $HOME/dev/google-cloud-sdk/bin
-  $HOME/.pyenv/bin
-  $HOME/.goenv/bin
   $HOME/.local/bin
   /opt/homebrew/bin
   /opt/homebrew/sbin
@@ -98,9 +95,9 @@ export LESS='-i -g -s -F -M -R -X -W -N'
 ## dev
 export DOCKER_BUILDKIT=1
 
-export NVM_DIR="$HOME/.nvm"
-export GOENV_ROOT="$HOME/.goenv"
-export PYENV_ROOT="$HOME/.pyenv"
+# mise を使うためコメントアウト
+# export NVM_DIR="$HOME/.nvm"
+# export GOENV_ROOT="$HOME/.goenv"
+# export PYENV_ROOT="$HOME/.pyenv"
 
-export GCLOUD="$HOME/dev/google-cloud-sdk"
 export USE_GKE_GCLOUD_AUTH_PLUGIN=True
