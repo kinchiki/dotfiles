@@ -156,6 +156,14 @@ alias dk-rm-image='docker image prune -af'
 #alias dk-rm-network='docker network prune -f'
 #alias dc-local-up='docker compose -f docker-compose.yml -f docker-compose.local.yml up'
 
+# podman
+# alias docker='podman'
+# alias docker-compose='podman compose'
+# alias dk='podman'
+# alias dc='podman compose'
+# alias dcu='podman compose up'
+# alias dkc='podman container'
+
 # PostgreSQL
 alias pgstt='pg_ctl start'
 alias pgstp='pg_ctl stop'

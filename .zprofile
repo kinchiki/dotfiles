@@ -95,6 +95,9 @@ export LESS='-i -g -s -F -M -R -X -W -N'
 ## dev
 export DOCKER_BUILDKIT=1
 
+# podman
+# export DOCKER_HOST=unix://$(podman machine inspect --format '{{.ConnectionInfo.PodmanSocket.Path}}')
+
 # mise を使うためコメントアウト
 # export NVM_DIR="$HOME/.nvm"
 # export GOENV_ROOT="$HOME/.goenv"
