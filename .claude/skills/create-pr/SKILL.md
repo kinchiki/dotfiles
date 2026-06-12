@@ -1,31 +1,29 @@
 ---
 name: create-pr
 description: >-
-  現在の変更をコミットし、ブランチを push して GitHub PR を作成、チーム規約に従ってレビュアーを割り当てる。
+  現在の変更をコミットし、ブランチを push して GitHub PR を作成する。
   PR を開きたいときに発火する。
   例:
     「PR作成」
     「PR作って」
     「プルリク」
   または implement-plan スキル完了後の PR 作成引き継ぎ。
-  外向きの操作( commit / push / gh pr create / レビュアー割当 )は実行前に確認する。
+  外向きの操作( commit / push / gh pr create )は実行前に確認する。
 ---
 
 # create-pr
 
-Open a pull request for the current branch's work, the way the team expects, and assign the right
-reviewers. This is the last leg of the ticket-to-plan → implement-plan → create-pr pipeline, but it
-also works standalone.
+Open a pull request for the current branch's work, the way the team expects. This is the last leg
+of the ticket-to-plan → implement-plan → create-pr pipeline, but it also works standalone.
 
 **Project conventions win.** If the current repo has its own PR skill (e.g.
 `.claude/skills/create-pr/local.SKILL.md`) or a documented PR template/convention, follow that — it
 overrides this generic skill. Check for it first.
 
 **These are outward-facing actions.** Pushing and opening a PR publish the work and notify people.
-So confirm with the user before the push/PR step, and never assign reviewers without showing the
-candidates first. (`git push` and `gh pr create` are permission-gated, so you'll be prompted there —
-that's the intended human checkpoint. `git commit` runs without a prompt, so it's on you to show the
-diff and get the user's nod *before* committing.)
+So confirm with the user before the push/PR step. (`git push` and `gh pr create` are
+permission-gated, so you'll be prompted there — that's the intended human checkpoint. `git commit`
+runs without a prompt, so it's on you to show the diff and get the user's nod *before* committing.)
 
 ## Step 1 — Sanity-check the change
 
@@ -85,32 +83,9 @@ gh pr create --base <default-branch> --title "<title>" --body "<body>"
 
 - If the repo has a `.github/pull_request_template.md`, fill that instead of the structure above.
 
-## Step 4 — Assign reviewers
+## Step 4 — Report
 
-Derive candidate reviewers, **present them to the user, and only assign after confirmation** — never
-ping people unprompted.
-
-Derivation order (use what's available):
-1. **CODEOWNERS** — check `.github/CODEOWNERS`, `CODEOWNERS`, `docs/CODEOWNERS`. Owners matching the
-   changed paths are the strongest signal.
-2. **Recent authors of the touched files** — `git log --format='%an <%ae>' -n 20 -- <changed files>`
-   surfaces who knows this code. Map to GitHub handles (e.g. via `gh`), skipping the PR author.
-3. **Ticket assignee / stakeholders** — whoever is on the ticket.
-
-Present 1–4 candidates with a one-line reason each, get the user's pick, then:
-
-```bash
-gh pr edit <pr-number> --add-reviewer <login1>,<login2>
-# team handles: gh pr edit <pr-number> --add-reviewer <org>/<team>
-```
-
-(`gh` has `read:org`, so team-slug reviewers resolve.) If reviewer derivation is inconclusive, ask
-the user who should review rather than guessing.
-
-## Step 5 — Report
-
-Give the user the PR URL (`gh pr view --web` to open it), the assigned reviewers, and a one-line
-recap. Done.
+Give the user the PR URL (`gh pr view --web` to open it) and a one-line recap. Done.
 
 ## Quick reference
 
@@ -120,5 +95,4 @@ recap. Done.
 | 1 | Inspect the change | `git status` / `git diff` |
 | 2 | Commit (repo convention) | `git add -A && git commit` |
 | 3 | Push + open PR (after confirm) | `git push -u origin HEAD` / `gh pr create` |
-| 4 | Assign reviewers (after confirm) | `gh pr edit --add-reviewer` |
-| 5 | Report PR URL + reviewers | `gh pr view --web` |
+| 4 | Report PR URL | `gh pr view --web` |

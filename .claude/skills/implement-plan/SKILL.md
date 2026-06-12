@@ -147,9 +147,9 @@ Codex blocking findings. Then give the user a short Japanese summary:
 - テスト結果（lint・test の最終状態）
 - Codex レビュー要約（解決した blocking、残した nit）
 
-Then invoke the **`create-pr`** skill to commit, push, open the PR, and assign reviewers. That skill
-owns the outward-facing confirmation (commit / push / `gh pr create` are gated), so do not commit or
-push here — let `create-pr` handle it.
+Then invoke the **`create-pr`** skill to commit, push, and open the PR. That skill owns the
+outward-facing confirmation (commit / push / `gh pr create` are gated), so do not commit or push
+here — let `create-pr` handle it.
 
 ## Quick reference
 
