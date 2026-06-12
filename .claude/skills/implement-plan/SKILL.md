@@ -5,7 +5,7 @@ description: >-
   承認済みプランを渡されて実装を始めるときに発火する。
   例:
     「implement-plan スキルで実装して」
-    「プラン docs/plans/....md を実装して」
+    「プラン .claude/plans/....md を実装して」
     「このプランを実装して」
   または ticket-to-plan スキルがプランファイルを指す実装セッションを起動したとき。
   これは ticket-to-plan → implement-plan → create-pr パイプラインの実装フェーズ。
@@ -56,9 +56,9 @@ git switch -c <type>/<ticket-id>-<slug>    # e.g. feat/ENG-123-oauth-token-refre
 ```
 
 `<type>` follows the repo's convention (`feat`/`fix`/`chore`…). If a branch already exists for this
-ticket, or the working tree has changes **other than the plan file** (`docs/plans/**`), stop and ask
-rather than guessing. An uncommitted plan file is expected — the planning session may have left it;
-just carry it onto the new branch.
+ticket, or the working tree has changes **other than the plan file** (`.claude/plans/**` is
+git-ignored, so it won't show in `git status` anyway), stop and ask rather than guessing. The plan
+file the planning session left is expected — just carry it onto the new branch.
 
 ## Step 2 — Work through the tasks
 
