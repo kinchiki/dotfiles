@@ -123,7 +123,7 @@ Once approved, persist the plan so a fresh session can execute it cold.
 **Location & naming** (create the directory if missing):
 
 ```
-docs/plans/<YYYY-MM-DD>-<source>-<ticket-id>-<slug>.md
+.claude/plans/<YYYY-MM-DD>-<source>-<ticket-id>-<slug>.md
 ```
 
 - `<YYYY-MM-DD>` — today's date. Get it from `date +%F` (do not guess).
@@ -131,11 +131,10 @@ docs/plans/<YYYY-MM-DD>-<source>-<ticket-id>-<slug>.md
 - `<ticket-id>` — issue/PR number or Linear key (e.g. `1234`, `ENG-123`).
 - `<slug>` — 3–5 word kebab-case summary from the title.
 
-Example: `docs/plans/2026-06-08-linear-ENG-123-oauth-token-refresh.md`
+Example: `.claude/plans/2026-06-08-linear-ENG-123-oauth-token-refresh.md`
 
-Why `docs/plans/`: it is discoverable, lives beside the code, and can be committed so the team
-(and the implementing session) shares one source of truth. If a project clearly uses a different
-convention, follow that instead and tell the user where you put it.
+If a project clearly uses a different convention, follow that instead and tell the user
+where you put it.
 
 **Use this template** — fill every section; omit one only if truly N/A and say why:
 
@@ -217,7 +216,7 @@ If `spawn_task` is **not** available in the session, fall back to printing the e
 the user to start a new session manually, e.g.:
 
 ```bash
-cd <repo> && claude "プラン docs/plans/<file>.md を implement-plan スキルで実装して"
+cd <repo> && claude "プラン .claude/plans/<file>.md を implement-plan スキルで実装して"
 ```
 
 Then tell the user: the plan is saved at `<path>`, and the implementation task has been queued (or
@@ -231,5 +230,5 @@ give them the manual command). Stop there — do not implement in this session.
 | 1 | Fetch full ticket context | `gh` CLI / GitHub MCP / Linear MCP |
 | 2 | Deep plan + break into tasks, max effort | plan mode + ultrathink |
 | 3 | Approve loop (plan + task breakdown) | `ExitPlanMode` |
-| 4 | Write plan file (with `## タスク`) | `docs/plans/<date>-<src>-<id>-<slug>.md` |
+| 4 | Write plan file (with `## タスク`) | `.claude/plans/<date>-<src>-<id>-<slug>.md` |
 | 5 | Hand off implementation | `spawn_task` → `implement-plan` skill |
