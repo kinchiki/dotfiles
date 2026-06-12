@@ -52,19 +52,20 @@ After user confirmation:
 
 ```bash
 git push -u origin HEAD
-gh pr create --base <default-branch> --title "<title>" --body "<body>"
+gh pr create --base <default-branch> --title "<title>" --body "<body>" --assignee kinchiki
 ```
 
+- **Assignees:** 必ず `kinchiki` を指定する（`--assignee kinchiki`）。
 - **Title:** concise, in the repo's usual language (日本語 if the team writes PRs in Japanese).
   Include the ticket key if that's the convention.
 - **Body:** generate from the plan and ticket. Suggested structure (日本語):
 
   ```markdown
+  ## issue
+  <指定されたチケットの URL>
+
   ## 概要
   <この PR で何を・なぜ変えたか（1〜3行）>
-
-  ## チケット
-  <URL または ID（GitHub なら `Closes #123` で自動クローズ）>
 
   ## 変更点
   - <主要な変更を箇条書き>
@@ -94,5 +95,5 @@ Give the user the PR URL (`gh pr view --web` to open it) and a one-line recap. D
 | 0 | Prefer project's own PR skill if present | (check `.claude/skills`) |
 | 1 | Inspect the change | `git status` / `git diff` |
 | 2 | Commit (repo convention) | `git add -A && git commit` |
-| 3 | Push + open PR (after confirm) | `git push -u origin HEAD` / `gh pr create` |
+| 3 | Push + open PR (after confirm) | `git push -u origin HEAD` / `gh pr create --assignee kinchiki` |
 | 4 | Report PR URL | `gh pr view --web` |
