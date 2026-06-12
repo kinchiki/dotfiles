@@ -69,17 +69,24 @@ should_skip_path() {
   return 1
 }
 
+# HOME 配下のパスは ~/ で表示する
+format_home_path() {
+  local path="$1"
+  echo "${path//$HOME/~}"
+}
+
 # symlink を張る。既存の実ディレクトリは上書きしない。
 link_path() {
   local source="$1"
   local target="$2"
 
   if [ -d "$target" ] && [ ! -L "$target" ]; then
-    echo "skip existing directory: ${target}"
+    echo "skip existing directory: $(format_home_path "$target")"
     return
   fi
 
-  ln -snfv "$source" "$target"
+  ln -snf "$source" "$target"
+  echo "$(format_home_path "$target")"$'\t'"-> $(format_home_path "$source")"
 }
 
 # find コマンド用のファイル名除外条件を生成
