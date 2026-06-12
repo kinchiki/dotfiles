@@ -106,23 +106,76 @@ Run the full relevant suite once more before Step 4 so the whole change is green
 ## Step 4 — Independent review with Codex (a different AI)
 
 Get a second opinion from Codex on the **uncommitted** working tree (no commit needed yet — review
-first, commit later):
+first, commit later). A one-line "no issues" result is only trustworthy if Codex actually had a
+diff to read AND actually explored it — so confirm both before believing it (Step 4a below):
 
 ```bash
 # `codex` is at ~/.local/bin/codex — add it to PATH first if it isn't already.
-REVIEW_OUT="/tmp/codex-review.md"   # deterministic path, so the next step can re-open it
+REVIEW_OUT="/tmp/codex-review.md"     # Codex's LAST message = the review body, tagged [P1]/[P2]/[P3]
+REVIEW_JSON="/tmp/codex-review.jsonl" # structured event stream, used to VERIFY the run (Step 4a)
 
-# NOTES on this command (learned the hard way):
+# --- 1. Confirm there is actually something to review (guards the silent no-op) ---
+# `--uncommitted` reviews staged + unstaged + UNTRACKED, so the "is it empty?" check must include
+# untracked files too — a tasks-added-new-files-only diff has an empty `git diff` but is NOT empty.
+git status --short                                # log the full uncommitted picture (incl. untracked)
+git diff --stat HEAD                              # and the tracked (staged+unstaged) size
+# `--untracked-files=all` so a repo with `status.showUntrackedFiles=no` still reports new files.
+PENDING="$(git status --porcelain --untracked-files=all)"  # non-empty ⇔ there IS something to review
+# If PENDING is EMPTY, `--uncommitted` reviews nothing and Codex returns a vacuous one-liner
+# ("No application code changes were present to review") that LOOKS like a clean pass.
+#   → If the change is already committed, switch to RANGE=(--base "<default-branch>").
+#   → If still empty, report "nothing to review" to the user and STOP — do NOT treat it as a pass.
+# RANGE is an ARRAY: in zsh an unquoted scalar does NOT word-split, so RANGE="--base main" would
+# reach codex as one bogus arg. An array + "${RANGE[@]}" passes each word correctly in zsh and bash.
+RANGE=(--uncommitted)
+
+# --- 2. Run with --json alongside -o (-o = human-readable last message; --json = verification) ---
+# Clear stale outputs first: these are FIXED paths, so a PREVIOUS run's file must never be mistaken
+# for this run's result (the bug that makes a failed review look like a clean pass).
+rm -f "$REVIEW_OUT" "$REVIEW_JSON"
+# Use `>|` not `>`: zsh here often has `noclobber` set, and this step re-runs up to 3 rounds, so a
+# plain `>` to an existing file fails with "file exists" and the review silently never runs.
+codex exec review "${RANGE[@]}" --json -o "$REVIEW_OUT" >| "$REVIEW_JSON" 2>| "${REVIEW_JSON%.jsonl}.err"
+CODEX_RC=$?                                        # CAPTURE codex's status — do not let `echo` mask it
+echo "Codex exit=$CODEX_RC ; last message -> $REVIEW_OUT ; events -> $REVIEW_JSON"
+# If Codex itself failed (non-zero exit), DON'T read the (now-deleted or partial) output and DON'T
+# treat it as a pass — go straight to the /code-review fallback below.
+[ "$CODEX_RC" -ne 0 ] && echo "Codex FAILED (see ${REVIEW_JSON%.jsonl}.err) — use the /code-review fallback, do not trust output."
+
+# NOTES on this command (learned the hard way / verified empirically):
 # - A range selector (--uncommitted / --base / --commit) CANNOT be combined with a custom [PROMPT];
 #   Codex errors out. So the review runs with Codex's built-in criteria — you judge acceptance below.
-# - `codex exec review` writes a human-readable markdown review to -o, tagging findings [P1]/[P2]/[P3]
-#   by priority. It does NOT honor --output-schema, so don't expect JSON — read the text.
-# - Use a DETERMINISTIC path (not $(mktemp) buried in a one-off command, which is lost to the next step).
-codex exec review --uncommitted -o "$REVIEW_OUT"
-echo "Codex review written to $REVIEW_OUT"
+# - `-o` writes the agent's LAST MESSAGE. For `codex exec review` that last message IS the review
+#   body, and findings appear there tagged [P1]/[P2]/[P3] — so reading $REVIEW_OUT does surface them.
+#   It does NOT honor --output-schema, so don't expect JSON from -o — read the text.
+# - The RAW stdout (without --json) is polluted with terminal/binary noise in codex 0.139.0
+#   (multi-MB). To check the run programmatically, always use --json (clean JSONL); never parse raw stdout.
+# - Use DETERMINISTIC paths (not $(mktemp) buried in a one-off command, which is lost to the next step).
 ```
 
-Then **Read `$REVIEW_OUT`** and act on it (it's markdown; Codex tags findings `[P1]`/`[P2]`/`[P3]`):
+### Step 4a — Verify the review is trustworthy *before* reading its verdict
+
+A clean one-liner is worthless if Codex never saw the diff. **First confirm Codex actually
+explored**, using `$REVIEW_JSON` (the count of `command_execution` items it ran):
+
+```bash
+# How many command events Codex emitted while reviewing (0 ⇒ it read nothing).
+# NOTE: codex emits COMPACT json — no space after the colon — so the pattern must have no space.
+# This counts both item.started + item.completed per command, so the value ≥ 1 simply means "explored".
+grep -c '"type":"command_execution"' "$REVIEW_JSON"
+```
+
+- The final verdict is the `agent_message` item — same text as `$REVIEW_OUT`.
+- **Trust rule:** a "no findings" (one-line) result counts as a PASS **only if** `CODEX_RC` was `0`,
+  **the selected `RANGE` was non-empty**, **and** the `command_execution` count is **≥ 1**. ("Non-empty"
+  is what step 1 established: for `--uncommitted` that's `PENDING`; for `--base <branch>` it's
+  `git diff --quiet <branch>...HEAD` reporting changes — so a clean working tree is normal there, not
+  a false pass.) If any of the three is missing, treat it as a **false pass / failed run**: re-check
+  the range, re-run, and if it still won't review anything (or Codex keeps erroring), fall back to
+  `/code-review` (and tell the user the review came from Claude, not Codex).
+
+Once the run is verified, **Read `$REVIEW_OUT`** and act on it (it's markdown; Codex tags findings
+`[P1]`/`[P2]`/`[P3]`):
 
 - **Acceptance is your job, not Codex's.** The range flag blocks a custom prompt, so Codex uses
   default criteria. Separately confirm the change meets the plan's `## 受入基準`; treat an
@@ -159,5 +212,5 @@ here — let `create-pr` handle it.
 | 1 | `git switch -c <type>/<id>-<slug>` | never the default branch |
 | 2 | Implement tasks (+ tests), in dep order | parallel via `task-implementer` (Sonnet), disjoint files only |
 | 3 | lint + test until green | cap 3 rounds; never weaken tests |
-| 4 | `codex exec review --uncommitted -o FILE` | read the text, fix [P1]/[P2], cap 3 rounds; `/code-review` fallback |
+| 4 | `codex exec review "${RANGE[@]}" --json -o FILE` | guard empty range (else `--base`); verify `CODEX_RC`=0 ∧ `command_execution`≥1 before trusting; a 1-line "clean" passes only if range≠∅ ∧ explored; fix [P1]/[P2], cap 3 rounds; `/code-review` fallback |
 | 5 | Report, then call `create-pr` | create-pr owns commit/push/PR confirmation |
