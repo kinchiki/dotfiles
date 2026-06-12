@@ -1,7 +1,7 @@
 ---
 name: implement-plan
 description: >-
-  承認済みの実装プランファイルを、新しいセッションで端から端まで実行する: feature ブランチを作成し、プランの `## タスク` をテストを書きながら進め、lint/test を緑にし、実行中のエージェントとは別の AI（Claude Code 実行時は Codex、Codex 実行時は Claude Code）から独立したコードレビューを受け、PR を開く。
+  承認済みの実装プランファイルを、新しいセッションで端から端まで実行する: feature ブランチを作成し、プランの `## タスク` をテストを書きながら進め、lint/test を緑にし、リスクに応じた AI レビューを受け、PR を開く。
   承認済みプランを渡されて実装を始めるときに発火する。
   例:
     「implement-plan スキルで実装して」
@@ -20,7 +20,7 @@ approved plan is the contract. The session only stops when (a) a quality gate fa
 budget, (b) the plan would have to be deviated from, or (c) it reaches the outward-facing PR step.
 
 Flow: **(exit plan mode if active) → confirm model & read plan → branch → implement tasks (with
-tests) → lint/test gate → review by the other AI → report → create-pr.**
+tests) → lint/test gate → risk-based AI review → report → create-pr.**
 
 ## Step 0a — If plan mode is active, exit it immediately
 
@@ -29,7 +29,7 @@ mode being active is a mode mismatch, not a signal to plan. Do **not** re-plan (
 re-verification, no re-checking the acceptance criteria, no rewriting the plan).
 
 Instead, call `ExitPlanMode` right away with a body that is **only a 1–2 line execution outline** —
-e.g. "承認済みプランを実行します: ブランチ作成 → タスク実装(+テスト) → lint/test → 相互AIレビュー
+e.g. "承認済みプランを実行します: ブランチ作成 → タスク実装(+テスト) → lint/test → リスク別AIレビュー
 → create-pr." Do not restate or re-litigate the plan's contents. Once approved (plan mode lifted),
 continue straight into Step 0 below. If plan mode is not active, skip this step and start at Step 0.
 
@@ -103,15 +103,33 @@ After each task (and after each parallel batch), run the project's lint and test
 
 Run the full relevant suite once more before Step 4 so the whole change is green together.
 
-## Step 4 — Independent review with the other AI
+## Step 4 — Risk-based AI review
 
-Get a second opinion from the AI that is **not** running the implementation session:
+After Step 3 is green, classify the change before spending review time. Use the plan's
+`## リスク・未解決の論点` as an input, but make the final call from the actual diff:
+
+- **Low risk:** docs/comments/copy-only changes, small type/test fixes, tiny UI text/styling tweaks
+  with no behavioral or data-path impact. Do a focused self-review against the diff and acceptance
+  criteria; lint/test green is enough. Record "independent AI review skipped: low risk" in the final
+  summary and PR body.
+- **Medium risk (default):** normal feature work, small bug fixes, UI behavior changes, API-adjacent
+  changes without high-risk flags. Run **one** independent review after lint/test is green.
+- **High risk:** auth, billing, permissions, data deletion, migrations, security, production data
+  handling, broad refactors, or changes with unclear blast radius. Run one independent review, and
+  allow at most one normal re-review after fixing P1/P2. Use a third review only when the change is
+  high-risk **and** a remaining P1/P2 finding is ambiguous or needs confirmation.
+
+For medium/high risk, get a second opinion from the AI that is **not** running the implementation
+session. Be explicit about the pairing:
 
 - If you are running in **Claude Code**, review with **Codex**.
 - If you are running in **Codex**, review with **Claude Code**.
 
 If you are unsure which environment you are in, inspect your system/developer prompt and available
 tools before choosing. Do not review your own work with the same agent and call it independent.
+
+Do not feed the reviewer a long implementation narrative. Review the actual diff / working tree /
+test results, with only concise context: purpose, acceptance criteria, and special risks.
 
 ### Step 4a — Claude Code session: review with Codex
 
@@ -144,8 +162,8 @@ RANGE=(--uncommitted)
 # Clear stale outputs first: these are FIXED paths, so a PREVIOUS run's file must never be mistaken
 # for this run's result (the bug that makes a failed review look like a clean pass).
 rm -f "$REVIEW_OUT" "$REVIEW_JSON"
-# Use `>|` not `>`: zsh here often has `noclobber` set, and this step re-runs up to 3 rounds, so a
-# plain `>` to an existing file fails with "file exists" and the review silently never runs.
+# Use `>|` not `>`: zsh here often has `noclobber` set. This step may re-run after P1/P2 fixes, so
+# a plain `>` to an existing file fails with "file exists" and the review silently never runs.
 codex exec review "${RANGE[@]}" --json -o "$REVIEW_OUT" >| "$REVIEW_JSON" 2>| "${REVIEW_JSON%.jsonl}.err"
 CODEX_RC=$?                                        # CAPTURE codex's status — do not let `echo` mask it
 echo "Codex exit=$CODEX_RC ; last message -> $REVIEW_OUT ; events -> $REVIEW_JSON"
@@ -191,9 +209,11 @@ Once the run is verified, **Read `$REVIEW_OUT`** and act on it (it's markdown; C
 - **Acceptance is your job, not Codex's.** The range flag blocks a custom prompt, so Codex uses
   default criteria. Separately confirm the change meets the plan's `## 受入基準`; treat an
   unmet criterion as blocking.
-- Treat **`[P1]`/`[P2]`** findings as **blocking**: fix them, re-run **Step 3** (lint/test), then
-  **re-run this Codex review**. Repeat up to **3 rounds**. If P1/P2 findings remain after 3 rounds,
-  stop and report to the user.
+- Treat **`[P1]`/`[P2]`** findings as **blocking**: fix them with Claude Code, re-run **Step 3**
+  (lint/test), then **re-run this Codex review once**.
+- A third Codex review is exceptional: run it only for high-risk changes or when a remaining P1/P2
+  finding is genuinely ambiguous after the second review. Otherwise stop and report the unresolved
+  blocking finding to the user.
 - **`[P3]`** (minor) findings: address the cheap ones; otherwise list them in the PR body for the
   human reviewer.
 - `codex exec review` is read-only (it won't edit your code). Use `--base <default-branch>` instead
@@ -231,19 +251,21 @@ echo "Claude Code exit=$CLAUDE_RC ; review -> $CLAUDE_REVIEW_OUT ; err -> $CLAUD
   reading the diff is a false pass; re-run with the explicit prompt above or use
   `claude ultrareview <default-branch>` if the work is already committed on a branch.
 - Treat **`[P1]`/`[P2]`** findings as **blocking**: fix them, re-run **Step 3** (lint/test), then
-  re-run this Claude Code review. Repeat up to **3 rounds**. If P1/P2 findings remain after 3
-  rounds, stop and report to the user.
+  re-run this Claude Code review once.
+- A third Claude Code review is exceptional: run it only for high-risk changes or when a remaining
+  P1/P2 finding is genuinely ambiguous after the second review. Otherwise stop and report the
+  unresolved blocking finding to the user.
 - **`[P3]`** (minor) findings: address the cheap ones; otherwise list them in the PR body for the
   human reviewer.
 
 ## Step 5 — Report, then hand off to create-pr
 
 Confirm the finish line: every task is `- [x]`, lint/test is green, and there are no remaining
-blocking findings from the other-AI review. Then give the user a short Japanese summary:
+blocking findings from the required review path. Then give the user a short Japanese summary:
 
 - 変更概要（何をしたか / 触ったファイル）
 - テスト結果（lint・test の最終状態）
-- 相互AIレビュー要約（レビュー担当、解決した blocking、残した nit）
+- AIレビュー要約（リスク分類、レビュー担当: Claude Code実装時はCodex / Codex実装時はClaude Code、または低リスクskip理由、解決した blocking、残した nit）
 
 Then invoke the **`create-pr`** skill to commit, push, and open the PR. That skill owns the
 outward-facing confirmation (commit / push / `gh pr create` are gated), so do not commit or push
@@ -257,5 +279,5 @@ here — let `create-pr` handle it.
 | 1 | `git switch -c <type>/<id>-<slug>` | never the default branch |
 | 2 | Implement tasks (+ tests), in dep order | parallel via `task-implementer` (Sonnet), disjoint files only |
 | 3 | lint + test until green | cap 3 rounds; never weaken tests |
-| 4 | Other-AI review | Claude Code session: `codex exec review "${RANGE[@]}" --json -o FILE`; Codex session: `claude -p --permission-mode plan ...`; guard empty ranges, distrust unexplored clean passes, fix [P1]/[P2], cap 3 rounds |
+| 4 | Risk-based AI review | low risk: self-review + green lint/test only; medium/high: review actual diff once; rerun once only for [P1]/[P2]; third review only for high-risk or ambiguous P1/P2 |
 | 5 | Report, then call `create-pr` | create-pr owns commit/push/PR confirmation |

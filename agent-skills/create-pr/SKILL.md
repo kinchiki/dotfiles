@@ -74,9 +74,11 @@ gh pr create --base <default-branch> --title "<title>" --body "<body>" --assigne
   - lint: <コマンドと結果>
   - test: <コマンドと結果>
 
-  ## レビュー（相互AI）
+  ## レビュー（AI）
+  - レビュー担当: <Claude Code実装時はCodex / Codex実装時はClaude Code / 低リスクskip>
   - 解決済み blocking: <あれば>
   - 残した nit: <あれば。なければ「なし」>
+  - レビュー方針: <低リスクskip / 独立AIレビュー1回 / P1-P2修正後の再レビュー など>
 
   ## 受入基準
   - [x] <プランの Acceptance criteria を転記し、満たしたものをチェック>
