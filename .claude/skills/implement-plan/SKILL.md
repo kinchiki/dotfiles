@@ -19,8 +19,19 @@ executes it, and calls `create-pr` at the end. Human checkpoints are deliberatel
 approved plan is the contract. The session only stops when (a) a quality gate fails after its retry
 budget, (b) the plan would have to be deviated from, or (c) it reaches the outward-facing PR step.
 
-Flow: **confirm model & read plan → branch → implement tasks (with tests) → lint/test gate →
-Codex review → report → create-pr.**
+Flow: **(exit plan mode if active) → confirm model & read plan → branch → implement tasks (with
+tests) → lint/test gate → Codex review → report → create-pr.**
+
+## Step 0a — If plan mode is active, exit it immediately
+
+This skill is the *execution* phase, and the plan you were handed is **already approved** — so plan
+mode being active is a mode mismatch, not a signal to plan. Do **not** re-plan (no codebase
+re-verification, no re-checking the acceptance criteria, no rewriting the plan).
+
+Instead, call `ExitPlanMode` right away with a body that is **only a 1–2 line execution outline** —
+e.g. "承認済みプランを実行します: ブランチ作成 → タスク実装(+テスト) → lint/test → Codex レビュー
+→ create-pr." Do not restate or re-litigate the plan's contents. Once approved (plan mode lifted),
+continue straight into Step 0 below. If plan mode is not active, skip this step and start at Step 0.
 
 ## Step 0 — Confirm model and read the plan
 
