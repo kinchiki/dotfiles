@@ -28,6 +28,12 @@ declare -a SKIP_DIRS=(
   "archive"
 )
 
+# symlink を張らないパス要素（配下も除外）
+declare -a SKIP_PATH_PARTS=(
+  ".claude/plans"
+  "worktrees"
+)
+
 # ==================== ヘルパー関数 ====================
 
 # 値が配列に含まれているかチェック
@@ -49,6 +55,31 @@ should_skip_dir() {
 # ファイルをスキップすべきか判定
 should_skip_file() {
   contains_value "$1" "${SKIP_FILES[@]}"
+}
+
+# パスをスキップすべきか判定
+should_skip_path() {
+  local path="/${1%/}/"
+  local skip
+  for skip in "${SKIP_PATH_PARTS[@]}"; do
+    if [[ "$path" == *"/${skip}/"* ]]; then
+      return 0
+    fi
+  done
+  return 1
+}
+
+# symlink を張る。既存の実ディレクトリは上書きしない。
+link_path() {
+  local source="$1"
+  local target="$2"
+
+  if [ -d "$target" ] && [ ! -L "$target" ]; then
+    echo "skip existing directory: ${target}"
+    return
+  fi
+
+  ln -snfv "$source" "$target"
 }
 
 # find コマンド用のファイル名除外条件を生成
@@ -78,10 +109,10 @@ build_skip_dir_path_conditions() {
 for file in .??*; do
   [ -d "$file" ] && continue
   should_skip_file "$file" && continue
-  ln -snfv "${DOT_FILES_DIRECTORY}/${file}" "${HOME}/${file}"
+  link_path "${DOT_FILES_DIRECTORY}/${file}" "${HOME}/${file}"
 done
 
-# 直下のドットディレクトリを再帰的にたどり、ディレクトリは作成し、ファイルは個別に symlink する。
+# 直下のドットディレクトリを再帰的にたどり、ディレクトリは作成し、ファイルと symlink は個別に symlink する。
 # ディレクトリごと symlink すると ~/.claude のようにアプリが生成物を書き込む実体ディレクトリと衝突し、管理したくないファイルもg管理されてしまう。
 # （dotfiles に実在するファイルだけが対象になるので、.codex のように一部だけ管理したいディレクトリでも置いたファイルしかリンクされない）
 for dir in .??*/; do
@@ -91,14 +122,16 @@ for dir in .??*/; do
   # ディレクトリ構造を作成（SKIP_DIRS 配下は除外）
   find "$dir" -type d $(build_skip_dir_path_conditions) -print0 |
     while IFS= read -r -d '' d; do
+      should_skip_path "$d" && continue
       mkdir -p "${HOME}/${d}"
     done
 
-  # ファイルを symlink（SKIP_DIRS と SKIP_FILES の除外）
-  find "$dir" -type f $(build_skip_dir_path_conditions) $(build_skip_file_conditions) -print0 |
+  # ファイルと symlink を symlink（SKIP_DIRS と SKIP_FILES の除外）
+  find "$dir" \( -type f -o -type l \) $(build_skip_dir_path_conditions) $(build_skip_file_conditions) -print0 |
     while IFS= read -r -d '' f; do
       should_skip_file "$f" && continue
-      ln -snfv "${DOT_FILES_DIRECTORY}/${f}" "${HOME}/${f}"
+      should_skip_path "$f" && continue
+      link_path "${DOT_FILES_DIRECTORY}/${f}" "${HOME}/${f}"
     done
 done
 

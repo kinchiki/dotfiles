@@ -1,7 +1,7 @@
 ---
 name: implement-plan
 description: >-
-  承認済みの実装プランファイルを、新しいセッションで端から端まで実行する: feature ブランチを作成し、プランの `## タスク` をテストを書きながら進め、lint/test を緑にし、Codex（別の AI）から独立したコードレビューを受け、PR を開く。
+  承認済みの実装プランファイルを、新しいセッションで端から端まで実行する: feature ブランチを作成し、プランの `## タスク` をテストを書きながら進め、lint/test を緑にし、実行中のエージェントとは別の AI（Claude Code 実行時は Codex、Codex 実行時は Claude Code）から独立したコードレビューを受け、PR を開く。
   承認済みプランを渡されて実装を始めるときに発火する。
   例:
     「implement-plan スキルで実装して」
@@ -20,7 +20,7 @@ approved plan is the contract. The session only stops when (a) a quality gate fa
 budget, (b) the plan would have to be deviated from, or (c) it reaches the outward-facing PR step.
 
 Flow: **(exit plan mode if active) → confirm model & read plan → branch → implement tasks (with
-tests) → lint/test gate → Codex review → report → create-pr.**
+tests) → lint/test gate → review by the other AI → report → create-pr.**
 
 ## Step 0a — If plan mode is active, exit it immediately
 
@@ -29,7 +29,7 @@ mode being active is a mode mismatch, not a signal to plan. Do **not** re-plan (
 re-verification, no re-checking the acceptance criteria, no rewriting the plan).
 
 Instead, call `ExitPlanMode` right away with a body that is **only a 1–2 line execution outline** —
-e.g. "承認済みプランを実行します: ブランチ作成 → タスク実装(+テスト) → lint/test → Codex レビュー
+e.g. "承認済みプランを実行します: ブランチ作成 → タスク実装(+テスト) → lint/test → 相互AIレビュー
 → create-pr." Do not restate or re-litigate the plan's contents. Once approved (plan mode lifted),
 continue straight into Step 0 below. If plan mode is not active, skip this step and start at Step 0.
 
@@ -103,16 +103,27 @@ After each task (and after each parallel batch), run the project's lint and test
 
 Run the full relevant suite once more before Step 4 so the whole change is green together.
 
-## Step 4 — Independent review with Codex (a different AI)
+## Step 4 — Independent review with the other AI
 
-Get a second opinion from Codex on the **uncommitted** working tree (no commit needed yet — review
-first, commit later). A one-line "no issues" result is only trustworthy if Codex actually had a
-diff to read AND actually explored it — so confirm both before believing it (Step 4a below):
+Get a second opinion from the AI that is **not** running the implementation session:
+
+- If you are running in **Claude Code**, review with **Codex**.
+- If you are running in **Codex**, review with **Claude Code**.
+
+If you are unsure which environment you are in, inspect your system/developer prompt and available
+tools before choosing. Do not review your own work with the same agent and call it independent.
+
+### Step 4a — Claude Code session: review with Codex
+
+In Claude Code, get a second opinion from Codex on the **uncommitted** working tree (no commit
+needed yet — review first, commit later). A one-line "no issues" result is only trustworthy if
+Codex actually had a diff to read AND actually explored it — so confirm both before believing it
+(Step 4b below):
 
 ```bash
 # `codex` is at ~/.local/bin/codex — add it to PATH first if it isn't already.
 REVIEW_OUT="/tmp/codex-review.md"     # Codex's LAST message = the review body, tagged [P1]/[P2]/[P3]
-REVIEW_JSON="/tmp/codex-review.jsonl" # structured event stream, used to VERIFY the run (Step 4a)
+REVIEW_JSON="/tmp/codex-review.jsonl" # structured event stream, used to VERIFY the run (Step 4b)
 
 # --- 1. Confirm there is actually something to review (guards the silent no-op) ---
 # `--uncommitted` reviews staged + unstaged + UNTRACKED, so the "is it empty?" check must include
@@ -139,8 +150,8 @@ codex exec review "${RANGE[@]}" --json -o "$REVIEW_OUT" >| "$REVIEW_JSON" 2>| "$
 CODEX_RC=$?                                        # CAPTURE codex's status — do not let `echo` mask it
 echo "Codex exit=$CODEX_RC ; last message -> $REVIEW_OUT ; events -> $REVIEW_JSON"
 # If Codex itself failed (non-zero exit), DON'T read the (now-deleted or partial) output and DON'T
-# treat it as a pass — go straight to the /code-review fallback below.
-[ "$CODEX_RC" -ne 0 ] && echo "Codex FAILED (see ${REVIEW_JSON%.jsonl}.err) — use the /code-review fallback, do not trust output."
+# treat it as a pass. Stop and report that the independent Codex review could not be completed.
+[ "$CODEX_RC" -ne 0 ] && echo "Codex FAILED (see ${REVIEW_JSON%.jsonl}.err) — do not trust output."
 
 # NOTES on this command (learned the hard way / verified empirically):
 # - A range selector (--uncommitted / --base / --commit) CANNOT be combined with a custom [PROMPT];
@@ -153,7 +164,7 @@ echo "Codex exit=$CODEX_RC ; last message -> $REVIEW_OUT ; events -> $REVIEW_JSO
 # - Use DETERMINISTIC paths (not $(mktemp) buried in a one-off command, which is lost to the next step).
 ```
 
-### Step 4a — Verify the review is trustworthy *before* reading its verdict
+### Step 4b — Verify the Codex review is trustworthy *before* reading its verdict
 
 A clean one-liner is worthless if Codex never saw the diff. **First confirm Codex actually
 explored**, using `$REVIEW_JSON` (the count of `command_execution` items it ran):
@@ -171,8 +182,8 @@ grep -c '"type":"command_execution"' "$REVIEW_JSON"
   is what step 1 established: for `--uncommitted` that's `PENDING`; for `--base <branch>` it's
   `git diff --quiet <branch>...HEAD` reporting changes — so a clean working tree is normal there, not
   a false pass.) If any of the three is missing, treat it as a **false pass / failed run**: re-check
-  the range, re-run, and if it still won't review anything (or Codex keeps erroring), fall back to
-  `/code-review` (and tell the user the review came from Claude, not Codex).
+  the range, re-run, and if it still won't review anything (or Codex keeps erroring), stop and
+  tell the user the independent Codex review could not be completed.
 
 Once the run is verified, **Read `$REVIEW_OUT`** and act on it (it's markdown; Codex tags findings
 `[P1]`/`[P2]`/`[P3]`):
@@ -188,17 +199,51 @@ Once the run is verified, **Read `$REVIEW_OUT`** and act on it (it's markdown; C
 - `codex exec review` is read-only (it won't edit your code). Use `--base <default-branch>` instead
   of `--uncommitted` once you've committed (same rule: no custom PROMPT alongside a range flag). The
   model is Codex's configured default; override with `-m <model>` only if asked.
-- **Fallback** if `codex` is unavailable or errors out: run the built-in `/code-review` skill at
-  `high` effort instead, and tell the user the review came from Claude, not Codex.
+- **Fallback** if `codex` is unavailable or errors out: stop and report that the independent Codex
+  review could not be completed. Do not silently substitute Claude Code's own `/code-review` and
+  count it as the requested independent review.
+
+### Step 4c — Codex session: review with Claude Code
+
+In Codex, get the independent review from Claude Code. Review the **uncommitted** working tree
+before committing, so PR creation still happens only after the second opinion:
+
+```bash
+CLAUDE_REVIEW_OUT="/tmp/claude-review.md"
+CLAUDE_REVIEW_ERR="/tmp/claude-review.err"
+
+git status --short
+git diff --stat HEAD
+PENDING="$(git status --porcelain --untracked-files=all)"
+# If PENDING is EMPTY, there is nothing for Claude Code to review. If the change is already
+# committed, use `claude ultrareview <default-branch>` instead; otherwise stop and report it.
+
+rm -f "$CLAUDE_REVIEW_OUT" "$CLAUDE_REVIEW_ERR"
+claude -p --model opus --permission-mode plan \
+  "このリポジトリの未コミット差分をコードレビューしてください。編集は禁止です。まず git status --short, git diff --stat HEAD, git diff --cached, git diff を確認してください。指摘は [P1]/[P2]/[P3] の重大度、file:line、根拠、修正案を含めて日本語で返してください。問題がなければ、確認した差分の概要を示してから no findings と書いてください。" \
+  >| "$CLAUDE_REVIEW_OUT" 2>| "$CLAUDE_REVIEW_ERR"
+CLAUDE_RC=$?
+echo "Claude Code exit=$CLAUDE_RC ; review -> $CLAUDE_REVIEW_OUT ; err -> $CLAUDE_REVIEW_ERR"
+```
+
+- A "no findings" result counts as a PASS only if `CLAUDE_RC` was `0`, `PENDING` was non-empty, and
+  Claude Code's output shows it inspected the diff. A one-line clean result with no evidence of
+  reading the diff is a false pass; re-run with the explicit prompt above or use
+  `claude ultrareview <default-branch>` if the work is already committed on a branch.
+- Treat **`[P1]`/`[P2]`** findings as **blocking**: fix them, re-run **Step 3** (lint/test), then
+  re-run this Claude Code review. Repeat up to **3 rounds**. If P1/P2 findings remain after 3
+  rounds, stop and report to the user.
+- **`[P3]`** (minor) findings: address the cheap ones; otherwise list them in the PR body for the
+  human reviewer.
 
 ## Step 5 — Report, then hand off to create-pr
 
 Confirm the finish line: every task is `- [x]`, lint/test is green, and there are no remaining
-Codex blocking findings. Then give the user a short Japanese summary:
+blocking findings from the other-AI review. Then give the user a short Japanese summary:
 
 - 変更概要（何をしたか / 触ったファイル）
 - テスト結果（lint・test の最終状態）
-- Codex レビュー要約（解決した blocking、残した nit）
+- 相互AIレビュー要約（レビュー担当、解決した blocking、残した nit）
 
 Then invoke the **`create-pr`** skill to commit, push, and open the PR. That skill owns the
 outward-facing confirmation (commit / push / `gh pr create` are gated), so do not commit or push
@@ -212,5 +257,5 @@ here — let `create-pr` handle it.
 | 1 | `git switch -c <type>/<id>-<slug>` | never the default branch |
 | 2 | Implement tasks (+ tests), in dep order | parallel via `task-implementer` (Sonnet), disjoint files only |
 | 3 | lint + test until green | cap 3 rounds; never weaken tests |
-| 4 | `codex exec review "${RANGE[@]}" --json -o FILE` | guard empty range (else `--base`); verify `CODEX_RC`=0 ∧ `command_execution`≥1 before trusting; a 1-line "clean" passes only if range≠∅ ∧ explored; fix [P1]/[P2], cap 3 rounds; `/code-review` fallback |
+| 4 | Other-AI review | Claude Code session: `codex exec review "${RANGE[@]}" --json -o FILE`; Codex session: `claude -p --permission-mode plan ...`; guard empty ranges, distrust unexplored clean passes, fix [P1]/[P2], cap 3 rounds |
 | 5 | Report, then call `create-pr` | create-pr owns commit/push/PR confirmation |

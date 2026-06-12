@@ -74,7 +74,7 @@ gh pr create --base <default-branch> --title "<title>" --body "<body>" --assigne
   - lint: <コマンドと結果>
   - test: <コマンドと結果>
 
-  ## レビュー（Codex）
+  ## レビュー（相互AI）
   - 解決済み blocking: <あれば>
   - 残した nit: <あれば。なければ「なし」>
 
