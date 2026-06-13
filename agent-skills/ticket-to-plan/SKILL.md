@@ -76,17 +76,15 @@ now — those become open questions in the plan.
 Enter plan mode (read-only research) so you cannot accidentally edit while exploring. This is
 where the "工数MAX" requirement lives — be genuinely thorough, not fast:
 
-- **ultrathink.** Reason hard about the approach, alternatives, and failure modes before writing
-  anything down.
-- **Explore the codebase, don't assume it.** Trace the actual data flow: find the models,
-  interactions/service objects, controllers, serializers, GraphQL types, jobs, and tests that
-  this change touches. Read them. Note exact file paths — the implementing session will rely on
-  them. (For this repo specifically, business logic lives in `app/interactions/`, modular code in
-  `packs/`, and conventions are in `CLAUDE.md` — honor them.)
-- **Find the seams.** Identify where the change plugs in, what existing patterns to mirror, and
-  what must not break. Look at neighboring tests to learn the project's testing idioms.
-- **Think about the edges.** Migrations, backward compatibility, permissions/auth, N+1s,
-  background-job idempotency, multi-domain API surfaces, i18n — whatever applies.
+- **ultrathink.** Reason hard about the approach, alternatives, and failure modes before writing nything down.
+- **Explore the codebase, don't assume it.** Trace the actual data flow: find the models, interactions/service objects, controllers, serializers, GraphQL types, jobs, and tests that
+  this change touches.
+  Read them. Note exact file paths — the implementing session will rely on them. (For this repo specifically, business logic lives in `app/interactions/`, modular code in `packs/`, and conventions are in `CLAUDE.md` — honor them.)
+- **Find the seams.** Identify where the change plugs in, what existing patterns to mirror, and what must not break. Look at neighboring tests to learn the project's testing idioms.
+- **Choose tests that prove behavior, not schema.** For Rails model changes, inspect
+  `db/schema.rb` and migrations before writing the `## テスト方針`.
+  Plan tests for behavior the DB cannot express: custom validators such as "associated records must belong to the same organization", conditional validations, normalization/callbacks, important error messages,`blank` vs `nil` behavior, service/API behavior, and enum mappings/prefixes that application.
+- **Think about the edges.** Migrations, backward compatibility, permissions/auth, N+1s, background-job idempotency, multi-domain API surfaces, i18n — whatever applies.
 
 The goal of this step is a plan detailed enough that someone who has *not* read the ticket or the
 code could implement it correctly. Vague plans ("update the model, add a test") are a failure of

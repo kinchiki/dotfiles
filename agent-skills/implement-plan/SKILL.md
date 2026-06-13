@@ -67,6 +67,12 @@ change in the listed `files` **and write/extend its tests** per the plan's `## ã
 When a task is done, flip its checkbox to `- [x]` in the plan file. **Only you (the orchestrator)
 edit the plan file** â€” this keeps progress consistent.
 
+**Test selection guardrail.** Before adding Rails model/validation specs, inspect the model, schema/migration, and nearby specs.
+Keep or add tests for behavior
+the database cannot express: custom validators such as "associated records must belong to the same
+organization", conditional validations, normalization/callbacks, meaningful error messages, `blank`
+vs `nil` behavior, service/API behavior, or enum mappings/prefixes that application code depends on.
+
 **Sequential is the default.** Run tasks one at a time unless a batch is clearly independent.
 
 **Parallel batches.** When two or more ready tasks are `parallel: yes` *and* their `files` sets do
