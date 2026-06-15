@@ -28,8 +28,7 @@ Planning と implementation は分けてください。
 
 ## Hard constraints
 
-- Planning quality が重要なので、orchestrator は可能なら最新 Opus を使う。
-- Opus でない場合は停止し、`/model opus` または Opus session での再実行を推奨する。
+- Planning quality が重要なので、orchestrator は top reasoning session（現在の AI agent で利用できる最上位推論モデル + 最大 reasoning / thinking 設定）を使い、そうでない、または確認できない場合は停止して再実行を推奨する。
 - ticket title と body だけで plan を作らない。
 - comments、labels、linked issues / PRs、acceptance criteria を確認する。
 - source が曖昧な場合は 1 つだけ短く確認する。
@@ -42,10 +41,10 @@ Planning と implementation は分けてください。
 
 ### Step 0: Confirm model
 
-- 自分の model を確認する。
-- 最新 Opus 相当なら続行する。
-- Opus でなければ、planning quality の理由を伝えて停止する。
-- 使用 model を plan file の header に記録する。
+- 自分の model と reasoning / thinking 設定を確認する。
+- top reasoning session なら続行する。
+- 条件を満たせない、または確認できない場合は、planning quality の理由を伝えて停止する。
+- 使用 model と reasoning / thinking 設定を plan file の header に記録する。
 
 ### Step 1: Read the ticket
 
@@ -171,7 +170,7 @@ cd <repo> && claude "プラン .claude/plans/<file>.md を implement-plan スキ
 
 | Step | Action | Tool |
 |------|--------|------|
-| 0 | Confirm Opus | Self-check. |
+| 0 | Confirm top reasoning model | Self-check. |
 | 1 | Fetch full ticket context | `gh` CLI / GitHub MCP / Linear MCP. |
 | 2 | Research codebase | Read-only planning. |
 | 3 | Break into tasks | `files`, `depends_on`, `parallel`, `test`, `done_when`. |

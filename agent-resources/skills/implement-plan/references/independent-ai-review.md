@@ -6,9 +6,10 @@ Do not load it for low risk changes.
 ## Contents
 
 - Trust rules.
-- Claude Code session: review with Codex.
-- Verify Codex review.
-- Codex session: review with Claude Code.
+- Select an independent reviewer.
+- Reviewer recipe: Codex CLI.
+- Verify Codex CLI review.
+- Reviewer recipe: Claude Code.
 - Handle findings.
 
 ## Trust rules
@@ -21,9 +22,17 @@ Do not load it for low risk changes.
 - If the independent reviewer cannot run, stop and report that independent review could not be completed.
 - Do not replace the required independent review with the same agent's self-review.
 
-## Claude Code session: review with Codex
+## Select an independent reviewer
 
-Use Codex to review the uncommitted working tree before commit.
+- Use a reviewer that is independent from the AI session that implemented the change.
+- If the implementation session is Claude Code or another non-Codex agent, prefer the Codex CLI recipe when available.
+- If the implementation session is Codex or another non-Claude Code agent, prefer the Claude Code recipe when available.
+- If both recipes are available, choose the strongest reviewer that was not used for implementation.
+- If only the same AI session is available, stop and report that independent review could not be completed.
+
+## Reviewer recipe: Codex CLI
+
+Use Codex CLI as the independent reviewer for the uncommitted working tree before commit.
 If the change is already committed, use `--base <default-branch>` instead of `--uncommitted`.
 
 ```bash
@@ -47,20 +56,20 @@ Important details:
 - `--uncommitted` reviews staged, unstaged, and untracked changes.
 - A repo with only untracked new files may have an empty `git diff`, so use `git status --porcelain --untracked-files=all`.
 - A range selector such as `--uncommitted`, `--base`, or `--commit` cannot be combined with a custom prompt.
-- `-o` writes Codex's last message, which is the review body for `codex exec review`.
-- `--json` produces the event stream used to verify that Codex actually explored.
+- `-o` writes Codex CLI's last message, which is the review body for `codex exec review`.
+- `--json` produces the event stream used to verify that Codex CLI actually explored.
 - Fixed output paths must be deleted before each run to avoid reading stale results.
 - Capture `CODEX_RC`; do not let another command mask a failed review.
 
-## Verify Codex review
+## Verify Codex CLI review
 
-Confirm Codex explored before reading a clean verdict as a pass.
+Confirm Codex CLI explored before reading a clean verdict as a pass.
 
 ```bash
 grep -c '"type":"command_execution"' "$REVIEW_JSON"
 ```
 
-A clean Codex result counts as pass only when all conditions are true:
+A clean Codex CLI result counts as pass only when all conditions are true:
 
 - `CODEX_RC` is `0`.
 - The selected range is non-empty.
@@ -68,14 +77,14 @@ A clean Codex result counts as pass only when all conditions are true:
 
 If any condition is false, treat the result as a false pass or failed run.
 Re-check the range and run once more.
-If Codex still cannot review, stop and report the blocker.
+If Codex CLI still cannot review, stop and report the blocker.
 
 Read `$REVIEW_OUT` only after the run is trustworthy.
 Findings are expected as `[P1]`, `[P2]`, or `[P3]`.
 
-## Codex session: review with Claude Code
+## Reviewer recipe: Claude Code
 
-Use Claude Code to review the uncommitted working tree before commit.
+Use Claude Code as the independent reviewer for the uncommitted working tree before commit.
 If the change is already committed, use `claude ultrareview <default-branch>` instead.
 
 ```bash
@@ -87,15 +96,18 @@ git diff --stat HEAD
 PENDING="$(git status --porcelain --untracked-files=all)"
 
 rm -f "$CLAUDE_REVIEW_OUT" "$CLAUDE_REVIEW_ERR"
+: "${CLAUDE_REVIEW_MODEL:?Set CLAUDE_REVIEW_MODEL to the strongest reasoning-capable Claude Code model available.}"
 CLAUDE_REVIEW_PROMPT="このリポジトリの未コミット差分をコードレビューしてください。
 編集は禁止です。
 まず git status --short, git diff --stat HEAD, git diff --cached, git diff を確認してください。
 指摘は [P1]/[P2]/[P3] の重大度、file:line、根拠、修正案を含めて日本語で返してください。
 問題がなければ、確認した差分の概要を示してから no findings と書いてください。"
-claude -p --model opus --permission-mode plan "$CLAUDE_REVIEW_PROMPT" >| "$CLAUDE_REVIEW_OUT" 2>| "$CLAUDE_REVIEW_ERR"
+claude -p --model "$CLAUDE_REVIEW_MODEL" --permission-mode plan "$CLAUDE_REVIEW_PROMPT" >| "$CLAUDE_REVIEW_OUT" 2>| "$CLAUDE_REVIEW_ERR"
 CLAUDE_RC=$?
 echo "Claude Code exit=$CLAUDE_RC ; review -> $CLAUDE_REVIEW_OUT ; err -> $CLAUDE_REVIEW_ERR"
 ```
+
+Set `CLAUDE_REVIEW_MODEL` for a top reasoning session.
 
 A clean Claude Code result counts as pass only when all conditions are true:
 

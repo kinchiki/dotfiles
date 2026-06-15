@@ -23,7 +23,7 @@ Example:
 
 - **チケット:** <完全な URL または ID>
 - **ソース:** GitHub | Linear
-- **計画者:** <モデル ID、例: claude-opus-4-8>
+- **計画者:** <AI agent 名、モデル ID、reasoning / thinking 設定。例: codex / best-available-reasoning-model / reasoning: max>
 - **日付:** <YYYY-MM-DD>
 - **ステータス:** 承認済み - 実装可能
 

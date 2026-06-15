@@ -33,9 +33,8 @@ description: >-
 
 - Plan mode が active なら、実装開始前に短い実行 outline だけで plan mode を抜ける。
 - Plan mode 中に plan を再検証、再作成、書き換えしない。
-- Orchestrator は可能なら最新 Opus を使う。
-- Opus でない場合は、その旨を伝えて `/model opus` を推奨する。
-- ユーザーが弱い model で続行を明示した場合だけ、その trade-off を明記して進める。
+- Orchestrator は top reasoning session（現在の AI agent で利用できる最上位推論モデル + 最大 reasoning / thinking 設定）を使い、そうでない場合はその旨を伝えて再実行を推奨する。
+- ユーザーが弱い model または低い reasoning 設定で続行を明示した場合だけ、その trade-off を明記して進める。
 - default branch では作業しない。
 - `## タスク` checkbox を更新するのは orchestrator だけにする。
 - parallel worker は plan file を編集しない。
