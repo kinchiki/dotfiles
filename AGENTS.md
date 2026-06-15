@@ -62,18 +62,30 @@ For multi-step tasks, state a brief plan:
 
 Strong success criteria let you loop independently. Weak criteria ("make it work") require constant clarification.
 
-## 5. SKILL.md Formatting Rule — Consult This Section Only When Creating Skills
+## 5. SKILL.md Rule — Use Only When Creating or Editing Skills
 
-> **Scope for AI assistants:**
-> Use this section only when creating or editing Skill documentation files.
+Use this section only for Skill documentation files:
+`**/SKILL.md`.
 
-When creating or editing skill docs (`**/SKILL.md`), apply this formatting consistently:
+### Formatting
 
-- Wrap lines at sentence boundaries. Do not hard-wrap in the middle of a sentence.
-- Keep one sentence per line for normal paragraphs when practical.
-- Preserve Markdown structure exactly: frontmatter, headings, lists, tables, and fenced code blocks must remain valid.
-- Never collapse fenced code blocks into a single line. Keep their internal line breaks as-is unless the content itself is intentionally edited.
-- For list items, keep one bullet per line. If continuation is needed, continue only at sentence boundaries.
+- Preserve valid Markdown structure: frontmatter, headings, lists, tables, and fenced code blocks.
+- Use one sentence per line for normal paragraphs when practical.
+- Wrap lines only at sentence boundaries.
+- Keep fenced code block line breaks intact.
+- Keep one list item per line.
+
+### AI Readability
+
+- Put trigger conditions, scope, hard constraints, workflow, resources, and expected output where they are easy to find.
+- Use direct imperative language.
+- Prefer positive instructions that state the desired behavior.
+- Use negative wording only for hard prohibitions, safety boundaries, data-loss risks, formatting risks, or non-negotiable constraints.
+- Write conditional rules as: `If X, do Y. Otherwise, do Z.`
+- Use exact relative paths for referenced files, scripts, and assets.
+- State when each referenced resource should be consulted.
+- Keep `SKILL.md` operational. Move long examples, schemas, background information, and reference material into separate files.
+- Include only task-specific, non-obvious, or convention-specific guidance.
 
 ---
 
