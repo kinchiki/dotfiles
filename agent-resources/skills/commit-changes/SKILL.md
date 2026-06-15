@@ -48,8 +48,12 @@ git diff --staged
 ### Step 2: Plan logical commits
 
 - review story が明確になる最小数の commit に分ける。
+- reviewer が各 commit を単独で読んだときに、目的、影響範囲、検証ポイントを把握できる単位にする。
+- reviewer が差分を追いやすい順序に並べる。
 - implementation と docs、production code と test-only cleanup、実質的な generated output など、別 concern は分ける。
+- semantic change と mechanical movement / formatting / generated update は、review noise を減らせる場合に分ける。
 - 密結合した code と test は同じ commit に入れる。
+- 1 つの behavior change を理解するために reviewer が複数 commit を往復する分割は避ける。
 - file 単位、task checkbox 単位、小さすぎる edit 単位で機械的に分けない。
 - 1 つの coherent concern なら 1 commit にする。
 
@@ -66,6 +70,7 @@ git commit
 - `git add -p`、pathspec、またはその両方で意図的に stage する。
 - 残りの diff 全体が次 commit に属すると明らかな場合だけ `git add -A` を使う。
 - staged diff は non-empty で、単独で理解できる内容にする。
+- staged diff を reviewer 目線で読み直し、別 commit の文脈なしに review できるか確認する。
 - message は「何を」だけでなく「なぜ」が伝わるようにする。
 - practical な範囲で各 commit を buildable / testable にする。
 
