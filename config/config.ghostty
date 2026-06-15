@@ -3,7 +3,7 @@
 
 font-family = "Bizin Gothic NF"
 font-family-bold = "Bizin Gothic NF Bold"
-font-size = 24
+font-size = 22
 
 cursor-style = bar
 # 点滅しなくなることがあったので明示する
@@ -11,3 +11,6 @@ cursor-style-blink = true
 
 # Option キーを Alt として扱う（tmux の M-* キーバインドを使うため）
 macos-option-as-alt = true
+
+# surface（ウィンドウ・タブ・ペインなど）を閉じるときに確認ダイアログを出す
+confirm-close-surface = always
