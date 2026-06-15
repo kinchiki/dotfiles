@@ -62,6 +62,19 @@ For multi-step tasks, state a brief plan:
 
 Strong success criteria let you loop independently. Weak criteria ("make it work") require constant clarification.
 
+## 5. SKILL.md Formatting Rule — Consult This Section Only When Creating Skills
+
+> **Scope for AI assistants:**
+> Use this section only when creating or editing Skill documentation files.
+
+When creating or editing skill docs (`**/SKILL.md`), apply this formatting consistently:
+
+- Wrap lines at sentence boundaries. Do not hard-wrap in the middle of a sentence.
+- Keep one sentence per line for normal paragraphs when practical.
+- Preserve Markdown structure exactly: frontmatter, headings, lists, tables, and fenced code blocks must remain valid.
+- Never collapse fenced code blocks into a single line. Keep their internal line breaks as-is unless the content itself is intentionally edited.
+- For list items, keep one bullet per line. If continuation is needed, continue only at sentence boundaries.
+
 ---
 
 **These guidelines are working if:** fewer unnecessary changes in diffs, fewer rewrites due to overcomplication, and clarifying questions come before implementation rather than after mistakes.
