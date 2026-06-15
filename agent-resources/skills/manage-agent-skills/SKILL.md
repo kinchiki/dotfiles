@@ -2,30 +2,23 @@
 name: manage-agent-skills
 description: >-
   dotfiles リポジトリの agent-resources を作成、更新、整理するときに使う。
-  SKILL.md 作成・編集ルールに従い、agent-resources/skills 配下の実体と .agents/skills および .claude/skills のシンボリックリンクを維持する。
-  agent definition は agent-resources/agents 配下の実体と .agents/agents、.claude/agents、.codex/agents のシンボリックリンクを維持する。
-  例: 「新しいスキルを作って」「対応するスキルを更新して」。
+  SKILL.md 作成・編集ルールに従い、以下のディレクトリ構成を維持する。
+    - agent-resources/skills 配下の実体と `.agents/skills` と `.claude/skills`
+    - agent-resources/agents 配下の実体と `.agents/agents`、`.claude/agents`、`.codex/agents`
+  例: 「新しいスキルを作って」「対応するスキルを更新して」
 ---
 
 # manage-agent-skills
 
 このリポジトリで agent skill を作成または更新するためのスキルです。
-Skill 本体は `agent-resources/skills/` 配下に置き、利用環境向けの公開リンクを `.agents/skills/` と `.claude/skills/` に作成してください。
-Agent definition 本体は `agent-resources/agents/` 配下に置き、利用環境向けの公開リンクを `.agents/agents/`、`.claude/agents/`、`.codex/agents/` に作成してください。
+Skill 本体は `agent-resources/skills/` 配下に、Agent definition 本体は `agent-resources/agents/` 配下に置いてください。
 
 ## Scope
 
 - `agent-resources/skills/<skill-name>/SKILL.md` を作成または更新する。
 - Skill 実行時に参照資料が必要な場合は `agent-resources/skills/<skill-name>/references/`、再利用する補助コマンドが必要な場合は `agent-resources/skills/<skill-name>/scripts/`、画像・テンプレートなどの素材が必要な場合は `agent-resources/skills/<skill-name>/assets/` を追加する。
 - UI metadata が必要な場合は `agent-resources/skills/<skill-name>/agents/openai.yaml` を作成または更新する。
-- `.agents/skills/<skill-name>` から `../../agent-resources/skills/<skill-name>` へのシンボリックリンクは `mkdir -p .agents/skills` と `ln -sfn ../../agent-resources/skills/<skill-name> .agents/skills/<skill-name>` で作成または更新する。
-- `.claude/skills/<skill-name>` から `../../agent-resources/skills/<skill-name>` へのシンボリックリンクは `mkdir -p .claude/skills` と `ln -sfn ../../agent-resources/skills/<skill-name> .claude/skills/<skill-name>` で作成または更新する。
-- `agent-resources/agents/<agent-name>/instructions.md` に AI 共通の実行指示を置く。
-- Claude Code 用定義は `agent-resources/agents/<agent-name>/claude.md` に置く。
-- Codex 用定義は `agent-resources/agents/<agent-name>/codex.toml` に置く。
-- `.agents/agents/<agent-name>.md` から `../../agent-resources/agents/<agent-name>/instructions.md` へのシンボリックリンクを作成または更新する。
-- `.claude/agents/<agent-name>.md` から `../../agent-resources/agents/<agent-name>/claude.md` へのシンボリックリンクを作成または更新する。
-- `.codex/agents/<agent-name>.toml` から `../../agent-resources/agents/<agent-name>/codex.toml` へのシンボリックリンクを作成または更新する。
+- シンボリックリンクの作成・更新は Step 4 に従う。
 - `agent-resources/skills/scripts/validate-agent-skills` で touched skill を検証する。
 
 ## Hard Constraints
@@ -65,7 +58,15 @@ Agent definition 本体は `agent-resources/agents/` 配下に置き、利用環
 - Body には trigger information を重複させず、実行時に必要な workflow と constraints を書く。
 - Resources を作る場合は、`SKILL.md` から exact relative path で参照する。
 
-### Step 3: Create repository symlinks
+### Step 3: Create or update agent definitions
+
+Agent definition は `agent-resources/agents/<agent-name>/` に以下の 3 ファイルで構成する。
+
+- `instructions.md` — AI 共通の実行指示。ツール非依存のロジック・制約・ワークフローを書く。
+- `claude.md` — Claude Code 用定義。`instructions.md` を `@` で参照しつつ、Claude Code 固有の設定や指示を追加する。
+- `codex.toml` — Codex 用定義。`instructions.md` を `instruction_file` で参照しつつ、Codex 固有の設定を TOML 形式で書く。
+
+### Step 4: Create repository symlinks
 
 #### Skill links
 
@@ -73,7 +74,6 @@ Agent definition 本体は `agent-resources/agents/` 配下に置き、利用環
 作成または更新した skill は、次のリンクで `.agents/` と `.claude/` の両方へ公開してください。
 
 ```bash
-mkdir -p .agents/skills .claude/skills
 ln -sfn ../../agent-resources/skills/<skill-name> .agents/skills/<skill-name>
 ln -sfn ../../agent-resources/skills/<skill-name> .claude/skills/<skill-name>
 ```
@@ -95,7 +95,6 @@ test -e .claude/skills/<skill-name>/SKILL.md
 作成または更新した agent definition は、次のリンクで `.agents/`、`.claude/`、`.codex/` へ公開してください。
 
 ```bash
-mkdir -p .agents/agents .claude/agents .codex/agents
 ln -sfn ../../agent-resources/agents/<agent-name>/instructions.md .agents/agents/<agent-name>.md
 ln -sfn ../../agent-resources/agents/<agent-name>/claude.md .claude/agents/<agent-name>.md
 ln -sfn ../../agent-resources/agents/<agent-name>/codex.toml .codex/agents/<agent-name>.toml
@@ -107,13 +106,13 @@ If the path exists but is not the intended symlink, stop and inspect it before r
 Verify links with:
 
 ```bash
-ls -l .agents/agents/<agent-name>.md .claude/agents/<agent-name>.md .codex/agents/<agent-name>.toml
+ls -l .agents/agents/<agent-name>.md .claude/agents/<agent-name>.md
 test -e .agents/agents/<agent-name>.md
 test -e .claude/agents/<agent-name>.md
 test -e .codex/agents/<agent-name>.toml
 ```
 
-### Step 4: Validate
+### Step 5: Validate
 
 After creating or updating skills, run the repository validator before finishing.
 Prefer validating the current diff first.

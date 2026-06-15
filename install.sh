@@ -34,6 +34,15 @@ declare -a SKIP_PATH_PARTS=(
   "worktrees"
 )
 
+# ディレクトリごと symlink を張るパス（ファイルを個別リンクする代わりにディレクトリをまるごとリンク）
+declare -a SYMLINK_DIR_PATHS=(
+  ".agents/agents"
+  ".agents/skills"
+  ".claude/agents"
+  ".claude/skills"
+  ".codex/agents"
+)
+
 # ==================== ヘルパー関数 ====================
 
 # 値が配列に含まれているかチェック
@@ -63,6 +72,18 @@ should_skip_path() {
   local skip
   for skip in "${SKIP_PATH_PARTS[@]}"; do
     if [[ "$path" == *"/${skip}/"* ]]; then
+      return 0
+    fi
+  done
+  return 1
+}
+
+# ディレクトリごと symlink すべきパスか判定（またはその配下か）
+should_symlink_dir_path() {
+  local path="${1%/}"
+  local sym
+  for sym in "${SYMLINK_DIR_PATHS[@]}"; do
+    if [[ "$path" == "$sym" || "$path" == "$sym/"* ]]; then
       return 0
     fi
   done
@@ -119,6 +140,13 @@ for file in .??*; do
   link_path "${DOT_FILES_DIRECTORY}/${file}" "${HOME}/${file}"
 done
 
+# ディレクトリごと symlink を張る
+for sym_path in "${SYMLINK_DIR_PATHS[@]}"; do
+  parent_dir=$(dirname "$sym_path")
+  mkdir -p "${HOME}/${parent_dir}"
+  link_path "${DOT_FILES_DIRECTORY}/${sym_path}" "${HOME}/${sym_path}"
+done
+
 # 直下のドットディレクトリを再帰的にたどり、ディレクトリは作成し、ファイルと symlink は個別に symlink する。
 # ディレクトリごと symlink すると ~/.claude のようにアプリが生成物を書き込む実体ディレクトリと衝突し、管理したくないファイルもg管理されてしまう。
 # （dotfiles に実在するファイルだけが対象になるので、.codex のように一部だけ管理したいディレクトリでも置いたファイルしかリンクされない）
@@ -130,6 +158,7 @@ for dir in .??*/; do
   find "$dir" -type d $(build_skip_dir_path_conditions) -print0 |
     while IFS= read -r -d '' d; do
       should_skip_path "$d" && continue
+      should_symlink_dir_path "$d" && continue
       mkdir -p "${HOME}/${d}"
     done
 
@@ -138,6 +167,7 @@ for dir in .??*/; do
     while IFS= read -r -d '' f; do
       should_skip_file "$f" && continue
       should_skip_path "$f" && continue
+      should_symlink_dir_path "$f" && continue
       link_path "${DOT_FILES_DIRECTORY}/${f}" "${HOME}/${f}"
     done
 done
