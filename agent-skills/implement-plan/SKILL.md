@@ -1,220 +1,161 @@
 ---
 name: implement-plan
 description: >-
-  承認済みの実装プランファイルを、新しいセッションで端から端まで実行する: feature ブランチを作成し、プランの `## タスク` をテストを書きながら進め、lint/test を緑にし、リスクに応じた AI レビューを受け、commit-changes で論理コミットを作り、create-pr-followup で PR 作成後の CI と AI レビュー初回フォローまで進める。
-  承認済みプランを渡されて実装を始めるときに発火する。
-  例:
-    「implement-plan スキルで実装して」
-    「プラン .claude/plans/....md を実装して」
-    「このプランを実装して」
-  または ticket-to-plan スキルがプランファイルを指す実装セッションを起動したとき。
-  これは ticket-to-plan → implement-plan → commit-changes → create-pr-followup パイプラインの実装フェーズ。
+  承認済みの実装プランファイルを、新しいセッションで端から端まで実行する。
+  feature branch を作成し、プランの `## タスク` をテスト込みで進め、lint / test を緑にする。
+  リスクに応じた AI レビューを受け、commit-changes で論理コミットを作り、create-pr-followup で PR 作成後の CI と AI レビュー初回フォローまで進める。
+  承認済みプランを渡されて実装を始めるときに使う。
+  例: 「implement-plan スキルで実装して」「プラン .claude/plans/....md を実装して」「このプランを実装して」。
+  ticket-to-plan がプランファイルを指す実装セッションを起動したときにも使う。
+  これは ticket-to-plan → implement-plan → commit-changes → create-pr-followup パイプラインの実装フェーズである。
 ---
 
 # implement-plan
 
-This skill drives a single approved plan to a finished PR, autonomously, in one session.
-It is the back half of the pipeline: `ticket-to-plan` produced a plan file with a `## タスク` list; this skill executes it, then calls `commit-changes` and `create-pr-followup` at the end.
-Human checkpoints are deliberately minimal — the approved plan is the contract.
-The session only stops when (a) a quality gate fails after its retry budget, (b) the plan would have to be deviated from, or (c) it reaches the outward-facing PR and follow-up step.
+承認済み plan file を読み、実装、検証、AI review、commit、PR follow-up まで進めるスキルです。
+承認済み plan が契約なので、勝手に再計画せず、`## タスク` を進捗の単一の真実として扱ってください。
 
-Flow: **(exit plan mode if active) → confirm model & read plan → branch → implement tasks (with tests) → lint/test gate → risk-based AI review → report → commit-changes → create-pr-followup.**
+## Scope
 
-## Step 0a — If plan mode is active, exit it immediately
+- 承認済み plan file を実装する。
+- feature branch を作る。
+- `## タスク` を dependency order で進める。
+- task ごとに必要な test を追加または更新する。
+- lint / test を green にする。
+- risk に応じて independent AI review を行う。
+- 最後に `commit-changes` と `create-pr-followup` へ引き継ぐ。
 
-This skill is the *execution* phase, and the plan you were handed is **already approved** — so plan mode being active is a mode mismatch, not a signal to plan. Do **not** re-plan (no codebase re-verification, no re-checking the acceptance criteria, no rewriting the plan).
+## Resources
 
-Instead, call `ExitPlanMode` right away with a body that is **only a 1–2 line execution outline**
-e.g. "承認済みプランを実行します: ブランチ作成 → タスク実装(+テスト) → lint/test → リスク別AIレビュー → commit-changes → create-pr-followup."
-Do not restate or re-litigate the plan's contents. Once approved (plan mode lifted), continue straight into Step 0 below. If plan mode is not active, skip this step and start at Step 0.
+- `references/independent-ai-review.md`: Step 4 で medium / high risk の independent AI review が必要になったら読む。
 
-## Step 0 — Confirm model and read the plan
+## Hard constraints
 
-- **Model.** The orchestrator should be the latest **Opus** for implementation judgment. Check your own model; if you are not on Opus, say so and recommend `/model opus`. (Parallel sub-workers run on Sonnet — see Step 2 — so only the orchestrator needs Opus.) If the user explicitly wants to proceed on a weaker model, you may, but flag the trade-off.
-- **Read the plan file** at the absolute path you were given. Internalize `## ゴール`, `## 受入基準`, `## 背景・影響するコード`, `## タスク`, `## テスト方針`, and `## スコープ外`. The `## タスク` checkboxes are your single source of truth for progress.
-- **Read the repo's `CLAUDE.md`** and note the project's conventions and the exact lint/test commands (e.g. `dip rubocop`, `dip rspec`). If the plan names commands, prefer those.
-- If the plan file is missing, ambiguous, or already partially checked off, resolve that first (resume from the first unchecked task; don't redo `- [x]` tasks).
+- Plan mode が active なら、実装開始前に短い実行 outline だけで plan mode を抜ける。
+- Plan mode 中に plan を再検証、再作成、書き換えしない。
+- Orchestrator は可能なら最新 Opus を使う。
+- Opus でない場合は、その旨を伝えて `/model opus` を推奨する。
+- ユーザーが弱い model で続行を明示した場合だけ、その trade-off を明記して進める。
+- default branch では作業しない。
+- `## タスク` checkbox を更新するのは orchestrator だけにする。
+- parallel worker は plan file を編集しない。
+- `## スコープ外` から逸脱しない。
+- plan から逸脱が必要な場合は、理由を添えて停止し、ユーザーに確認する。
+- test を弱める、削除する、skip / pending にする行為は禁止する。
+- lint / test 修正 loop は最大 3 round にする。
 
-## Step 1 — Create a feature branch
+## Workflow
 
-Work on a branch, never the default branch. From a clean tree:
+### Step 0a: Exit plan mode if active
 
-```bash
-git switch -c <type>/<ticket-id>-<slug>    # e.g. feat/ENG-123-oauth-token-refresh
+このスキルは execution phase です。
+plan mode が active なら、1 から 2 行の実行 outline だけを出して plan mode を終了してください。
+
+Example outline:
+
+```text
+承認済みプランを実行します: ブランチ作成 → タスク実装(+テスト) → lint/test → リスク別AIレビュー → commit-changes → create-pr-followup。
 ```
 
-`<type>` follows the repo's convention (`feat`/`fix`/`chore`…). If a branch already exists for this ticket, or the working tree has changes **other than the plan file** (`.claude/plans/**` is git-ignored, so it won't show in `git status` anyway), stop and ask rather than guessing. The plan file the planning session left is expected — just carry it onto the new branch.
+plan の内容を再提示したり、再議論したりしないでください。
 
-## Step 2 — Work through the tasks
+### Step 0: Read the plan and repo conventions
 
-Execute `## タスク` **in dependency order** (respect `depends_on`). For each task: implement the change in the listed `files` **and write/extend its tests** per the plan's `## テスト方針`.
-When a task is done, flip its checkbox to `- [x]` in the plan file. **Only you (the orchestrator) edit the plan file** — this keeps progress consistent.
+- 渡された absolute path の plan file を読む。
+- `## ゴール`、`## 受入基準`、`## 背景・影響するコード`、`## タスク`、`## テスト方針`、`## スコープ外` を確認する。
+- `## タスク` checkbox を進捗管理の単一ソースにする。
+- repo の `CLAUDE.md` を読み、convention と lint / test command を確認する。
+- plan に command が書かれている場合は、それを優先する。
+- plan file が missing、ambiguous、または一部 checked off の場合は、最初の unchecked task から再開できるか確認する。
 
-**Sequential is the default.** Run tasks one at a time unless a batch is clearly independent.
+### Step 1: Create a feature branch
 
-**Parallel batches.** When two or more ready tasks are `parallel: yes` *and* their `files` sets do not overlap, run them concurrently to save wall-clock:
-
-- Spawn one `task-implementer` sub-agent per task with the Agent tool, `subagent_type:
-  "task-implementer"`, `model: "sonnet"`. Give each worker only its task: the files it may touch, what to implement, and which tests to add. Workers return a summary; **workers do not edit the plan file**.
-- When the batch returns, you integrate the results, run that batch's tests, and flip the checkboxes together.
-- If `files` overlap, or a task depends on another in the same batch, **fall back to sequential** — correctness beats parallelism.
-- Reserve git worktrees for the rare case where parallel tasks genuinely cannot share a working tree (conflicting global state). The default — disjoint files in one tree — needs no merge.
-
-**Guardrails.** Stay inside `## スコープ外`. If you discover the plan is wrong or incomplete and must deviate, **stop and ask the user** with the reason — don't silently improvise.
-
-## Step 3 — Quality gate: lint + test until green
-
-After each task (and after each parallel batch), run the project's lint and test commands:
+clean tree から feature branch を作ってください。
 
 ```bash
-<lint command, e.g. dip rubocop>
-<test command, e.g. dip rspec spec/...>
+git switch -c <type>/<ticket-id>-<slug>
 ```
 
-- If something fails, fix the **code** and re-run. Repeat up to **3 rounds**.
-- If still failing after 3 rounds, **stop** and report to the user with the failing output — do not loop forever.
-- **Never** weaken, delete, skip, or `pending` a test to make the suite pass. If a test genuinely looks wrong, stop and ask — don't "fix" it by gutting it.
+- `<type>` は repo convention に合わせる。
+- ticket 用 branch が既にある場合は確認する。
+- plan file 以外の変更が working tree にある場合は、勝手に進めず確認する。
+- `.claude/plans/**` が git-ignored の場合、その plan file は branch 作成を妨げない。
 
-Run the full relevant suite once more before Step 4 so the whole change is green together.
+### Step 2: Implement tasks
 
-## Step 4 — Risk-based AI review
+- `## タスク` を dependency order で実装する。
+- 各 task の `files` だけを中心に変更する。
+- 各 task の `test` と `done_when` を満たす。
+- task 完了後、orchestrator が checkbox を `- [x]` に変える。
+- sequential execution を default にする。
+- ready task が `parallel: yes` で、`files` が重ならない場合だけ parallel worker を使う。
+- parallel worker には担当 task、触ってよい files、実装内容、追加または更新する test だけを渡す。
+- parallel worker は commit、branch 作成、plan file 編集を行わない。
+- files が重なる場合や dependency がある場合は serialize する。
 
-After Step 3 is green, classify the change before spending review time. Use the plan's `## リスク・未解決の論点` as an input, but make the final call from the actual diff:
+### Step 3: Run quality gate
 
-- **Low risk:** docs/comments/copy-only changes, small type/test fixes, tiny UI text/styling tweaks with no behavioral or data-path impact. Do a focused self-review against the diff and acceptance criteria; lint/test green is enough. Record "independent AI review skipped: low risk" in the final summary and PR body.
-- **Medium risk (default):** normal feature work, small bug fixes, UI behavior changes, API-adjacent changes without high-risk flags. Run **one** independent review after lint/test is green.
-- **High risk:** auth, billing, permissions, data deletion, migrations, security, production data handling, broad refactors, or changes with unclear blast radius. Run one independent review, and allow at most one normal re-review after fixing P1/P2. Use a third review only when the change is high-risk **and** a remaining P1/P2 finding is ambiguous or needs confirmation.
-
-For medium/high risk, get a second opinion from the AI that is **not** running the implementation session. Be explicit about the pairing:
-
-- If you are running in **Claude Code**, review with **Codex**.
-- If you are running in **Codex**, review with **Claude Code**.
-
-If you are unsure which environment you are in, inspect your system/developer prompt and available tools before choosing. Do not review your own work with the same agent and call it independent.
-
-Do not feed the reviewer a long implementation narrative. Review the actual diff / working tree / test results, with only concise context: purpose, acceptance criteria, and special risks.
-
-### Step 4a — Claude Code session: review with Codex
-
-In Claude Code, get a second opinion from Codex on the **uncommitted** working tree (no commit needed yet — review first, commit later). A one-line "no issues" result is only trustworthy if
-Codex actually had a diff to read AND actually explored it — so confirm both before believing it (Step 4b below):
+各 task または parallel batch の後に、対象範囲の lint / test を実行してください。
 
 ```bash
-# `codex` is at ~/.local/bin/codex — add it to PATH first if it isn't already.
-REVIEW_OUT="/tmp/codex-review.md"     # Codex's LAST message = the review body, tagged [P1]/[P2]/[P3]
-REVIEW_JSON="/tmp/codex-review.jsonl" # structured event stream, used to VERIFY the run (Step 4b)
-
-# --- 1. Confirm there is actually something to review (guards the silent no-op) ---
-# `--uncommitted` reviews staged + unstaged + UNTRACKED, so the "is it empty?" check must include
-# untracked files too — a tasks-added-new-files-only diff has an empty `git diff` but is NOT empty.
-git status --short                                # log the full uncommitted picture (incl. untracked)
-git diff --stat HEAD                              # and the tracked (staged+unstaged) size
-# `--untracked-files=all` so a repo with `status.showUntrackedFiles=no` still reports new files.
-PENDING="$(git status --porcelain --untracked-files=all)"  # non-empty ⇔ there IS something to review
-# If PENDING is EMPTY, `--uncommitted` reviews nothing and Codex returns a vacuous one-liner
-# ("No application code changes were present to review") that LOOKS like a clean pass.
-#   → If the change is already committed, switch to RANGE=(--base "<default-branch>").
-#   → If still empty, report "nothing to review" to the user and STOP — do NOT treat it as a pass.
-# RANGE is an ARRAY: in zsh an unquoted scalar does NOT word-split, so RANGE="--base main" would
-# reach codex as one bogus arg. An array + "${RANGE[@]}" passes each word correctly in zsh and bash.
-RANGE=(--uncommitted)
-
-# --- 2. Run with --json alongside -o (-o = human-readable last message; --json = verification) ---
-# Clear stale outputs first: these are FIXED paths, so a PREVIOUS run's file must never be mistaken
-# for this run's result (the bug that makes a failed review look like a clean pass).
-rm -f "$REVIEW_OUT" "$REVIEW_JSON"
-# Use `>|` not `>`: zsh here often has `noclobber` set. This step may re-run after P1/P2 fixes, so
-# a plain `>` to an existing file fails with "file exists" and the review silently never runs.
-codex exec review "${RANGE[@]}" --json -o "$REVIEW_OUT" >| "$REVIEW_JSON" 2>| "${REVIEW_JSON%.jsonl}.err"
-CODEX_RC=$?                                        # CAPTURE codex's status — do not let `echo` mask it
-echo "Codex exit=$CODEX_RC ; last message -> $REVIEW_OUT ; events -> $REVIEW_JSON"
-# If Codex itself failed (non-zero exit), DON'T read the (now-deleted or partial) output and DON'T
-# treat it as a pass. Stop and report that the independent Codex review could not be completed.
-[ "$CODEX_RC" -ne 0 ] && echo "Codex FAILED (see ${REVIEW_JSON%.jsonl}.err) — do not trust output."
-
-# NOTES on this command (learned the hard way / verified empirically):
-# - A range selector (--uncommitted / --base / --commit) CANNOT be combined with a custom [PROMPT];
-#   Codex errors out. So the review runs with Codex's built-in criteria — you judge acceptance below.
-# - `-o` writes the agent's LAST MESSAGE. For `codex exec review` that last message IS the review
-#   body, and findings appear there tagged [P1]/[P2]/[P3] — so reading $REVIEW_OUT does surface them.
-#   It does NOT honor --output-schema, so don't expect JSON from -o — read the text.
-# - The RAW stdout (without --json) is polluted with terminal/binary noise in codex 0.139.0
-#   (multi-MB). To check the run programmatically, always use --json (clean JSONL); never parse raw stdout.
-# - Use DETERMINISTIC paths (not $(mktemp) buried in a one-off command, which is lost to the next step).
+<lint command>
+<test command>
 ```
 
-### Step 4b — Verify the Codex review is trustworthy *before* reading its verdict
+- 失敗した場合は code を直して再実行する。
+- 修正と再実行は最大 3 round にする。
+- 3 round 後も失敗する場合は停止し、失敗 output を報告する。
+- Step 4 の前に、関連する full suite をもう一度実行する。
 
-A clean one-liner is worthless if Codex never saw the diff. **First confirm Codex actually explored**, using `$REVIEW_JSON` (the count of `command_execution` items it ran):
+### Step 4: Run risk-based AI review
 
-```bash
-# How many command events Codex emitted while reviewing (0 ⇒ it read nothing).
-# NOTE: codex emits COMPACT json — no space after the colon — so the pattern must have no space.
-# This counts both item.started + item.completed per command, so the value ≥ 1 simply means "explored".
-grep -c '"type":"command_execution"' "$REVIEW_JSON"
-```
+lint / test が green になった後で、実 diff を見て risk を分類してください。
 
-- The final verdict is the `agent_message` item — same text as `$REVIEW_OUT`.
-- **Trust rule:** a "no findings" (one-line) result counts as a PASS **only if** `CODEX_RC` was `0`,
-  **the selected `RANGE` was non-empty**, **and** the `command_execution` count is **≥ 1**. ("Non-empty" is what step 1 established: for `--uncommitted` that's `PENDING`; for `--base <branch>` it's `git diff --quiet <branch>...HEAD` reporting changes — so a clean working tree is normal there, not a false pass.) If any of the three is missing, treat it as a **false pass / failed run**: re-check the range, re-run, and if it still won't review anything (or Codex keeps erroring), stop and tell the user the independent Codex review could not be completed.
+- Low risk: docs、comments、copy-only、small type / test fix、tiny UI text / styling。
+  Self-review と green lint / test でよい。
+- Medium risk: 通常の feature、small bug fix、UI behavior、API-adjacent change。
+  Independent AI review を 1 回行う。
+- High risk: auth、billing、permissions、data deletion、migration、security、production data、broad refactor、blast radius 不明。
+  Independent AI review を 1 回行い、P1 / P2 修正後に最大 1 回 re-review する。
 
-Once the run is verified, **Read `$REVIEW_OUT`** and act on it (it's markdown; Codex tags findings `[P1]`/`[P2]`/`[P3]`):
+- `## リスク・未解決の論点` を参考にする。
+- 最終判断は actual diff から行う。
+- Medium / high risk の場合は `references/independent-ai-review.md` を読んで実行する。
+- Claude Code 実装時は Codex に review させる。
+- Codex 実装時は Claude Code に review させる。
+- 同じ agent に自己レビューさせて independent review と呼ばない。
+- P1 / P2 は blocking として修正する。
+- P3 は cheap なものだけ直し、残す場合は PR body に書く。
+- high risk または曖昧な P1 / P2 の確認が必要な場合だけ 3 回目の review を行う。
 
-- **Acceptance is your job, not Codex's.** The range flag blocks a custom prompt, so Codex uses default criteria. Separately confirm the change meets the plan's `## 受入基準`; treat an unmet criterion as blocking.
-- Treat **`[P1]`/`[P2]`** findings as **blocking**: fix them with Claude Code, re-run **Step 3** (lint/test), then **re-run this Codex review once**.
-- A third Codex review is exceptional: run it only for high-risk changes or when a remaining P1/P2 finding is genuinely ambiguous after the second review. Otherwise stop and report the unresolved blocking finding to the user.
-- **`[P3]`** (minor) findings: address the cheap ones; otherwise list them in the PR body for the human reviewer.
-- `codex exec review` is read-only (it won't edit your code). Use `--base <default-branch>` instead of `--uncommitted` once you've committed (same rule: no custom PROMPT alongside a range flag). The model is Codex's configured default; override with `-m <model>` only if asked.
-- **Fallback** if `codex` is unavailable or errors out: stop and report that the independent Codex review could not be completed. Do not silently substitute Claude Code's own `/code-review` and count it as the requested independent review.
+### Step 5: Report and hand off
 
-### Step 4c — Codex session: review with Claude Code
+finish line を確認してください。
 
-In Codex, get the independent review from Claude Code. Review the **uncommitted** working tree before committing, so PR creation still happens only after the second opinion:
+- すべての `## タスク` が `- [x]` である。
+- lint / test が green である。
+- 必要な AI review の blocking finding が残っていない。
 
-```bash
-CLAUDE_REVIEW_OUT="/tmp/claude-review.md"
-CLAUDE_REVIEW_ERR="/tmp/claude-review.err"
+日本語で次を報告してください。
 
-git status --short
-git diff --stat HEAD
-PENDING="$(git status --porcelain --untracked-files=all)"
-# If PENDING is EMPTY, there is nothing for Claude Code to review. If the change is already
-# committed, use `claude ultrareview <default-branch>` instead; otherwise stop and report it.
+- 変更概要。
+- 主な変更ファイル。
+- lint / test の最終結果。
+- risk 分類と AI review 結果。
+- 解決した blocking finding。
+- 残した nit。
 
-rm -f "$CLAUDE_REVIEW_OUT" "$CLAUDE_REVIEW_ERR"
-claude -p --model opus --permission-mode plan \
-  "このリポジトリの未コミット差分をコードレビューしてください。編集は禁止です。まず git status --short, git diff --stat HEAD, git diff --cached, git diff を確認してください。指摘は [P1]/[P2]/[P3] の重大度、file:line、根拠、修正案を含めて日本語で返してください。問題がなければ、確認した差分の概要を示してから no findings と書いてください。" \
-  >| "$CLAUDE_REVIEW_OUT" 2>| "$CLAUDE_REVIEW_ERR"
-CLAUDE_RC=$?
-echo "Claude Code exit=$CLAUDE_RC ; review -> $CLAUDE_REVIEW_OUT ; err -> $CLAUDE_REVIEW_ERR"
-```
-
-- A "no findings" result counts as a PASS only if `CLAUDE_RC` was `0`, `PENDING` was non-empty, and
-  Claude Code's output shows it inspected the diff. A one-line clean result with no evidence of reading the diff is a false pass; re-run with the explicit prompt above or use `claude ultrareview <default-branch>` if the work is already committed on a branch.
-- Treat **`[P1]`/`[P2]`** findings as **blocking**: fix them, re-run **Step 3** (lint/test), then re-run this Claude Code review once.
-- A third Claude Code review is exceptional: run it only for high-risk changes or when a remaining
-  P1/P2 finding is genuinely ambiguous after the second review. Otherwise stop and report the unresolved blocking finding to the user.
-- **`[P3]`** (minor) findings: address the cheap ones; otherwise list them in the PR body for the human reviewer.
-
-## Step 5 — Report, then hand off to commit-changes and create-pr-followup
-
-Confirm the finish line: every task is `- [x]`, lint/test is green, and there are no remaining blocking findings from the required review path. Then give the user a short Japanese summary:
-
-- 変更概要（何をしたか / 触ったファイル）
-- テスト結果（lint・test の最終状態）
-- AIレビュー要約（リスク分類、レビュー担当: Claude Code実装時はCodex / Codex実装時はClaude Code、または低リスクskip理由、解決した blocking、残した nit）
-
-Then invoke the **`commit-changes`** skill to split the finished diff into appropriate logical commits.
-After that, invoke the **`create-pr-followup`** skill.
-`commit-changes` owns local commits; `create-pr-followup` owns invoking `create-pr`, waiting for CI and AI review, and routing first-round follow-up fixes through the existing specialist skills.
+その後、`commit-changes` を使って logical commit を作成してください。
+commit 完了後、`create-pr-followup` を使って PR 作成と初回 follow-up を進めてください。
 
 ## Quick reference
 
 | Step | Action | Notes |
 |------|--------|-------|
-| 0 | Confirm Opus, read plan + CLAUDE.md | `## タスク` = progress source of truth |
-| 1 | `git switch -c <type>/<id>-<slug>` | never the default branch |
-| 2 | Implement tasks (+ tests), in dep order | parallel via `task-implementer` (Sonnet), disjoint files only |
-| 3 | lint + test until green | cap 3 rounds; never weaken tests |
-| 4 | Risk-based AI review | low risk: self-review + green lint/test only; medium/high: review actual diff once; rerun once only for [P1]/[P2]; third review only for high-risk or ambiguous P1/P2 |
-| 5 | Report, then call `commit-changes` and `create-pr-followup` | commit-changes owns commits; create-pr-followup owns PR creation and first follow-up |
+| 0a | Exit plan mode if active | Approved plan is the contract. |
+| 0 | Read plan and `CLAUDE.md` | `## タスク` is the progress source. |
+| 1 | Create feature branch | Never work on default branch. |
+| 2 | Implement tasks with tests | Parallelize only disjoint ready tasks. |
+| 3 | Run lint / test | Cap fixes at 3 rounds. |
+| 4 | Run AI review by risk | Read `references/independent-ai-review.md` for medium / high risk. |
+| 5 | Report and hand off | Use `commit-changes`, then `create-pr-followup`. |

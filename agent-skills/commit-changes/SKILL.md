@@ -1,45 +1,61 @@
 ---
 name: commit-changes
 description: >-
-  未コミット差分を確認し、一般的に適切な粒度の論理コミットに分割して作成する。
-  コミットしてほしいとき、PR 作成前に差分をコミットする必要があるとき、または implement-plan 完了後に create-pr へ渡す前のコミット作成で発火する。
-  例:
-    「コミットして」
-    「変更をコミット」
-    「commit」
-    「PR 前にコミット」
+  未コミット差分を確認し、レビューしやすい粒度の論理コミットに分割して作成する。
+  コミットしてほしいとき、PR 作成前に差分をコミットする必要があるとき、または implement-plan 完了後に create-pr / create-pr-followup へ渡す前に使う。
+  例: 「コミットして」「変更をコミット」「commit」「PR 前にコミット」。
   push / PR 作成 / GitHub への書き戻しは行わない。
 ---
 
 # commit-changes
 
-Turn a verified working tree into one or more clean local commits. This skill owns commit planning, staging, and commit messages only. It never pushes, opens PRs, or writes to GitHub; call `create-pr` after the branch is committed.
+検証済みの working tree を、1 つ以上の読みやすい local commit にまとめるスキルです。
+このスキルは commit planning、staging、commit message だけを担当します。
 
-**Project conventions win.** Read recent `git log` before writing messages, and follow the repo's language, prefix, and Conventional Commit conventions if present.
+## Scope
 
-## Step 1 — Sanity-check the change
+- local commit を作成する。
+- 必要なら複数 commit に分割する。
+- push、PR 作成、GitHub への書き込みは行わない。
+- PR が必要な場合は、このスキルの後に `create-pr` または `create-pr-followup` を使う。
 
-- Confirm you're on a feature branch, not the default branch (`git branch --show-current`).
-- Review the full pending state: `git status --short`, `git diff`, and `git diff --staged`.
-- Make sure nothing unintended is included: secrets, debug prints, generated noise, or unrelated files. If unrelated user changes are mixed in and cannot be separated confidently, stop and ask.
-- Confirm lint/test are green. If this skill was called by `implement-plan`, they already are; if invoked standalone and the right commands are obvious, run them before committing.
+## Hard constraints
 
-If there is no pending diff, report that there is nothing to commit and stop.
+- default branch では commit しない。
+- staging 前に `git status --short`、`git diff`、`git diff --staged` を確認する。
+- unrelated な user change が混ざっていて安全に分けられない場合は停止して確認する。
+- secrets、debug print、generated noise、無関係な file を commit に含めない。
+- repo の commit message 言語、prefix、Conventional Commit 規約を優先する。
+- ユーザーがこの turn で明示的に commit 許可を出していない場合は、commit plan を提示してから進める。
 
-## Step 2 — Plan logical commits
+## Workflow
 
-Split the pending diff into the smallest number of commits that still tells a clear review story:
+### Step 1: Inspect pending state
 
-- Separate unrelated concerns, even if they came from the same task (e.g. implementation vs docs, production code vs test-only fixture cleanup, generated lockfile/vendor output when substantial).
-- Keep tightly coupled code and its tests in the same commit when that is easier to review and bisect.
-- Do not split mechanically by file, task checkbox, or tiny edit. Avoid commits that only make sense  when squashed with the next one.
-- If the whole change is one coherent concern, use one commit.
+- 現在の branch を確認する。
+- pending diff 全体を読む。
+- staged diff がある場合も必ず読む。
+- standalone invocation で lint / test コマンドが明らかな場合は、commit 前に実行する。
+- pending diff がない場合は、commit するものがないと報告して停止する。
 
-Before committing, show the user the proposed commit plan unless the user already gave explicit permission to commit in this turn.
+```bash
+git branch --show-current
+git status --short
+git diff
+git diff --staged
+```
 
-## Step 3 — Commit intentionally
+### Step 2: Plan logical commits
 
-For each planned commit:
+- review story が明確になる最小数の commit に分ける。
+- implementation と docs、production code と test-only cleanup、実質的な generated output など、別 concern は分ける。
+- 密結合した code と test は同じ commit に入れる。
+- file 単位、task checkbox 単位、小さすぎる edit 単位で機械的に分けない。
+- 1 つの coherent concern なら 1 commit にする。
+
+### Step 3: Stage and commit intentionally
+
+各 commit ごとに staged diff を確認してください。
 
 ```bash
 git add -p
@@ -47,20 +63,25 @@ git diff --staged
 git commit
 ```
 
-- Use `git add -p`, pathspecs, or both. Stage intentionally; do not rely on `git add -A` unless the entire remaining diff belongs in the next commit.
-- Inspect the staged diff before every commit. It must be non-empty and independently understandable.
-- Write a message that follows repo convention and summarizes the *why*, not just the *what*.
-- Prefer each commit to be buildable/testable when practical, but do not contort the history into artificial micro-commits.
+- `git add -p`、pathspec、またはその両方で意図的に stage する。
+- 残りの diff 全体が次 commit に属すると明らかな場合だけ `git add -A` を使う。
+- staged diff は non-empty で、単独で理解できる内容にする。
+- message は「何を」だけでなく「なぜ」が伝わるようにする。
+- practical な範囲で各 commit を buildable / testable にする。
 
-## Step 4 — Report
+### Step 4: Report
 
-Report the created commit hashes and subjects, and state whether the working tree is clean. If the user wants a PR, hand off to `create-pr`.
+日本語で次を報告してください。
+
+- 作成した commit hash と subject。
+- working tree が clean か dirty か。
+- PR に進む場合は `create-pr` または `create-pr-followup` が次 step であること。
 
 ## Quick reference
 
 | Step | Action | Command |
 |------|--------|---------|
 | 1 | Inspect pending diff | `git status --short` / `git diff` / `git diff --staged` |
-| 2 | Plan logical commits | read `git log`, group by concern |
+| 2 | Plan logical commits | Read recent `git log`. |
 | 3 | Commit intentionally | `git add -p` / `git diff --staged` / `git commit` |
-| 4 | Report | commit hashes + clean/dirty status |
+| 4 | Report | Commit hashes and tree state. |

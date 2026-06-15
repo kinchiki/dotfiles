@@ -1,44 +1,56 @@
 ---
 name: address-pr-comments
 description: >-
-  GitHub PR のレビューコメントを、最強モデルが実コードを読んでトリアージし、並列で修正する。
-  未解決のレビューコメント＋レビュー本文を取得し（bot 含む、解決済みスレッドは除外）、各コメントを must-fix / recommend-fix / recommend-skip に判定する。
-  must-fix は自動で着手しつつ、任意のものはユーザーに確認し、承認された項目を task-implementer ワーカーで並列実装、lint/test を緑にする。
-  PR のレビュー指摘を処理したいときに発火する。
-  例:
-    「PRのコメントに対応して」
-    「レビュー対応」
-    「PRの指摘を直して」
-    「レビューを反映」
-  作業ツリーが緑になった時点で止まる。
-  commit / push / GitHub への書き戻しはしない。
+  GitHub PR の未解決レビューコメントとレビュー本文を取得し、実コードを読んで must-fix / recommend-fix / recommend-skip にトリアージして修正する。
+  bot コメントも対象にし、解決済みスレッドは除外する。
+  must-fix は自動で進め、任意対応はユーザー確認後に実装する。
+  PR のレビュー指摘を処理したいときに使う。
+  例: 「PRのコメントに対応して」「レビュー対応」「PRの指摘を直して」「レビューを反映」。
+  作業ツリーが緑になった時点で止め、commit / push / GitHub への返信や resolve は行わない。
 ---
 
 # address-pr-comments
 
-Take a PR's review feedback and turn it into fixes — without missing the obvious must-fixes (typos, real bugs, requirement violations) and without dutifully "fixing" comments that are outdated or wrong. The strongest model reads the **actual code** each comment points at before deciding, the clear must-fixes proceed on their own, and the judgment calls go back to you.
+GitHub PR のレビュー指摘を、実コードに照らして直すスキルです。
+コメント本文だけで判断せず、対象行と周辺コードを読んでから対応可否を決めてください。
 
-This skill reuses the team's existing machinery: parallel implementation runs through the `task-implementer` sub-agent (the same worker `implement-plan` uses), the quality gate mirrors `implement-plan`'s lint/test loop, commits are left to `commit-changes`, and push / PR creation is left to `create-pr`. It stops at a green working tree and reports — it never commits, pushes, or posts back to GitHub.
+## Scope
 
-Flow: **confirm model & resolve PR → fetch unresolved comments → judge each (read real code) → present + auto-start must-fixes + confirm the rest → implement in parallel → lint/test to green → report.**
+- 未解決の inline review thread と review summary body を扱う。
+- `coderabbitai`、`copilot` などの bot コメントも扱う。
+- 通常の PR conversation コメントは対象外にする。
+- 通常コメントに実質的な指摘がある場合は、範囲を広げるかユーザーに確認する。
+- 作業ツリーが green になったところで止める。
+- commit、push、GitHub への返信、thread resolve は行わない。
 
-## Step 0 — Confirm model and resolve the PR
+## Hard constraints
 
-- **Model.** Judgment is the heart of this skill, so the orchestrator should be the latest **Opus**.
-  Check your own model; if you are not on Opus, say so and recommend `/model opus`. (Parallel implementation workers run on Sonnet — see Step 4 — so only the orchestrator needs Opus.)
-- **Resolve the target PR.** Priority: an argument (PR number, `owner/repo#123`, or a PR URL). If none is given, use the current branch's PR. Derive `owner`, `repo`, and the PR number — you need all three for the GraphQL query in Step 1:
+- Orchestrator は可能なら最新 Opus を使う。
+- Opus でない場合は、その旨を伝えて `/model opus` を推奨する。
+- すべての判定で、対象コードの `file:line` を確認して引用する。
+- dirty tree で別ブランチに切り替える必要がある場合は、stash や破棄をせずに確認する。
+- test を弱める、削除する、skip / pending にする行為は禁止する。
+- 3 回修正しても lint / test が通らない場合は停止して失敗内容を報告する。
 
-  ```bash
-  REPO=$(gh repo view --json nameWithOwner -q .nameWithOwner)   # owner/repo (or take from a URL arg)
-  gh pr view <n-or-omit> --json number,headRefName,baseRefName,url,state,title
-  ```
+## Workflow
 
-- **Check out the PR branch from a clean tree.** Run `git status --porcelain`. If you're already on the target PR's branch (e.g. straight after `implement-plan`), stay put. Otherwise `gh pr checkout
-  <n>`. If the tree is **dirty and you're on a different branch**, stop and ask — don't stash or discard someone's work.
+### Step 0: Resolve the PR
 
-## Step 1 — Fetch the comments (unresolved only, bots included)
+- PR 番号、`owner/repo#123`、PR URL の順に優先して対象 PR を決める。
+- 指定がなければ current branch の PR を使う。
+- `owner`、`repo`、PR number を確定する。
+- `git status --porcelain` を確認する。
+- 既に対象 PR ブランチにいる場合はそのまま進める。
+- 別ブランチなら clean tree のときだけ `gh pr checkout <n>` を実行する。
 
-Inline review comments carry their resolution state only via GraphQL, so that is the primary source:
+```bash
+gh repo view --json nameWithOwner -q .nameWithOwner
+gh pr view <n-or-omit> --json number,headRefName,baseRefName,url,state,title
+```
+
+### Step 1: Fetch unresolved feedback
+
+GraphQL の `reviewThreads` を主ソースにして、解決済み thread を除外してください。
 
 ```bash
 gh api graphql -f query='
@@ -54,72 +66,80 @@ query($owner:String!,$repo:String!,$pr:Int!){
 }' -F owner=OWNER -F repo=REPO -F pr=N
 ```
 
-- **Keep only threads where `isResolved == false`.** Each unresolved thread is one logical comment (use the first comment plus any replies as context). Note `isOutdated` for Step 2.
-- **Also fetch review summary bodies** (the `CHANGES_REQUESTED` / `COMMENTED` text):
+Review summary body も取得してください。
 
-  ```bash
-  gh pr view N --json reviews --jq '.reviews[] | select(.body != "") | {author:.author.login, state:.state, body:.body}'
-  ```
+```bash
+gh pr view N --json reviews --jq '.reviews[] | select(.body != "") | {author:.author.login, state:.state, body:.body}'
+```
 
-- **Bots are in scope** — do not filter out `coderabbitai`, `copilot`, or similar authors. Pure conversation (issue) comments are **out of scope**; if the PR's substantive feedback is in plain
-  PR comments, say so and offer to widen the scope rather than silently pulling them in.
-- If there are no unresolved comments, report that and stop.
+- `isResolved == false` の thread だけを対象にする。
+- 1 つの unresolved thread を 1 つの論理コメントとして扱う。
+- reply は判断材料として使う。
+- `isOutdated` は triage の材料として残す。
+- unresolved feedback が 0 件なら報告して停止する。
 
-## Step 2 — Judge each comment (strongest model, max effort)
+### Step 2: Triage each item
 
-For every unresolved comment and review body, **do not judge from the comment text alone — read the code it points at.** This is what "max effort" means here and it's how you catch comments that no longer apply.
+- 各コメントの `path` と `line` 周辺、`diffHunk`、関連する現行コードを読む。
+- `isOutdated` が true か、現行コードがコメント内容と一致しない場合は skip 寄りに判断し、理由を書く。
+- 各項目を必ず 1 つの bucket に分類する。
 
-- Open the referenced code: `path` around `line` (Read), plus the `diffHunk` for context. If `isOutdated` is true, or the code no longer matches what the comment describes, lean toward skip and say why.
-- Classify each into exactly one bucket:
-  - **must-fix** (fixed without asking): typo · factual error · a real bug the comment correctly identifies · requirement violation · would error or fail to build · failing test · security issue.
-  - **recommend-fix** (ask first, with a concrete approach): a valid improvement, but discretionary.
-  - **recommend-skip** (ask first, with a reason): outdated / wrong / off-target comment · out of scope · conflicts with the requirements · subjective preference · bot noise · already handled.
-- For each, produce: `{ id, source (file:line or "review body"), author, summary, verdict, approach-or-reason, files_to_touch }`. **Every verdict must cite the `file:line`** it's about.
-- **Scale with the comment count.** With many comments (~5+), fan out judgment to parallel sub-agents — one thread per agent, `model: "opus"` — each reading its referenced code and returning a structured verdict; then consolidate and de-duplicate. With only a few, judge inline.
+| Bucket | Meaning |
+|--------|---------|
+| `must-fix` | typo、事実誤認、実バグ、要件違反、build / test failure、security issue など、修正すべき明確な問題。 |
+| `recommend-fix` | 妥当だが裁量のある改善。 |
+| `recommend-skip` | outdated、誤指摘、範囲外、要件との衝突、主観的 preference、bot noise、対応済み。 |
 
-## Step 3 — Present, auto-start the must-fixes, confirm the rest
+各判定は次の形にしてください。
 
-Present a categorized table to the user: **must-fix** (will do now), **recommend-fix** (proposed approach), **recommend-skip** (reason). Then, in the same turn:
+```text
+{ id, source, author, summary, verdict, approach_or_reason, files_to_touch }
+```
 
-- **Start the must-fix set immediately, in the background.** Group must-fix items into batches whose `files_to_touch` do not overlap, and spawn one `task-implementer` per item with the Agent tool:
-  `subagent_type: "task-implementer"`, `model: "sonnet"`, `run_in_background: true`. This honors
-  "必ず対応するものは進めておく" — the clear fixes run while the user is still deciding.
-- **Confirm the discretionary items with `AskUserQuestion`.** If there are ≤4 of them, use a `multiSelect` question listing each recommend-fix / recommend-skip item so the user can flip any decision. If there are more than 4, present the numbered table and ask a coarse question instead ("proposalどおり対応 / 例外を指定する") — the tool allows at most 4 questions × 4 options, so don't try to cram one option per item.
+コメントが 5 件以上ある場合は、可能なら Opus の並列 sub-agent に分けて判定させ、最後に統合してください。
 
-If a recommend-skip would actually break things (you only flagged it skip because it's subjective), say so plainly — the user's call still wins, but don't let a real defect ride out silently.
+### Step 3: Present and confirm
 
-## Step 4 — Implement the approved set in parallel
+- `must-fix`、`recommend-fix`、`recommend-skip` の表をユーザーに出す。
+- `must-fix` は同じ turn で着手する。
+- `files_to_touch` が重ならない `must-fix` は、可能なら `task-implementer` sub-agent で並列に進める。
+- `recommend-fix` と `recommend-skip` はユーザーに確認する。
+- 確認用の質問ツールがある場合は使い、ない場合は番号付きの短い質問で確認する。
 
-- **Collect the background must-fix results** (they may still be running — wait for them).
-- For the items the user approved, implement in parallel the same way `implement-plan` does:
-  group by non-overlapping `files_to_touch`, spawn one `task-implementer` (`model: "sonnet"`) per item. Each worker edits **only its assigned files**, writes/updates the relevant tests, and returns a structured summary; workers don't commit or branch.
-- **Serialize on overlap.** If an approved item touches a file a must-fix item already changed (or two approved items share files), run those sequentially — correctness beats parallelism. This is the same disjoint-files rule `implement-plan` Step 2 uses.
+### Step 4: Implement approved work
 
-## Step 5 — Quality gate: lint + test until green
+- background の `must-fix` があれば完了を待つ。
+- 承認された項目を実装する。
+- `files_to_touch` が重ならない項目だけ並列化する。
+- overlap がある項目は順番に実装する。
+- 各 worker は割り当てられた files だけを編集し、必要な test を追加または更新する。
+- worker は commit、branch 作成、push を行わない。
 
-- Determine the target repo's lint/test commands from its `CLAUDE.md` (e.g. `dip rubocop`, `dip rspec`), the same way `implement-plan` does.
-- Run them. If something fails, fix the **code** and re-run — up to **3 rounds**. If still failing after 3, **stop** and report with the failing output; don't loop forever.
-- **Never** weaken, delete, skip, or `pending` a test to go green. If a test genuinely looks wrong, stop and ask.
-- Run the full relevant suite once more so the whole change is green together.
+### Step 5: Run quality gate
 
-## Step 6 — Report (no commit, no push, no GitHub writeback)
+- 対象 repo の lint / test コマンドを `CLAUDE.md` や既存設定から特定する。
+- 失敗した場合は code を直して再実行する。
+- 修正と再実行は最大 3 round にする。
+- 最後に関連する full suite を 1 回通す。
 
-Give the user a Japanese summary table mapping each comment to its outcome:
+### Step 6: Report
 
-- コメント（source / author）→ verdict → 実施内容 or 見送り理由 → 変更ファイル
-- lint・test の最終状態
+日本語で次を報告してください。
 
-Then state the next step explicitly: **commit/push は未実施**（`commit-changes` → `create-pr` skill
-か手動で）、**GitHub への返信・resolve もしていない**（報告のみ）。If the user wants to ship it, hand off to `commit-changes` first, then `create-pr`.
+- コメントごとの source / author、verdict、実施内容または見送り理由、変更ファイル。
+- lint / test の最終状態。
+- commit / push は未実施であること。
+- GitHub への reply / resolve は未実施であること。
+- 次に進める場合は `commit-changes` の後に `create-pr` を使うこと。
 
 ## Quick reference
 
 | Step | Action | Notes |
 |------|--------|-------|
-| 0 | Confirm Opus, resolve PR, checkout | clean tree only; stay if already on the PR branch |
-| 1 | Fetch via GraphQL `reviewThreads` + `gh pr view --json reviews` | unresolved only, bots in, issue comments out |
-| 2 | Judge each — **read the real code** | must-fix / recommend-fix / recommend-skip; cite `file:line`; fan-out (Opus) at scale |
-| 3 | Present + auto-start must-fixes (background) + confirm rest | `task-implementer` Sonnet, `run_in_background`; `AskUserQuestion` for discretionary |
-| 4 | Implement approved set in parallel | disjoint files only; serialize overlaps |
-| 5 | lint + test until green | cap 3 rounds; never weaken tests |
-| 6 | Report (日本語表) | no commit/push/GitHub writeback; hand off to `commit-changes` then `create-pr` if wanted |
+| 0 | Resolve PR and branch | Clean tree before checkout. |
+| 1 | Fetch review threads and reviews | Unresolved only, bots included. |
+| 2 | Triage after reading code | Cite `file:line`. |
+| 3 | Present and confirm | Start clear `must-fix` items. |
+| 4 | Implement approved work | Parallelize only disjoint files. |
+| 5 | Run lint / test | Cap fixes at 3 rounds. |
+| 6 | Report | No commit, push, or GitHub writeback. |

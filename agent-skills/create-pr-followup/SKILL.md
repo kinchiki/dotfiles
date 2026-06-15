@@ -1,118 +1,134 @@
 ---
 name: create-pr-followup
 description: >-
-  PR を作成したあと一定時間待ち、GitHub Actions CI と PR に付いた AI レビュー / レビューコメントを確認し、既存スキルへ切り出して後追い対応する。
-  PR 作成自体は create-pr を使い、CI 失敗は GitHub plugin の gh-fix-ci、レビューコメント対応は agent-skills の address-pr-comments（または GitHub plugin の gh-address-comments）を使う。
-  例:
-    「PR作って、CIとAIレビューまで見て」
-    「PR作成後にレビュー指摘とCI失敗も対応して」
-    「create-pr のあとしばらく待って後追いして」
-  implement-plan / commit-changes 完了後に、PR作成だけで止めずにCI・AIレビューの初回フォローまで進めたいときに発火する。
+  PR 作成後に一定時間待ち、GitHub Actions CI と AI レビュー / レビューコメントを確認して、既存スキルへ切り出して後追い対応する。
+  PR 作成は create-pr、CI 失敗は GitHub plugin の gh-fix-ci、レビューコメント対応は address-pr-comments または GitHub plugin の gh-address-comments を使う。
+  例: 「PR作って、CIとAIレビューまで見て」「PR作成後にレビュー指摘とCI失敗も対応して」「create-pr のあとしばらく待って後追いして」。
+  implement-plan / commit-changes 完了後に、PR 作成だけで止めずに CI と AI レビューの初回フォローまで進めたいときに使う。
 ---
 
 # create-pr-followup
 
-Create the PR, wait for the first round of automation and AI review, then route follow-up work to the existing specialist skills.
-This skill is an orchestrator; do not duplicate the implementation logic owned by `create-pr`, `gh-fix-ci`, `address-pr-comments`, `commit-changes`, or `gh-address-comments`.
+PR を作成し、初回の CI と AI レビューを待って、必要な follow-up を専門スキルに委譲する orchestrator です。
+`create-pr`、`gh-fix-ci`、`address-pr-comments`、`commit-changes`、`gh-address-comments` が持つ実装ロジックを重複させないでください。
 
-Flow: **create-pr → wait → inspect CI and AI review → split CI/comment work → verify → commit/push follow-up fixes if needed → report.**
+## Scope
 
-## Step 0 — Confirm scope and prerequisites
+- `create-pr` を使って PR を作る。
+- 初回の CI と AI review / unresolved review comment を確認する。
+- CI failure は `gh-fix-ci` に委譲する。
+- review comment は `address-pr-comments` を優先し、必要に応じて `gh-address-comments` に委譲する。
+- follow-up fix が発生した場合は `commit-changes` で commit し、ユーザー確認後に push する。
+- 既に open している PR に対して `create-pr` を再実行しない。
 
-- Confirm the user wants post-PR follow-up, not just PR creation.
-- Confirm the working tree is clean or already ready for `create-pr`.
-- If there are uncommitted changes, hand off to `commit-changes` first.
-- Use `create-pr` for the initial push and PR creation.
-- Treat every push and GitHub write as outward-facing, and keep the human confirmation checkpoints required by the child skills.
+## Hard constraints
 
-## Step 1 — Create and resolve the PR
+- PR 作成だけを求められている場合は、このスキルを使わず `create-pr` で止める。
+- uncommitted changes がある場合は、先に `commit-changes` に引き渡す。
+- push や GitHub writeback は外向き操作として扱い、子スキルの確認ポイントを守る。
+- CI / review follow-up は concrete PR が解決できた場合だけ進める。
+- test を弱める、削除する、skip / pending にする行為は禁止する。
+- follow-up cycle は最大 2 回にする。
+- ユーザーが明示的に継続を求めた場合だけ 3 回目以降を行う。
 
-Invoke the existing `create-pr` skill.
-After it succeeds, resolve the PR URL, number, head branch, and base branch:
+## Workflow
+
+### Step 0: Confirm scope and prerequisites
+
+- ユーザーが post-PR follow-up を求めていることを確認する。
+- working tree が clean か、`create-pr` に渡せる状態であることを確認する。
+- uncommitted changes がある場合は `commit-changes` を使う。
+- initial push と PR 作成は `create-pr` に委譲する。
+
+### Step 1: Create and resolve the PR
+
+- `create-pr` を実行する。
+- 成功後に PR URL、number、head branch、base branch、state、title を取得する。
+- PR が解決できない場合は停止して blocker を報告する。
 
 ```bash
 gh pr view --json number,url,headRefName,baseRefName,state,title
 ```
 
-If `create-pr` fails or the PR cannot be resolved, stop and report the blocker.
-Do not continue with CI or review follow-up without a concrete PR.
+### Step 2: Wait for automation and AI review
 
-## Step 2 — Wait for automation and AI review
-
-Use the wait interval requested by the user.
-If the user did not specify one, wait 5 minutes before the first inspection.
+- ユーザー指定の wait interval があればそれを使う。
+- 指定がなければ最初に 5 分待つ。
+- checks が queued / in progress の間、または期待する AI review がまだ出ていない間は、2 分間隔で最大 3 回追加 poll する。
+- AI review が wait budget 内に出ない場合は、CI inspection だけ続けて、AI review が未検出だったことを報告する。
 
 ```bash
 sleep 300
 ```
 
-After the first wait, poll at most 3 more times with 2 minutes between polls while checks are still queued/in progress or the expected AI review has not appeared.
-Do not wait forever.
-If no AI review appears after the wait budget, continue with CI inspection and report that no AI review was found yet.
+### Step 3: Inspect CI and review state
 
-## Step 3 — Inspect CI and review state
-
-Inspect CI status first:
+CI を先に確認してください。
 
 ```bash
 gh pr checks <pr-number-or-url>
 ```
 
-- If all checks pass or are skipped, record that result.
-- If GitHub Actions checks fail, route CI investigation and fixes to `gh-fix-ci`.
-- If a failing check is external to GitHub Actions, report the URL and do not pretend `gh-fix-ci` can inspect it.
+- checks が pass または skipped なら結果を記録する。
+- GitHub Actions check が fail している場合は `gh-fix-ci` に委譲する。
+- GitHub Actions 以外の external check が fail している場合は URL を報告し、`gh-fix-ci` で inspect できると仮定しない。
 
-Inspect AI review and unresolved review comments next.
-Prefer `address-pr-comments` because it already includes bot comments, unresolved GraphQL review threads, triage, parallel implementation, and local lint/test gating.
-Use GitHub plugin `gh-address-comments` only if the local `address-pr-comments` skill is unavailable or the current environment provides only the plugin workflow.
+次に AI review と unresolved review comment を確認してください。
 
-## Step 4 — Split follow-up work into lanes
+- local `address-pr-comments` が使える場合は優先する。
+- local skill が使えない場合、または plugin workflow しかない環境では `gh-address-comments` を使う。
+- bot comment と unresolved GraphQL review thread を含める。
 
-When both CI failures and unresolved actionable review comments exist, split the work into separate agents, sessions, or worktrees if the environment provides them.
-Use one lane for CI with `gh-fix-ci` and one lane for review comments with `address-pr-comments` or `gh-address-comments`.
+### Step 4: Split follow-up work into lanes
 
-Parallelize only when the lanes can edit safely:
+- CI failure と actionable review comment が両方ある場合は、別 lane に分ける。
+- CI lane は `gh-fix-ci` に委譲する。
+- review lane は `address-pr-comments` または `gh-address-comments` に委譲する。
+- separate worktree、separate session、または disjoint file set がある場合だけ並列化する。
+- 同じ working tree で files が重なる場合は serialize する。
+- 子スキルの approval point を守る。
+- 作業が片方だけなら、その専門スキルだけ実行する。
+- どちらも作業がなければ Step 7 に進む。
 
-- Use separate git worktrees, separate sessions with isolated patches, or clearly disjoint file sets.
-- Serialize the lanes if they touch overlapping files or the available tools share one working tree.
-- Keep each lane scoped to its assigned failure or comment set.
-- Respect child-skill approval points, especially `gh-fix-ci`'s requirement to summarize the root cause and get approval before editing.
+### Step 5: Integrate and verify
 
-If only one category has work, run only that specialist skill.
-If neither category has work, skip to Step 7.
+- CI lane と review lane の出力を集める。
+- separate worktree / session が patch を作った場合は、1 つずつ適用して combined diff を確認する。
+- 子スキルが既に lint / test を実行していても、統合後に最小の combined check を実行する。
 
-## Step 5 — Integrate and verify local follow-up fixes
+### Step 6: Commit and push follow-up fixes
 
-Collect the outputs from the CI and review lanes.
-If separate worktrees or sessions produced patches, integrate them one at a time and inspect the combined diff.
-
-Run the relevant lint/test commands after integration.
-If the child skills already ran them, still run the smallest combined check that proves the merged result is coherent.
-Never weaken, skip, or delete tests to make the follow-up green.
-
-## Step 6 — Commit and push follow-up fixes
-
-If the follow-up work changed files, invoke `commit-changes` to create local commits.
-After commits are created, push the current PR branch only after user confirmation:
+- file change がある場合は `commit-changes` で local commit を作る。
+- commit 後、ユーザー確認を取ってから current PR branch に push する。
+- already-open PR に対して `create-pr` を再実行しない。
+- push 後に Step 2 の default で再度待ち、Step 3 で確認する。
 
 ```bash
 git push
 ```
 
-Do not call `create-pr` again for an already-open PR.
-After pushing follow-up fixes, wait once more for CI and AI review using Step 2's defaults, then inspect again with Step 3.
-Run at most 2 full follow-up cycles unless the user explicitly asks to keep iterating.
+### Step 7: Report
 
-## Step 7 — Report
+日本語で次を報告してください。
 
-Report in Japanese:
+- PR URL。
+- CI status と failing / external checks。
+- AI review / unresolved comment status。
+- 実行した専門スキルと、各スキルが変更した内容。
+- 最終 lint / test status。
+- follow-up commit を push したかどうか。
+- human action または次 cycle が必要な残件。
+- 最終 status: `完了`、`追加対応待ち`、または `ブロック中`。
 
-- PR URL.
-- CI status and any failing or external checks.
-- AI review / unresolved comment status.
-- Which specialist skills ran and what each changed.
-- Final lint/test status.
-- Whether follow-up commits were pushed.
-- Any remaining items that need human action or another cycle.
+## Quick reference
 
-End with a clear status: `完了`, `追加対応待ち`, or `ブロック中`.
+| Step | Action | Notes |
+|------|--------|-------|
+| 0 | Confirm follow-up scope | Hand dirty tree to `commit-changes`. |
+| 1 | Create and resolve PR | Use `create-pr`. |
+| 2 | Wait and poll | Default 5 min, then 3 polls. |
+| 3 | Inspect CI and review | CI first, comments second. |
+| 4 | Split lanes | Parallelize only isolated work. |
+| 5 | Integrate and verify | Run combined check. |
+| 6 | Commit and push fixes | Confirm before push. |
+| 7 | Report | End with clear status. |

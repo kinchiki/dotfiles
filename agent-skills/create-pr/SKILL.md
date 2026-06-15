@@ -2,91 +2,112 @@
 name: create-pr
 description: >-
   コミット済みの現在ブランチを push して GitHub PR を作成する。
-  PR を開きたいときに発火する。
-  例:
-    「PR作成」
-    「PR作って」
-    「プルリク」
-  または implement-plan / commit-changes 完了後の PR 作成引き継ぎ。
+  PR を開きたいとき、または implement-plan / commit-changes 完了後の PR 作成引き継ぎで使う。
+  例: 「PR作成」「PR作って」「プルリク」。
   未コミット差分がある場合は commit-changes に引き渡す。
-  外向きの操作(push / gh pr create)は実行前に確認する。
+  push / gh pr create は外向きの操作なので、実行前にユーザー確認を取る。
 ---
 
 # create-pr
 
-Open a pull request for an already-committed branch, the way the team expects. This is the last leg of the ticket-to-plan → implement-plan → commit-changes → create-pr pipeline, but it also works standalone when the branch is already committed.
+既に commit 済みの branch を push し、チームの期待に沿った pull request を作るスキルです。
+`ticket-to-plan` → `implement-plan` → `commit-changes` → `create-pr` の最後の段階として使えます。
 
-**Project conventions win.** If the current repo has its own PR skill (e.g.
-`.claude/skills/create-pr/local.SKILL.md`) or a documented PR template/convention, follow that — it overrides this generic skill. Check for it first.
+## Scope
 
-**Scope boundary.** This skill never stages, commits, amends, rebases, or decides commit grouping.
-If the working tree has uncommitted changes, stop and hand off to `commit-changes`.
+- 現在 branch を remote に push する。
+- GitHub PR を作成する。
+- PR URL を報告する。
+- stage、commit、amend、rebase、commit grouping は行わない。
+- 未コミット差分がある場合は `commit-changes` に引き渡す。
 
-**These are outward-facing actions.** Pushing and opening a PR publish the work and notify people.
-Confirm with the user before the push/PR step. (`git push` and `gh pr create` are permission-gated, so you'll be prompted there — that's the intended human checkpoint.)
+## Hard constraints
 
-## Step 1 — Sanity-check the branch
+- repo 固有の PR skill や PR template がある場合は、それを優先する。
+- default branch から PR を作らない。
+- working tree が dirty の場合は停止する。
+- push と `gh pr create` の前にユーザー確認を取る。
+- PR assignee には必ず `kinchiki` を指定する。
 
-- Confirm you're on a feature branch, not the default branch (`git branch --show-current`).
-- Confirm the working tree is clean:
+## Workflow
 
-  ```bash
-  git status --short
-  ```
+### Step 0: Prefer project conventions
 
-  If there are uncommitted changes, do not stage or commit them. Stop and invoke `commit-changes`.
-- Confirm the branch has commits to ship relative to the target base branch.
-- Confirm lint/test are green. If this skill was called by `implement-plan`, they already are; if invoked standalone, run or ask for the relevant checks before publishing.
+- `.claude/skills/create-pr/local.SKILL.md` など、repo 固有の PR skill があるか確認する。
+- `.github/pull_request_template.md` がある場合は、その template を使う。
+- repo に明文化された convention がある場合は、この generic skill より優先する。
 
-## Step 2 — Push and open the PR
+### Step 1: Sanity-check the branch
 
-After user confirmation:
+- 現在 branch が feature branch であることを確認する。
+- working tree が clean であることを確認する。
+- target base branch に対して ship する commit があることを確認する。
+- standalone invocation で lint / test が未確認なら、publish 前に実行するかユーザーに確認する。
+
+```bash
+git branch --show-current
+git status --short
+```
+
+### Step 2: Push and open the PR
+
+ユーザー確認後に実行してください。
 
 ```bash
 git push -u origin HEAD
 gh pr create --base <default-branch> --title "<title>" --body "<body>" --assignee kinchiki
 ```
 
-- **Assignees:** 必ず `kinchiki` を指定する（`--assignee kinchiki`）。
-- **Title:** concise, in the repo's usual language (日本語 if the team writes PRs in Japanese).
-  Include the ticket key if that's the convention.
-- **Body:** generate from the plan and ticket. Suggested structure (日本語):
+- Title は repo の通常言語に合わせて簡潔に書く。
+- team が日本語で PR を書く場合は日本語にする。
+- ticket key を title に含める convention がある場合は従う。
+- Body は plan と ticket から生成する。
+- `.github/pull_request_template.md` がある場合は、次の generic structure ではなく template を埋める。
 
-  ```markdown
-  ## issue
-  <指定されたチケットの URL>
+Generic body structure:
 
-  ## 概要
-  <この PR で何を・なぜ変えたか（1〜3行）>
+```markdown
+## issue
+<指定されたチケットの URL>
 
-  ## 変更点
-  - <主要な変更を箇条書き>
+## 概要
+<この PR で何を・なぜ変えたか（1〜3行）>
 
-  ## テスト
-  - lint: <コマンドと結果>
-  - test: <コマンドと結果>
+## 変更点
+- <主要な変更を箇条書き>
 
-  ## レビュー（AI）
-  - レビュー担当: <Claude Code実装時はCodex / Codex実装時はClaude Code / 低リスクskip>
-  - 解決済み blocking: <あれば>
-  - 残した nit: <あれば。なければ「なし」>
-  - レビュー方針: <低リスクskip / 独立AIレビュー1回 / P1-P2修正後の再レビュー など>
+## テスト
+- lint: <コマンドと結果>
+- test: <コマンドと結果>
 
-  ## 受入基準
-  - [x] <プランの Acceptance criteria を転記し、満たしたものをチェック>
-  ```
+## レビュー（AI）
+- レビュー担当: <Claude Code実装時はCodex / Codex実装時はClaude Code / 低リスクskip>
+- 解決済み blocking: <あれば>
+- 残した nit: <あれば。なければ「なし」>
+- レビュー方針: <低リスクskip / 独立AIレビュー1回 / P1-P2修正後の再レビュー など>
 
-- If the repo has a `.github/pull_request_template.md`, fill that instead of the structure above.
+## 受入基準
+- [x] <プランの Acceptance criteria を転記し、満たしたものをチェック>
+```
 
-## Step 3 — Report
+### Step 3: Report
 
-Give the user the PR URL (`gh pr view --web` to open it) and a one-line recap. Done.
+日本語で次を報告してください。
+
+- PR URL。
+- PR title。
+- 何を publish したかの 1 行 recap。
+- follow-up が必要なら `create-pr-followup` が次 step であること。
+
+```bash
+gh pr view --json url,title
+```
 
 ## Quick reference
 
 | Step | Action | Command |
 |------|--------|---------|
-| 0 | Prefer project's own PR skill if present | (check `.claude/skills`) |
-| 1 | Confirm committed clean branch | `git status --short` |
-| 2 | Push + open PR (after confirm) | `git push -u origin HEAD` / `gh pr create --assignee kinchiki` |
-| 3 | Report PR URL | `gh pr view --web` |
+| 0 | Prefer project conventions | Check local skill and PR template. |
+| 1 | Confirm clean committed branch | `git status --short` |
+| 2 | Push and open PR | `git push -u origin HEAD` / `gh pr create --assignee kinchiki` |
+| 3 | Report PR URL | `gh pr view --json url,title` |
