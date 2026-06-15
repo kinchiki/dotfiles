@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../.." && pwd)"
 VALIDATOR="${SKILL_VALIDATOR:-"$HOME/.codex/skills/.system/skill-creator/scripts/quick_validate.py"}"
 PYTHON_BIN="${PYTHON:-python3}"
-PYTHONPATH_PREFIX="$ROOT/agent-skills/scripts/pythonpath"
+PYTHONPATH_PREFIX="$ROOT/agent-resources/skills/scripts/pythonpath"
 
 if [[ ! -f "$VALIDATOR" ]]; then
   echo "quick_validate.py not found: $VALIDATOR" >&2
@@ -20,7 +20,7 @@ else
   skill_dirs=()
   while IFS= read -r skill_md; do
     skill_dirs+=("$(dirname "$skill_md")")
-  done < <(find "$ROOT/agent-skills" -mindepth 2 -maxdepth 2 -name SKILL.md -print | sort)
+  done < <(find "$ROOT/agent-resources/skills" -mindepth 2 -maxdepth 2 -name SKILL.md -print | sort)
 fi
 
 for skill_dir in "${skill_dirs[@]}"; do

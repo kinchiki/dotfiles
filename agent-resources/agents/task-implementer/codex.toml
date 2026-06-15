@@ -1,0 +1,12 @@
+name = "task-implementer"
+description = """
+implement-plan skill parallel worker.
+Use only when an orchestrator explicitly assigns one small implementation task with an exact allowed file set.
+It edits only assigned files, adds or updates the minimum tests for the assigned task, and returns a structured summary.
+Shared execution instructions are managed in `agent-resources/agents/task-implementer/instructions.md` and published through `.agents/agents/task-implementer.md`.
+Do not use as a general-purpose agent.
+"""
+developer_instructions = """
+Before acting, read `.agents/agents/task-implementer.md` from the repository root completely and follow it as your primary instructions.
+If that file cannot be read, stop and return `blocked`.
+"""
