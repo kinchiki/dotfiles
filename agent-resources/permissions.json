@@ -1,0 +1,290 @@
+{
+  "permissions": {
+    "allow": [
+      { "claude": "Bash(cat:*)" },
+      { "claude": "Bash(cp:*)" },
+      { "claude": "Bash(find:*)" },
+      { "claude": "Bash(grep:*)" },
+      { "claude": "Bash(jq:*)" },
+      { "claude": "Bash(ls:*)" },
+      { "claude": "Bash(rg:*)" },
+      { "claude": "Bash(touch:*)" },
+      { "claude": "Bash(gh pr view:*)" },
+      { "claude": "Bash(gh pr list:*)" },
+      { "claude": "Bash(gh pr diff:*)" },
+      { "claude": "Bash(gh issue view:*)" },
+      { "claude": "Bash(gh release list:*)" },
+      { "claude": "Bash(git add:*)" },
+      { "claude": "Bash(git fetch:*)" },
+      { "claude": "Bash(git stash:*)" },
+      { "claude": "WebFetch(domain:github.com)" },
+      { "claude": "WebFetch(domain:raw.githubusercontent.com)" },
+      { "claude": "WebFetch(domain:docs.anthropic.com)" },
+      { "claude": "mcp__notion__search" },
+      { "claude": "mcp__notion__fetch" },
+      { "claude": "mcp__notion__notion-fetch" },
+      { "claude": "mcp__linear__get_issue" },
+      { "claude": "mcp__Sentry__get_issue_details" },
+      { "claude": "mcp__context7__resolve-library-id" },
+      { "claude": "mcp__context7__get-library-docs" },
+      { "claude": "mcp__plugin_context7_context7__resolve-library-id" },
+      { "claude": "mcp__plugin_context7_context7__get-library-docs" },
+      { "claude": "mcp__github__list_pull_requests" },
+      { "claude": "mcp__github__get_me" },
+      { "claude": "mcp__github__search_pull_requests" },
+      { "claude": "mcp__github__search_repositories" },
+      { "claude": "mcp__github__pull_request_read" },
+      { "claude": "Bash(codex review:*)" },
+      { "claude": "Bash(codex exec review:*)" },
+      { "claude": "Bash(git switch:*)" },
+      { "claude": "Bash(git branch:*)" },
+      { "claude": "Bash(git worktree:*)" },
+      { "claude": "Bash(git commit:*)" }
+    ],
+    "deny": [
+      {
+        "claude": "Bash(env:*)",
+        "codex": {
+          "pattern": ["env"],
+          "justification": "Do not dump or run commands through the full inherited environment.",
+          "match": ["env", "env FOO=bar printenv"]
+        }
+      },
+      {
+        "claude": "Bash(mongod:*)",
+        "codex": {
+          "pattern": ["mongod"],
+          "justification": "Starting database daemons is outside normal agent work.",
+          "match": ["mongod --config mongo.conf"]
+        }
+      },
+      {
+        "claude": "Bash(mysql:*)",
+        "codex": {
+          "pattern": ["mysql"],
+          "justification": "Direct database access should not be performed by the agent.",
+          "match": ["mysql -h localhost"]
+        }
+      },
+      {
+        "claude": "Bash(nc:*)",
+        "codex": {
+          "pattern": ["nc"],
+          "justification": "Raw network connections should not be opened by the agent.",
+          "match": ["nc -vz example.com 443"]
+        }
+      },
+      {
+        "claude": "Bash(npm remove:*)",
+        "codex": {
+          "pattern": ["npm", "remove"],
+          "justification": "Package removal should be requested explicitly by the user.",
+          "match": ["npm remove left-pad"],
+          "not_match": ["npm install"]
+        }
+      },
+      {
+        "claude": "Bash(npm uninstall:*)",
+        "codex": {
+          "pattern": ["npm", "uninstall"],
+          "justification": "Package removal should be requested explicitly by the user.",
+          "match": ["npm uninstall left-pad"],
+          "not_match": ["npm install"]
+        }
+      },
+      {
+        "claude": "Bash(op:*)",
+        "codex": {
+          "pattern": ["op"],
+          "justification": "Password-manager access is not allowed.",
+          "match": ["op item get example"]
+        }
+      },
+      {
+        "claude": "Bash(psql:*)",
+        "codex": {
+          "pattern": ["psql"],
+          "justification": "Direct database access should not be performed by the agent.",
+          "match": ["psql postgres://localhost/db"]
+        }
+      },
+      {
+        "claude": "Bash(rm -rf:*)",
+        "codex": [
+          {
+            "pattern": ["rm", "-rf"],
+            "justification": "Recursive forced deletion is not allowed; use a narrower deletion after approval.",
+            "match": ["rm -rf build"]
+          },
+          {
+            "pattern": ["rm", "-fr"],
+            "justification": "Recursive forced deletion is not allowed; use a narrower deletion after approval.",
+            "match": ["rm -fr build"]
+          },
+          {
+            "pattern": ["rm", "-r", "-f"],
+            "justification": "Recursive forced deletion is not allowed; use a narrower deletion after approval.",
+            "match": ["rm -r -f build"]
+          },
+          {
+            "pattern": ["rm", "-f", "-r"],
+            "justification": "Recursive forced deletion is not allowed; use a narrower deletion after approval.",
+            "match": ["rm -f -r build"]
+          },
+          {
+            "pattern": ["rm", "--recursive", "--force"],
+            "justification": "Recursive forced deletion is not allowed; use a narrower deletion after approval.",
+            "match": ["rm --recursive --force build"]
+          },
+          {
+            "pattern": ["rm", "--force", "--recursive"],
+            "justification": "Recursive forced deletion is not allowed; use a narrower deletion after approval.",
+            "match": ["rm --force --recursive build"]
+          }
+        ]
+      },
+      {
+        "claude": "Bash(sudo:*)",
+        "codex": {
+          "pattern": ["sudo"],
+          "justification": "Privileged commands require direct user control.",
+          "match": ["sudo ls /var/root"]
+        }
+      },
+      { "claude": "mcp__supabase__execute_sql" },
+      { "claude": "NotebookEdit" },
+      { "claude": "Read(.env.*)" },
+      { "claude": "Read(.envrc)" },
+      { "claude": "Read(.mise.toml)" },
+      { "claude": "Read(*.env)" },
+      { "claude": "Read(**/*key*)" },
+      { "claude": "Read(**/*token*)" },
+      { "claude": "Read(id_ed25519)" },
+      { "claude": "Read(id_rsa)" },
+      { "claude": "Read(mise.local.toml)" },
+      { "claude": "Write(.env.*)" },
+      { "claude": "Write(.env*)" },
+      { "claude": "Write(.envrc)" },
+      { "claude": "Write(.mise.toml)" },
+      { "claude": "Write(*.env)" },
+      { "claude": "Write(**/secrets/**)" },
+      { "claude": "Write(mise.local.toml)" }
+    ],
+    "ask": [
+      {
+        "claude": "Bash(curl:*)",
+        "codex": {
+          "pattern": ["curl"],
+          "justification": "Network fetches should be approved explicitly.",
+          "match": ["curl https://example.com"]
+        }
+      },
+      {
+        "claude": "Bash(wget:*)",
+        "codex": {
+          "pattern": ["wget"],
+          "justification": "Network fetches should be approved explicitly.",
+          "match": ["wget https://example.com/file"]
+        }
+      },
+      {
+        "claude": "Bash(rm:*)",
+        "codex": {
+          "pattern": ["rm"],
+          "justification": "Deleting files should be approved explicitly.",
+          "match": ["rm file.txt", "rm -r build"]
+        }
+      },
+      {
+        "claude": "Bash(git merge:*)",
+        "codex": {
+          "pattern": ["git", "merge"],
+          "justification": "Git operations that mutate history, remotes, or the working tree require approval.",
+          "match": ["git merge main"],
+          "not_match": ["git fetch origin", "git status"]
+        }
+      },
+      {
+        "claude": "Bash(git pull:*)",
+        "codex": {
+          "pattern": ["git", "pull"],
+          "justification": "Git operations that mutate history, remotes, or the working tree require approval.",
+          "match": ["git pull"],
+          "not_match": ["git fetch origin", "git status"]
+        }
+      },
+      {
+        "claude": "Bash(git push:*)",
+        "codex": {
+          "pattern": ["git", "push"],
+          "justification": "Git operations that mutate history, remotes, or the working tree require approval.",
+          "match": ["git push origin HEAD"],
+          "not_match": ["git fetch origin", "git status"]
+        }
+      },
+      {
+        "claude": "Bash(git rebase:*)",
+        "codex": {
+          "pattern": ["git", "rebase"],
+          "justification": "Git operations that mutate history, remotes, or the working tree require approval.",
+          "match": ["git rebase main"],
+          "not_match": ["git fetch origin", "git status"]
+        }
+      },
+      {
+        "claude": "Bash(git reset:*)",
+        "codex": {
+          "pattern": ["git", "reset"],
+          "justification": "Git operations that mutate history, remotes, or the working tree require approval.",
+          "match": ["git reset --hard HEAD"],
+          "not_match": ["git fetch origin", "git status"]
+        }
+      },
+      {
+        "claude": "Bash(git restore:*)",
+        "codex": {
+          "pattern": ["git", "restore"],
+          "justification": "Git operations that mutate history, remotes, or the working tree require approval.",
+          "match": ["git restore ."],
+          "not_match": ["git fetch origin", "git status"]
+        }
+      },
+      {
+        "claude": "Bash(git tag:*)",
+        "codex": {
+          "pattern": ["git", "tag"],
+          "justification": "Git operations that mutate history, remotes, or the working tree require approval.",
+          "match": ["git tag v1.0.0"],
+          "not_match": ["git fetch origin", "git status"]
+        }
+      },
+      {
+        "claude": "Bash(git publish:*)",
+        "codex": {
+          "pattern": ["git", "publish"],
+          "justification": "Git operations that mutate history, remotes, or the working tree require approval.",
+          "match": ["git publish"],
+          "not_match": ["git fetch origin", "git status"]
+        }
+      },
+      {
+        "claude": "Bash(gh pr create:*)",
+        "codex": {
+          "pattern": ["gh", "pr", "create"],
+          "justification": "Creating a pull request publishes repository state and should be approved explicitly.",
+          "match": ["gh pr create --draft --title test --body body"],
+          "not_match": ["gh pr view 123"]
+        }
+      },
+      { "claude": "mcp__linear__list_comments" },
+      { "claude": "mcp__linear__create_comment" },
+      { "claude": "mcp__linear__list_cycles" },
+      { "claude": "mcp__linear__get_document" },
+      { "claude": "mcp__linear__list_documents" },
+      { "claude": "mcp__linear__list_issues" },
+      { "claude": "mcp__linear__create_issue" },
+      { "claude": "mcp__linear__update_issue" },
+      { "claude": "mcp__linear__list_issue_statuses" }
+    ]
+  }
+}
