@@ -62,37 +62,9 @@ For multi-step tasks, state a brief plan:
 
 Strong success criteria let you loop independently. Weak criteria ("make it work") require constant clarification.
 
-## 5. SKILL.md Rule — Use Only When Creating or Editing Skills
+## 5. Agent Skills - Use Only When Creating or Editing Skills
 
-Use this section only for Skill documentation files:
-`**/SKILL.md`.
-
-### Formatting
-
-- Preserve valid Markdown structure: frontmatter, headings, lists, tables, and fenced code blocks.
-- Use one sentence per line for normal paragraphs when practical.
-- Wrap lines only at sentence boundaries.
-- Keep fenced code block line breaks intact.
-- Keep one list item per line.
-
-### AI Readability
-
-- Put trigger conditions, scope, hard constraints, workflow, resources, and expected output where they are easy to find.
-- Use direct imperative language.
-- Prefer positive instructions that state the desired behavior.
-- Use negative wording only for hard prohibitions, safety boundaries, data-loss risks, formatting risks, or non-negotiable constraints.
-- Write conditional rules as: `If X, do Y. Otherwise, do Z.`
-- Use exact relative paths for referenced files, scripts, and assets.
-- State when each referenced resource should be consulted.
-- Keep `SKILL.md` operational. Move long examples, schemas, background information, and reference material into separate files.
-- Include only task-specific, non-obvious, or convention-specific guidance.
-
-### Validation
-
-- After creating or updating skills, run the repository validators before finishing.
-- Prefer validating the current diff first (files changed in this task), then expand to wider checks only if needed.
-- If a validator exists for agent skills (for example `scripts/validate-agent-skills`), use it and fix reported issues in the touched files.
-- If validation cannot be run, state why and what was checked manually.
+When creating or updating skills in this repository, use the `manage-agent-skills` skill.
 
 ---
 
