@@ -54,7 +54,7 @@ gh pr view --json number,url,headRefName,baseRefName,state,title
 
 - ユーザー指定の wait interval があればそれを使う。
 - 指定がなければ最初に 5 分待つ。
-- checks が queued / in progress の間、または期待する AI review がまだ出ていない間は、2 分間隔で最大 3 回追加 poll する。
+- checks が queued / in progress の間、または期待する AI review がまだ出ていない間は、3 分間隔で最大 3 回追加 poll する。
 - AI review が wait budget 内に出ない場合は、CI inspection だけ続けて、AI review が未検出だったことを報告する。
 
 ```bash
