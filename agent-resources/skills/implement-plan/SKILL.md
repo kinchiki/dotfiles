@@ -5,7 +5,7 @@ description: >-
   feature branch を作成し、プランの `## タスク` をテスト込みで進め、lint / test を緑にする。
   リスクに応じた AI レビューを受け、commit-changes で論理コミットを作り、create-pr-followup で PR 作成後の CI と AI レビュー初回フォローまで進める。
   承認済みプランを渡されて実装を始めるときに使う。
-  例: 「implement-plan スキルで実装して」「プラン .claude/plans/....md を実装して」「このプランを実装して」。
+  例: 「implement-plan スキルで実装して」「プランを実装して」
   ticket-to-plan がプランファイルを指す実装セッションを起動したときにも使う。
   これは ticket-to-plan → implement-plan → commit-changes → create-pr-followup パイプラインの実装フェーズである。
 ---
@@ -78,7 +78,6 @@ git switch -c <type>/<ticket-id>-<slug>
 - `<type>` は repo convention に合わせる。
 - ticket 用 branch が既にある場合は確認する。
 - plan file 以外の変更が working tree にある場合は、勝手に進めず確認する。
-- `.claude/plans/**` が git-ignored の場合、その plan file は branch 作成を妨げない。
 
 ### Step 2: Implement tasks
 

@@ -43,4 +43,5 @@ Temporary Items
 
 # AI
 **/.claude/settings.local.json
+.ai-local/plans/
 .claude/plans

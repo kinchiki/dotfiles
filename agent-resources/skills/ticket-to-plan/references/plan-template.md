@@ -7,13 +7,13 @@ If a section is not applicable, say why in that section.
 ## Path convention
 
 ```text
-.claude/plans/<YYYY-MM-DD>-<source>-<ticket-id>-<slug>.md
+.ai-local/plans/<ticket-id>/<YYYYMMDD>_<agent-name>_<slug>.md
 ```
 
 Example:
 
 ```text
-.claude/plans/2026-06-08-linear-ENG-123-oauth-token-refresh.md
+.ai-local/plans/ENG-123/20260608_codex_oauth-token-refresh.md
 ```
 
 ## Template

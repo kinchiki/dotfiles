@@ -30,6 +30,7 @@ declare -a SKIP_DIRS=(
 
 # symlink を張らないパス要素（配下も除外）
 declare -a SKIP_PATH_PARTS=(
+  ".ai-local/plans"
   ".claude/plans"
   "worktrees"
 )
