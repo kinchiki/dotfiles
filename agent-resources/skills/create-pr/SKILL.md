@@ -67,7 +67,7 @@ gh pr create --base <default-branch> --title "<title>" --body "<body>" --assigne
 Generic body structure:
 
 ```markdown
-## issue
+## チケット
 <指定されたチケットの URL>
 
 ## 概要
