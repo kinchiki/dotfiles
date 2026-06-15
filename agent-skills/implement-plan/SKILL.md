@@ -1,26 +1,26 @@
 ---
 name: implement-plan
 description: >-
-  承認済みの実装プランファイルを、新しいセッションで端から端まで実行する: feature ブランチを作成し、プランの `## タスク` をテストを書きながら進め、lint/test を緑にし、リスクに応じた AI レビューを受け、PR を開く。
+  承認済みの実装プランファイルを、新しいセッションで端から端まで実行する: feature ブランチを作成し、プランの `## タスク` をテストを書きながら進め、lint/test を緑にし、リスクに応じた AI レビューを受け、commit-changes で論理コミットを作り、create-pr で PR を開く。
   承認済みプランを渡されて実装を始めるときに発火する。
   例:
     「implement-plan スキルで実装して」
     「プラン .claude/plans/....md を実装して」
     「このプランを実装して」
   または ticket-to-plan スキルがプランファイルを指す実装セッションを起動したとき。
-  これは ticket-to-plan → implement-plan → create-pr パイプラインの実装フェーズ。
+  これは ticket-to-plan → implement-plan → commit-changes → create-pr パイプラインの実装フェーズ。
 ---
 
 # implement-plan
 
 This skill drives a single approved plan to a finished PR, autonomously, in one session. It is the
 back half of the pipeline: `ticket-to-plan` produced a plan file with a `## タスク` list; this skill
-executes it, and calls `create-pr` at the end. Human checkpoints are deliberately minimal — the
+executes it, then calls `commit-changes` and `create-pr` at the end. Human checkpoints are deliberately minimal — the
 approved plan is the contract. The session only stops when (a) a quality gate fails after its retry
 budget, (b) the plan would have to be deviated from, or (c) it reaches the outward-facing PR step.
 
 Flow: **(exit plan mode if active) → confirm model & read plan → branch → implement tasks (with
-tests) → lint/test gate → risk-based AI review → report → create-pr.**
+tests) → lint/test gate → risk-based AI review → report → commit-changes → create-pr.**
 
 ## Step 0a — If plan mode is active, exit it immediately
 
@@ -30,7 +30,7 @@ re-verification, no re-checking the acceptance criteria, no rewriting the plan).
 
 Instead, call `ExitPlanMode` right away with a body that is **only a 1–2 line execution outline** —
 e.g. "承認済みプランを実行します: ブランチ作成 → タスク実装(+テスト) → lint/test → リスク別AIレビュー
-→ create-pr." Do not restate or re-litigate the plan's contents. Once approved (plan mode lifted),
+→ commit-changes → create-pr." Do not restate or re-litigate the plan's contents. Once approved (plan mode lifted),
 continue straight into Step 0 below. If plan mode is not active, skip this step and start at Step 0.
 
 ## Step 0 — Confirm model and read the plan
@@ -258,7 +258,7 @@ echo "Claude Code exit=$CLAUDE_RC ; review -> $CLAUDE_REVIEW_OUT ; err -> $CLAUD
 - **`[P3]`** (minor) findings: address the cheap ones; otherwise list them in the PR body for the
   human reviewer.
 
-## Step 5 — Report, then hand off to create-pr
+## Step 5 — Report, then hand off to commit-changes and create-pr
 
 Confirm the finish line: every task is `- [x]`, lint/test is green, and there are no remaining
 blocking findings from the required review path. Then give the user a short Japanese summary:
@@ -267,9 +267,9 @@ blocking findings from the required review path. Then give the user a short Japa
 - テスト結果（lint・test の最終状態）
 - AIレビュー要約（リスク分類、レビュー担当: Claude Code実装時はCodex / Codex実装時はClaude Code、または低リスクskip理由、解決した blocking、残した nit）
 
-Then invoke the **`create-pr`** skill to commit, push, and open the PR. That skill owns the
-outward-facing confirmation (commit / push / `gh pr create` are gated), so do not commit or push
-here — let `create-pr` handle it.
+Then invoke the **`commit-changes`** skill to split the finished diff into appropriate logical
+commits. After that, invoke the **`create-pr`** skill to push and open the PR. `commit-changes` owns
+local commits; `create-pr` owns the outward-facing push / `gh pr create` confirmation.
 
 ## Quick reference
 
@@ -280,4 +280,4 @@ here — let `create-pr` handle it.
 | 2 | Implement tasks (+ tests), in dep order | parallel via `task-implementer` (Sonnet), disjoint files only |
 | 3 | lint + test until green | cap 3 rounds; never weaken tests |
 | 4 | Risk-based AI review | low risk: self-review + green lint/test only; medium/high: review actual diff once; rerun once only for [P1]/[P2]; third review only for high-risk or ambiguous P1/P2 |
-| 5 | Report, then call `create-pr` | create-pr owns commit/push/PR confirmation |
+| 5 | Report, then call `commit-changes` and `create-pr` | commit-changes owns commits; create-pr owns push/PR confirmation |

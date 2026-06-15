@@ -200,7 +200,7 @@ Use the `spawn_task` tool with a **self-contained** prompt: the spawned session 
 this conversation, so include the absolute plan-file path, the ticket reference, and the working
 directory. The implementation session should drive the work with the **`implement-plan` skill**,
 which owns the whole pipeline (feature branch → implement `## タスク` with tests → lint/test gate →
-risk-based AI review → PR). Recommend the orchestrator run on **Opus**. Write the prompt in Japanese (the
+risk-based AI review → logical commits → PR). Recommend the orchestrator run on **Opus**. Write the prompt in Japanese (the
 user's preference) unless they indicate otherwise.
 
 Suggested call:
@@ -211,7 +211,7 @@ Suggested call:
   > **`implement-plan` スキルを使って**実装してください（オーケストレーターは Opus 推奨）。
   > このスキルが、プラン読込 → feature ブランチ作成 → `## タスク` を依存順に実装（テスト込み）→
   > lint / test を緑にする → リスクに応じた AI レビュー
-  > （Claude Code 実装時は Codex、Codex 実装時は Claude Code）→ PR 作成、まで面倒を見ます。
+  > （Claude Code 実装時は Codex、Codex 実装時は Claude Code）→ 論理コミット作成 → PR 作成、まで面倒を見ます。
   > 元チケット: `<URL/ID>`。プランから逸脱が必要になったら、勝手に進めず理由を添えて確認してください。
 
 If `spawn_task` is **not** available in the session, fall back to printing the exact command for

@@ -1,52 +1,49 @@
 ---
 name: create-pr
 description: >-
-  現在の変更をコミットし、ブランチを push して GitHub PR を作成する。
+  コミット済みの現在ブランチを push して GitHub PR を作成する。
   PR を開きたいときに発火する。
   例:
     「PR作成」
     「PR作って」
     「プルリク」
-  または implement-plan スキル完了後の PR 作成引き継ぎ。
-  外向きの操作( commit / push / gh pr create )は実行前に確認する。
+  または implement-plan / commit-changes 完了後の PR 作成引き継ぎ。
+  未コミット差分がある場合は commit-changes に引き渡す。
+  外向きの操作(push / gh pr create)は実行前に確認する。
 ---
 
 # create-pr
 
-Open a pull request for the current branch's work, the way the team expects. This is the last leg
-of the ticket-to-plan → implement-plan → create-pr pipeline, but it also works standalone.
+Open a pull request for an already-committed branch, the way the team expects. This is the last leg
+of the ticket-to-plan → implement-plan → commit-changes → create-pr pipeline, but it also works
+standalone when the branch is already committed.
 
 **Project conventions win.** If the current repo has its own PR skill (e.g.
 `.claude/skills/create-pr/local.SKILL.md`) or a documented PR template/convention, follow that — it
 overrides this generic skill. Check for it first.
 
-**These are outward-facing actions.** Pushing and opening a PR publish the work and notify people.
-So confirm with the user before the push/PR step. (`git push` and `gh pr create` are
-permission-gated, so you'll be prompted there — that's the intended human checkpoint. `git commit`
-runs without a prompt, so it's on you to show the diff and get the user's nod *before* committing.)
+**Scope boundary.** This skill never stages, commits, amends, rebases, or decides commit grouping.
+If the working tree has uncommitted changes, stop and hand off to `commit-changes`.
 
-## Step 1 — Sanity-check the change
+**These are outward-facing actions.** Pushing and opening a PR publish the work and notify people.
+Confirm with the user before the push/PR step. (`git push` and `gh pr create` are permission-gated,
+so you'll be prompted there — that's the intended human checkpoint.)
+
+## Step 1 — Sanity-check the branch
 
 - Confirm you're on a feature branch, not the default branch (`git branch --show-current`).
-- Review what will ship: `git status` and `git diff` (and `git diff --staged`). Make sure nothing
-  unintended (secrets, debug prints, unrelated files) is included.
+- Confirm the working tree is clean:
+
+  ```bash
+  git status --short
+  ```
+
+  If there are uncommitted changes, do not stage or commit them. Stop and invoke `commit-changes`.
+- Confirm the branch has commits to ship relative to the target base branch.
 - Confirm lint/test are green. If this skill was called by `implement-plan`, they already are; if
-  invoked standalone, run them now.
+  invoked standalone, run or ask for the relevant checks before publishing.
 
-## Step 2 — Commit
-
-Stage and commit with a message that follows the repo's convention (read recent `git log` to match
-style and language). Summarize the *why*, not just the *what*.
-
-```bash
-git add -A
-git commit
-```
-
-If the repo uses Conventional Commits or a ticket-prefix convention, match it. Keep the subject
-short; put detail in the body.
-
-## Step 3 — Push and open the PR
+## Step 2 — Push and open the PR
 
 After user confirmation:
 
@@ -86,7 +83,7 @@ gh pr create --base <default-branch> --title "<title>" --body "<body>" --assigne
 
 - If the repo has a `.github/pull_request_template.md`, fill that instead of the structure above.
 
-## Step 4 — Report
+## Step 3 — Report
 
 Give the user the PR URL (`gh pr view --web` to open it) and a one-line recap. Done.
 
@@ -95,7 +92,6 @@ Give the user the PR URL (`gh pr view --web` to open it) and a one-line recap. D
 | Step | Action | Command |
 |------|--------|---------|
 | 0 | Prefer project's own PR skill if present | (check `.claude/skills`) |
-| 1 | Inspect the change | `git status` / `git diff` |
-| 2 | Commit (repo convention) | `git add -A && git commit` |
-| 3 | Push + open PR (after confirm) | `git push -u origin HEAD` / `gh pr create --assignee kinchiki` |
-| 4 | Report PR URL | `gh pr view --web` |
+| 1 | Confirm committed clean branch | `git status --short` |
+| 2 | Push + open PR (after confirm) | `git push -u origin HEAD` / `gh pr create --assignee kinchiki` |
+| 3 | Report PR URL | `gh pr view --web` |

@@ -23,9 +23,9 @@ clear must-fixes proceed on their own, and the judgment calls go back to you.
 
 This skill reuses the team's existing machinery: parallel implementation runs through the
 `task-implementer` sub-agent (the same worker `implement-plan` uses), the quality gate mirrors
-`implement-plan`'s lint/test loop, and anything outward-facing (commit / push / PR) is left to
-`create-pr`. It stops at a green working tree and reports — it never commits, pushes, or posts back
-to GitHub.
+`implement-plan`'s lint/test loop, commits are left to `commit-changes`, and push / PR creation is
+left to `create-pr`. It stops at a green working tree and reports — it never commits, pushes, or
+posts back to GitHub.
 
 Flow: **confirm model & resolve PR → fetch unresolved comments → judge each (read real code) →
 present + auto-start must-fixes + confirm the rest → implement in parallel → lint/test to green →
@@ -150,9 +150,9 @@ Give the user a Japanese summary table mapping each comment to its outcome:
 - コメント（source / author）→ verdict → 実施内容 or 見送り理由 → 変更ファイル
 - lint・test の最終状態
 
-Then state the next step explicitly: **commit/push は未実施**（`create-pr` skill か手動で）、
-**GitHub への返信・resolve もしていない**（報告のみ）。If the user wants to ship it, hand off to the
-`create-pr` skill.
+Then state the next step explicitly: **commit/push は未実施**（`commit-changes` → `create-pr` skill
+か手動で）、**GitHub への返信・resolve もしていない**（報告のみ）。If the user wants to ship it, hand off
+to `commit-changes` first, then `create-pr`.
 
 ## Quick reference
 
@@ -164,4 +164,4 @@ Then state the next step explicitly: **commit/push は未実施**（`create-pr` 
 | 3 | Present + auto-start must-fixes (background) + confirm rest | `task-implementer` Sonnet, `run_in_background`; `AskUserQuestion` for discretionary |
 | 4 | Implement approved set in parallel | disjoint files only; serialize overlaps |
 | 5 | lint + test until green | cap 3 rounds; never weaken tests |
-| 6 | Report (日本語表) | no commit/push/GitHub writeback; hand off to `create-pr` if wanted |
+| 6 | Report (日本語表) | no commit/push/GitHub writeback; hand off to `commit-changes` then `create-pr` if wanted |
