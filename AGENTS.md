@@ -87,6 +87,13 @@ Use this section only for Skill documentation files:
 - Keep `SKILL.md` operational. Move long examples, schemas, background information, and reference material into separate files.
 - Include only task-specific, non-obvious, or convention-specific guidance.
 
+### Validation
+
+- After creating or updating skills, run the repository validators before finishing.
+- Prefer validating the current diff first (files changed in this task), then expand to wider checks only if needed.
+- If a validator exists for agent skills (for example `scripts/validate-agent-skills`), use it and fix reported issues in the touched files.
+- If validation cannot be run, state why and what was checked manually.
+
 ---
 
 **These guidelines are working if:** fewer unnecessary changes in diffs, fewer rewrites due to overcomplication, and clarifying questions come before implementation rather than after mistakes.

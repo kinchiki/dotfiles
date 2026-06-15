@@ -1,1 +1,4 @@
-# .gitignore_global に一通り書いてある
+# .gitignore_global に汎用的なものは一通り書いてある
+
+.venv-skill-validate/
+__pycache__/
