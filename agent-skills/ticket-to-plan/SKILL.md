@@ -14,40 +14,24 @@ description: >-
 
 # ticket-to-plan
 
-This skill takes one input — a reference to a GitHub or Linear ticket — and produces one durable
-artifact: an implementation plan file that a *fresh* session can pick up and execute without
-re-reading the ticket or re-discovering the codebase. Planning and implementation are split on
-purpose: deep planning fills a context window with research, and starting implementation in a
-clean session keeps that research from crowding out the actual coding work. It also lets the plan
-be reviewed and committed before any change is made.
+This skill takes one input — a reference to a GitHub or Linear ticket — and produces one durable artifact: an implementation plan file that a *fresh* session can pick up and execute without re-reading the ticket or re-discovering the codebase. Planning and implementation are split on purpose: deep planning fills a context window with research, and starting implementation in a clean session keeps that research from crowding out the actual coding work. It also lets the plan be reviewed and committed before any change is made.
 
-The flow is: **confirm model → read the ticket → plan (and break it into tasks) with max effort →
-get the plan approved → write the plan file → spawn the implementation session.** Walk through the
-steps in order.
+The flow is: **confirm model → read the ticket → plan (and break it into tasks) with max effort → get the plan approved → write the plan file → spawn the implementation session.** Walk through the steps in order.
 
 ## Step 0 — Confirm you are the right model
 
-This skill asks for "the latest Opus, maximum effort." A skill cannot change the model that is
-already running this session — that is fixed when the session starts. So check yourself:
+This skill asks for "the latest Opus, maximum effort." A skill cannot change the model that is already running this session — that is fixed when the session starts. So check yourself:
 
-- Look at your own model in the system prompt. If it is the latest Opus (e.g. `claude-opus-4-8`
-  or newer), continue.
-- If it is **not** Opus, stop and tell the user: planning quality depends heavily on the model,
-  and they should switch with `/model opus` (or relaunch with Opus) and re-run this skill. Do not
-  silently plan on a weaker model — that defeats the point of the request.
+- Look at your own model in the system prompt. If it is the latest Opus (e.g. `claude-opus-4-8` or newer), continue.
+- If it is **not** Opus, stop and tell the user: planning quality depends heavily on the model, and they should switch with `/model opus` (or relaunch with Opus) and re-run this skill. Do not silently plan on a weaker model — that defeats the point of the request.
 
-State which model you are running so the choice is visible, and record it in the plan file header
-later (Step 4) for traceability.
+State which model you are running so the choice is visible, and record it in the plan file header later (Step 4) for traceability.
 
 ## Step 1 — Read the ticket
 
-Identify the source from the reference the user gave, then fetch the **full** context — not just
-the title and body. Comments, labels, linked issues/PRs, and acceptance criteria often carry the
-real requirements.
+Identify the source from the reference the user gave, then fetch the **full** context — not just the title and body. Comments, labels, linked issues/PRs, and acceptance criteria often carry the real requirements.
 
-**GitHub** — recognized forms: a full URL (`https://github.com/owner/repo/issues/123` or
-`/pull/123`), shorthand `owner/repo#123`, or a bare `#123` (use the current repo). Prefer the
-`gh` CLI, which is reliable across machines:
+**GitHub** — recognized forms: a full URL (`https://github.com/owner/repo/issues/123` or `/pull/123`), shorthand `owner/repo#123`, or a bare `#123` (use the current repo). Prefer the `gh` CLI, which is reliable across machines:
 
 ```bash
 gh issue view <number> --repo <owner/repo> --comments
@@ -55,66 +39,38 @@ gh pr view    <number> --repo <owner/repo> --comments
 ```
 
 If `gh` is unavailable, fall back to the GitHub MCP read tools (`issue_read` / `pull_request_read`
-/ `get_issue`). Search for them with ToolSearch (`select:` or keywords like `github issue`) since
-they are deferred and their exact names vary by session.
+/ `get_issue`). Search for them with ToolSearch (`select:` or keywords like `github issue`) since they are deferred and their exact names vary by session.
 
-**Linear** — recognized forms: an issue ID like `ENG-123` / `ABC-45`, or a Linear URL
-(`https://linear.app/<team>/issue/ENG-123/...`). Use the Linear MCP tools — `get_issue` for the
-issue and `list_comments` for discussion. Find them with ToolSearch (keywords `linear issue`,
-`linear comments`). Also pull linked sub-issues, the parent, and the project/milestone if they
-add requirements.
+**Linear** — recognized forms: an issue ID like `ENG-123` / `ABC-45`, or a Linear URL (`https://linear.app/<team>/issue/ENG-123/...`). Use the Linear MCP tools — `get_issue` for the issue and `list_comments` for discussion. Find them with ToolSearch (keywords `linear issue`, `linear comments`). Also pull linked sub-issues, the parent, and the project/milestone if they add requirements.
 
-If the reference is ambiguous (could be either source, or no repo is implied), ask the user one
-short clarifying question rather than guessing.
+If the reference is ambiguous (could be either source, or no repo is implied), ask the user one short clarifying question rather than guessing.
 
-After fetching, write a 3–6 line summary back to the user so they can confirm you understood the
-ticket before you spend effort planning. If the ticket is thin or contradictory, surface the gaps
-now — those become open questions in the plan.
+After fetching, write a 3–6 line summary back to the user so they can confirm you understood the ticket before you spend effort planning. If the ticket is thin or contradictory, surface the gaps now — those become open questions in the plan.
 
 ## Step 2 — Plan with maximum effort
 
-Enter plan mode (read-only research) so you cannot accidentally edit while exploring. This is
-where the "工数MAX" requirement lives — be genuinely thorough, not fast:
+Enter plan mode (read-only research) so you cannot accidentally edit while exploring. This is where the "工数MAX" requirement lives — be genuinely thorough, not fast:
 
-- **ultrathink.** Reason hard about the approach, alternatives, and failure modes before writing
-  anything down.
-- **Explore the codebase, don't assume it.** Trace the actual data flow: find the models,
-  interactions/service objects, controllers, serializers, GraphQL types, jobs, and tests that
-  this change touches. Read them. Note exact file paths — the implementing session will rely on
-  them. (For this repo specifically, business logic lives in `app/interactions/`, modular code in
-  `packs/`, and conventions are in `CLAUDE.md` — honor them.)
-- **Find the seams.** Identify where the change plugs in, what existing patterns to mirror, and
-  what must not break. Look at neighboring tests to learn the project's testing idioms.
-- **Think about the edges.** Migrations, backward compatibility, permissions/auth, N+1s,
-  background-job idempotency, multi-domain API surfaces, i18n — whatever applies.
+- **ultrathink.** Reason hard about the approach, alternatives, and failure modes before writing anything down.
+- **Explore the codebase, don't assume it.** Trace the actual data flow: find the models, interactions/service objects, controllers, serializers, GraphQL types, jobs, and tests that this change touches. Read them. Note exact file paths — the implementing session will rely on them. (For this repo specifically, business logic lives in `app/interactions/`, modular code in `packs/`, and conventions are in `CLAUDE.md` — honor them.)
+- **Find the seams.** Identify where the change plugs in, what existing patterns to mirror, and what must not break. Look at neighboring tests to learn the project's testing idioms.
+- **Think about the edges.** Migrations, backward compatibility, permissions/auth, N+1s, background-job idempotency, multi-domain API surfaces, i18n — whatever applies.
 
-The goal of this step is a plan detailed enough that someone who has *not* read the ticket or the
-code could implement it correctly. Vague plans ("update the model, add a test") are a failure of
-this step.
+The goal of this step is a plan detailed enough that someone who has *not* read the ticket or the code could implement it correctly. Vague plans ("update the model, add a test") are a failure of this step.
 
-**Break the plan into tasks.** Decompose the design into an ordered task list the implementation
-session can pick up directly. Give each task: the **files** it touches, its prerequisite tasks
-(**depends_on**), whether it can run in **parallel**, the command(s) that **test** it, and a
-**done_when** condition. A task may be marked `parallel: yes` only when its files don't overlap
-with other tasks that could run at the same time — overlapping files force sequential execution.
-This decomposition is written verbatim into the `## タスク` section of the plan file (Step 4), and
-it is part of what the user approves in Step 3.
+**Break the plan into tasks.** Decompose the design into an ordered task list the implementation session can pick up directly. Give each task: the **files** it touches, its prerequisite tasks (**depends_on**), whether it can run in **parallel**, the command(s) that **test** it, and a
+**done_when** condition. A task may be marked `parallel: yes` only when its files don't overlap with other tasks that could run at the same time — overlapping files force sequential execution.
+This decomposition is written verbatim into the `## タスク` section of the plan file (Step 4), and it is part of what the user approves in Step 3.
 
 ## Step 3 — Present the plan and iterate until approved
 
-Present the plan — **including the task breakdown** — with `ExitPlanMode` (find it via ToolSearch
-if deferred). This gives the user the native approve / reject affordance and keeps the loop crisp.
-The user is approving both the approach *and* how it is sliced into tasks, so make the `## タスク`
-list visible in what you present.
+Present the plan — **including the task breakdown** — with `ExitPlanMode` (find it via ToolSearch if deferred). This gives the user the native approve / reject affordance and keeps the loop crisp.
+The user is approving both the approach *and* how it is sliced into tasks, so make the `## タスク` list visible in what you present.
 
-- If the user **rejects or gives feedback**, treat their comments as the spec. Stay in plan mode,
-  revise — re-explore the code if the feedback reveals a wrong assumption — and present again.
-- Repeat until the user **approves**. There is no iteration cap; quality of the approved plan
-  matters more than speed.
+- If the user **rejects or gives feedback**, treat their comments as the spec. Stay in plan mode, revise — re-explore the code if the feedback reveals a wrong assumption — and present again.
+- Repeat until the user **approves**. There is no iteration cap; quality of the approved plan matters more than speed.
 
-Important: approval here means "the plan is good," **not** "start coding now in this session." Do
-not begin implementing after approval. Continue to Step 4. (Say this plainly if the user seems to
-expect immediate implementation — the whole point is to implement in a separate, clean session.)
+Important: approval here means "the plan is good," **not** "start coding now in this session." Do not begin implementing after approval. Continue to Step 4. (Say this plainly if the user seems to expect immediate implementation — the whole point is to implement in a separate, clean session.)
 
 ## Step 4 — Write the plan file
 
@@ -133,8 +89,7 @@ Once approved, persist the plan so a fresh session can execute it cold.
 
 Example: `.claude/plans/2026-06-08-linear-ENG-123-oauth-token-refresh.md`
 
-If a project clearly uses a different convention, follow that instead and tell the user
-where you put it.
+If a project clearly uses a different convention, follow that instead and tell the user where you put it.
 
 **Use this template** — fill every section; omit one only if truly N/A and say why:
 
@@ -188,20 +143,13 @@ where you put it.
 <やらないことを明示し、実装セッションでのスコープ膨張を防ぐ。>
 ```
 
-Keep the ticket summary in the file so the implementer doesn't have to re-fetch — but still link
-the ticket so the source of truth stays reachable.
+Keep the ticket summary in the file so the implementer doesn't have to re-fetch — but still link the ticket so the source of truth stays reachable.
 
 ## Step 5 — Hand off to a separate implementation session
 
-Spin off implementation as a background task so it runs in its own session and (typically) its own
-worktree — isolated from this planning session's context.
+Spin off implementation as a background task so it runs in its own session and (typically) its own worktree — isolated from this planning session's context.
 
-Use the `spawn_task` tool with a **self-contained** prompt: the spawned session has no memory of
-this conversation, so include the absolute plan-file path, the ticket reference, and the working
-directory. The implementation session should drive the work with the **`implement-plan` skill**,
-which owns the whole pipeline (feature branch → implement `## タスク` with tests → lint/test gate →
-risk-based AI review → logical commits → PR). Recommend the orchestrator run on **Opus**. Write the prompt in Japanese (the
-user's preference) unless they indicate otherwise.
+Use the `spawn_task` tool with a **self-contained** prompt: the spawned session has no memory of this conversation, so include the absolute plan-file path, the ticket reference, and the working directory. The implementation session should drive the work with the **`implement-plan` skill**, which owns the whole pipeline (feature branch → implement `## タスク` with tests → lint/test gate → risk-based AI review → logical commits → PR). Recommend the orchestrator run on **Opus**. Write the prompt in Japanese (the user's preference) unless they indicate otherwise.
 
 Suggested call:
 - **title:** `<ticket-id> を実装` (imperative, < 60 chars)
@@ -214,15 +162,13 @@ Suggested call:
   > （Claude Code 実装時は Codex、Codex 実装時は Claude Code）→ 論理コミット作成 → PR 作成、まで面倒を見ます。
   > 元チケット: `<URL/ID>`。プランから逸脱が必要になったら、勝手に進めず理由を添えて確認してください。
 
-If `spawn_task` is **not** available in the session, fall back to printing the exact command for
-the user to start a new session manually, e.g.:
+If `spawn_task` is **not** available in the session, fall back to printing the exact command for the user to start a new session manually, e.g.:
 
 ```bash
 cd <repo> && claude "プラン .claude/plans/<file>.md を implement-plan スキルで実装して"
 ```
 
-Then tell the user: the plan is saved at `<path>`, and the implementation task has been queued (or
-give them the manual command). Stop there — do not implement in this session.
+Then tell the user: the plan is saved at `<path>`, and the implementation task has been queued (or give them the manual command). Stop there — do not implement in this session.
 
 ## Quick reference
 

@@ -14,20 +14,16 @@ description: >-
 
 # create-pr
 
-Open a pull request for an already-committed branch, the way the team expects. This is the last leg
-of the ticket-to-plan → implement-plan → commit-changes → create-pr pipeline, but it also works
-standalone when the branch is already committed.
+Open a pull request for an already-committed branch, the way the team expects. This is the last leg of the ticket-to-plan → implement-plan → commit-changes → create-pr pipeline, but it also works standalone when the branch is already committed.
 
 **Project conventions win.** If the current repo has its own PR skill (e.g.
-`.claude/skills/create-pr/local.SKILL.md`) or a documented PR template/convention, follow that — it
-overrides this generic skill. Check for it first.
+`.claude/skills/create-pr/local.SKILL.md`) or a documented PR template/convention, follow that — it overrides this generic skill. Check for it first.
 
 **Scope boundary.** This skill never stages, commits, amends, rebases, or decides commit grouping.
 If the working tree has uncommitted changes, stop and hand off to `commit-changes`.
 
 **These are outward-facing actions.** Pushing and opening a PR publish the work and notify people.
-Confirm with the user before the push/PR step. (`git push` and `gh pr create` are permission-gated,
-so you'll be prompted there — that's the intended human checkpoint.)
+Confirm with the user before the push/PR step. (`git push` and `gh pr create` are permission-gated, so you'll be prompted there — that's the intended human checkpoint.)
 
 ## Step 1 — Sanity-check the branch
 
@@ -40,8 +36,7 @@ so you'll be prompted there — that's the intended human checkpoint.)
 
   If there are uncommitted changes, do not stage or commit them. Stop and invoke `commit-changes`.
 - Confirm the branch has commits to ship relative to the target base branch.
-- Confirm lint/test are green. If this skill was called by `implement-plan`, they already are; if
-  invoked standalone, run or ask for the relevant checks before publishing.
+- Confirm lint/test are green. If this skill was called by `implement-plan`, they already are; if invoked standalone, run or ask for the relevant checks before publishing.
 
 ## Step 2 — Push and open the PR
 
