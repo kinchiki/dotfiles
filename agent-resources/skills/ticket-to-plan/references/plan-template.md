@@ -7,22 +7,32 @@ If a section is not applicable, say why in that section.
 ## Path convention
 
 ```text
-.ai-local/plans/<ticket-id>/<YYYYMMDD>_<agent-name>_<slug>.md
+.ai-local/plans/<plan-id>/<YYYYMMDD>_<agent-name>_<slug>.md
 ```
 
-Example:
+Ticket source example:
 
 ```text
 .ai-local/plans/ENG-123/20260608_codex_oauth-token-refresh.md
 ```
 
+User request source example:
+
+```text
+.ai-local/plans/request-change-x-to-y/20260616_codex_change-x-to-y.md
+```
+
+Use a ticket ID such as `ENG-123` or `github-123` for ticket sources.
+Use `request-<slug>` for user request sources.
+
 ## Template
 
 ```markdown
-# <チケットのタイトル>
+# <プランのタイトル>
 
-- **チケット:** <完全な URL または ID>
-- **ソース:** GitHub | Linear
+- **ソース:** GitHub | Linear | User request
+- **参照:** <完全な URL、ID、または元依頼の短い引用>
+- **Plan ID:** <plan-id>
 - **計画者:** <AI agent 名、モデル ID、reasoning / thinking 設定。例: codex / best-available-reasoning-model / reasoning: max>
 - **日付:** <YYYY-MM-DD>
 - **ステータス:** 承認済み - 実装可能
@@ -31,7 +41,7 @@ Example:
 <1〜3文: 完了状態を平易な言葉で。>
 
 ## 受入基準
-- [ ] <観測可能でテスト可能な成果。可能ならチケットから引く>
+- [ ] <source から導いた観測可能でテスト可能な成果>
 
 ## 背景・影響するコード
 <主要なファイル/モジュールをパス付きで、各1行メモを添える。>

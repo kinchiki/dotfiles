@@ -23,7 +23,8 @@ The goal is to improve the plan before approval, not to approve the plan on the 
 Pass only the context needed to evaluate the plan.
 Include:
 
-- Ticket source and 3 to 6 line ticket summary.
+- Source kind and 3 to 6 line source summary.
+- Original source reference or user request excerpt.
 - Draft plan, including goal, acceptance criteria, scoped approach, risks, and out-of-scope items.
 - Draft `## タスク` breakdown with `files`, `depends_on`, `parallel`, `test`, and `done_when`.
 - File paths and existing patterns the planner inspected.
@@ -31,7 +32,9 @@ Include:
 
 Ask the reviewer to check:
 
-- Missing requirements from the ticket, comments, labels, linked issues / PRs, or acceptance criteria.
+- Missing requirements from the source.
+- For ticket sources, check comments, labels, linked issues / PRs, and acceptance criteria.
+- For user request sources, check whether inferred assumptions and acceptance criteria are explicit enough for implementation.
 - Missed affected files, data flow, auth / permission, background job, API, migration, or compatibility concerns.
 - Task ordering, dependency, and `parallel: yes` safety.
 - Test coverage, lint / test commands, and observable `done_when` conditions.

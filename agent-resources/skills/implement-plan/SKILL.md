@@ -72,7 +72,7 @@ plan の内容を再提示したり、再議論したりしないでください
 clean tree から feature branch を作ってください。
 
 ```bash
-git switch -c <type>/<ticket-id>-<slug>
+git switch -c <type>/<plan-id>-<slug>
 ```
 
 - `<type>` は repo convention に合わせる。
