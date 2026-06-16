@@ -18,7 +18,8 @@ PR を作成し、初回の CI と AI レビューを待って、必要な follo
 - 初回の CI と AI review / unresolved review comment を確認する。
 - CI failure は `gh-fix-ci` に委譲する。
 - review comment は `address-pr-comments` を優先し、必要に応じて `gh-address-comments` に委譲する。
-- follow-up fix が発生した場合は `commit-changes` で commit し、ユーザー確認後に push する。
+- review comment fix は、委譲先が対応する場合は commit / push / reply / resolve まで任せる。
+- CI fix などの残りの file change がある場合は `commit-changes` で commit し、ユーザー確認後に push する。
 - 既に open している PR に対して `create-pr` を再実行しない。
 
 ## Hard constraints
@@ -77,6 +78,7 @@ gh pr checks <pr-number-or-url>
 
 - local `address-pr-comments` が使える場合は優先する。
 - local skill が使えない場合、または plugin workflow しかない環境では `gh-address-comments` を使う。
+- `gh-address-comments` が commit / push / reply / resolve まで完了しない場合は、その未実施 writeback を残件として扱う。
 - bot comment と unresolved GraphQL review thread を含める。
 
 ### Step 4: Split follow-up work into lanes
@@ -95,13 +97,15 @@ gh pr checks <pr-number-or-url>
 - CI lane と review lane の出力を集める。
 - separate worktree / session が patch を作った場合は、1 つずつ適用して combined diff を確認する。
 - 子スキルが既に lint / test を実行していても、統合後に最小の combined check を実行する。
+- review lane が既に commit / push / reply / resolve を完了している場合は、その commit を記録し、重複して commit / push しない。
 
-### Step 6: Commit and push follow-up fixes
+### Step 6: Commit and push remaining follow-up fixes
 
-- file change がある場合は `commit-changes` で local commit を作る。
+- review lane 以外の file change または未コミットの統合差分がある場合は `commit-changes` で local commit を作る。
 - commit 後、ユーザー確認を取ってから current PR branch に push する。
 - already-open PR に対して `create-pr` を再実行しない。
 - push 後に Step 2 の default で再度待ち、Step 3 で確認する。
+- file change がなく、review lane が既に push 済みなら Step 7 に進む。
 
 ```bash
 git push
@@ -116,7 +120,7 @@ git push
 - AI review / unresolved comment status。
 - 実行した専門スキルと、各スキルが変更した内容。
 - 最終 lint / test status。
-- follow-up commit を push したかどうか。
+- follow-up commit を push したか、review lane が push / reply / resolve まで完了したか。
 - human action または次 cycle が必要な残件。
 - 最終 status: `完了`、`追加対応待ち`、または `ブロック中`。
 
@@ -130,5 +134,5 @@ git push
 | 3 | Inspect CI and review | CI first, comments second. |
 | 4 | Split lanes | Parallelize only isolated work. |
 | 5 | Integrate and verify | Run combined check. |
-| 6 | Commit and push fixes | Confirm before push. |
+| 6 | Commit and push remaining fixes | Skip if review lane already finalized. |
 | 7 | Report | End with clear status. |
