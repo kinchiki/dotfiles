@@ -1,6 +1,6 @@
 # Plan Template Reference
 
-Read this file from `../SKILL.md` Step 5 before writing the approved plan file.
+Read this file from `../SKILL.md` Step 6 before writing the approved plan file.
 Fill every section unless it is truly not applicable.
 If a section is not applicable, say why in that section.
 
@@ -36,6 +36,12 @@ Example:
 ## 背景・影響するコード
 <主要なファイル/モジュールをパス付きで、各1行メモを添える。>
 <実装者がコードベースに合わせられるよう、踏襲すべき既存パターンも含める。>
+
+## 事前AIレビュー
+- reviewer: <AI agent 名、model、review 実行方法>
+- findings: <P1/P2/P3 の要約、または no findings>
+- planner disposition: <採用 / 一部採用 / 不採用と理由>
+- plan updates: <review 後に反映した変更>
 
 ## タスク
 <順序付きタスク。実装セッションが進捗に応じてこのチェックボックスを更新する。>
