@@ -37,6 +37,8 @@ Skill 本体は `agent-resources/skills/` 配下に、Agent definition 本体は
 - 参照リソースは、いつ読むべきかを明記する。
 - `SKILL.md` は operational に保つ。
 - Long examples、schemas、background information、reference material は separate files に移す。
+- Convention、path format、command example、schema、root mapping は 1 つの canonical location に集約する。
+- Detailed rule を reference file に置く場合、`SKILL.md` には読むタイミングと短い operational instruction だけを書く。
 - Task-specific、non-obvious、convention-specific guidance だけを含める。
 - Single-use abstraction、speculative flexibility、不要な resource directory を追加しない。
 
@@ -49,6 +51,7 @@ Skill 本体は `agent-resources/skills/` 配下に、Agent definition 本体は
 - Agent definition folder は `agent-resources/agents/<agent-name>/` にする。
 - User request が ambiguous な場合は、実装前に短く確認する。
 - Existing skill または agent definition を更新する場合は、既存構造と style を読む。
+- Existing skill を更新する場合は、同じ concept を説明している `SKILL.md` section、references、scripts、assets を探し、どこを canonical location にするか決めてから編集する。
 
 ### Step 2: Create or update the skill body
 
@@ -57,6 +60,7 @@ Skill 本体は `agent-resources/skills/` 配下に、Agent definition 本体は
 - `description` には what the skill does と when to use it を含める。
 - Body には trigger information を重複させず、実行時に必要な workflow と constraints を書く。
 - Resources を作る場合は、`SKILL.md` から exact relative path で参照する。
+- `SKILL.md` と reference file の両方に同じ detail が必要に見える場合は、reference file に detail を置き、`SKILL.md` から参照する。
 
 ### Step 3: Create or update agent definitions
 
@@ -126,6 +130,8 @@ If validation reports issues in touched files, fix them and run the validator ag
 If validation cannot be run, report why and state what was checked manually.
 Agent definition changes currently have no dedicated validator.
 For agent definitions, verify symlinks and read the linked files before finishing.
+Before finishing, review the diff for duplicated concepts, copied examples, and repeated path or command conventions.
+If duplication remains because it is needed for standalone execution, keep it and report why.
 
 ## Expected Output
 
@@ -134,3 +140,4 @@ For agent definitions, verify symlinks and read the linked files before finishin
 - 作成または確認した symlink path を報告する。
 - 実行した validator command と結果を報告する。
 - Validation を省略した場合は理由を報告する。
+- 意図して残した重複があれば、その理由を報告する。
