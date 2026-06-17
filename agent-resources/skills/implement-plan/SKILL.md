@@ -145,15 +145,3 @@ finish line を確認してください。
 
 その後、`commit-changes` を使って logical commit を作成してください。
 commit 完了後、`create-pr-followup` を使って PR 作成と初回 follow-up を進めてください。
-
-## Quick reference
-
-| Step | Action | Notes |
-|------|--------|-------|
-| 0a | Exit plan mode if active | Approved plan is the contract. |
-| 0 | Read plan and `CLAUDE.md` | `## タスク` is the progress source. |
-| 1 | Create feature branch | Never work on default branch. |
-| 2 | Implement tasks with tests | Parallelize only disjoint ready tasks. |
-| 3 | Run lint / test | Cap fixes at 3 rounds. |
-| 4 | Run AI review by risk | Read `references/independent-ai-review.md` for medium / high risk. |
-| 5 | Report and hand off | Use `commit-changes`, then `create-pr-followup`. |

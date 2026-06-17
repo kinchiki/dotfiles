@@ -21,6 +21,10 @@ description: >-
 - stage、commit、amend、rebase、commit grouping は行わない。
 - 未コミット差分がある場合は `commit-changes` に引き渡す。
 
+## Resources
+
+- `references/pr-body-template.md`: Step 2 で repo 固有 template がない場合に読む。
+
 ## Hard constraints
 
 - repo 固有の PR skill や PR template がある場合は、それを優先する。
@@ -28,6 +32,7 @@ description: >-
 - working tree が dirty の場合は停止する。
 - push と `gh pr create` の前にユーザー確認を取る。
 - PR assignee には必ず `kinchiki` を指定する。
+- コマンド出力は、PR URL、title、失敗要点だけを報告する。
 
 ## Workflow
 
@@ -62,52 +67,18 @@ gh pr create --base <default-branch> --title "<title>" --body "<body>" --assigne
 - team が日本語で PR を書く場合は日本語にする。
 - ticket key を title に含める convention がある場合は従う。
 - Body は plan と ticket から生成する。
-- `.github/pull_request_template.md` がある場合は、次の generic structure ではなく template を埋める。
-
-Generic body structure:
-
-```markdown
-## チケット
-<指定されたチケットの URL>
-
-## 概要
-<この PR で何を・なぜ変えたか（1〜3行）>
-
-## 変更点
-- <主要な変更を箇条書き>
-
-## テスト
-- lint: <コマンドと結果>
-- test: <コマンドと結果>
-
-## レビュー（AI）
-- レビュー担当: <Claude Code実装時はCodex / Codex実装時はClaude Code / 低リスクskip>
-- 解決済み blocking: <あれば>
-- 残した nit: <あれば。なければ「なし」>
-- レビュー方針: <低リスクskip / 独立AIレビュー1回 / P1-P2修正後の再レビュー など>
-
-## 受入基準
-- [x] <プランの Acceptance criteria を転記し、満たしたものをチェック>
-```
+- `.github/pull_request_template.md` がある場合は、generic body ではなく template を埋める。
+- repo 固有 template がない場合は `references/pr-body-template.md` の generic body を使う。
 
 ### Step 3: Report
 
 日本語で次を報告してください。
 
-- PR URL。
-- PR title。
-- 何を publish したかの 1 行 recap。
-- follow-up が必要なら `create-pr-followup` が次 step であること。
+- PR URL
+- PR title
+- 何を publish したかの 1 行 recap
+- follow-up が必要なら `create-pr-followup` が次 step であること
 
 ```bash
 gh pr view --json url,title
 ```
-
-## Quick reference
-
-| Step | Action | Command |
-|------|--------|---------|
-| 0 | Prefer project conventions | Check local skill and PR template. |
-| 1 | Confirm clean committed branch | `git status --short` |
-| 2 | Push and open PR | `git push -u origin HEAD` / `gh pr create --assignee kinchiki` |
-| 3 | Report PR URL | `gh pr view --json url,title` |

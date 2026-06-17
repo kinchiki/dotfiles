@@ -22,6 +22,10 @@ PR を作成し、初回の CI と AI レビューを待って、必要な follo
 - CI fix などの残りの file change がある場合は `commit-changes` で commit し、ユーザー確認後に push する。
 - 既に open している PR に対して `create-pr` を再実行しない。
 
+## Resources
+
+- `references/followup-workflow-details.md`: Step 1 から Step 6 で PR metadata、poll、checks、lane integration、push command が必要になったら読む。
+
 ## Hard constraints
 
 - PR 作成だけを求められている場合は、このスキルを使わず `create-pr` で止める。
@@ -31,6 +35,7 @@ PR を作成し、初回の CI と AI レビューを待って、必要な follo
 - test を弱める、削除する、skip / pending にする行為は禁止する。
 - follow-up cycle は最大 2 回にする。
 - ユーザーが明示的に継続を求めた場合だけ 3 回目以降を行う。
+- コマンド出力は、CI status、review status、失敗要点、URL、commit hash だけを報告する。
 
 ## Workflow
 
@@ -46,10 +51,7 @@ PR を作成し、初回の CI と AI レビューを待って、必要な follo
 - `create-pr` を実行する。
 - 成功後に PR URL、number、head branch、base branch、state、title を取得する。
 - PR が解決できない場合は停止して blocker を報告する。
-
-```bash
-gh pr view --json number,url,headRefName,baseRefName,state,title
-```
+- metadata command は `references/followup-workflow-details.md` を使う。
 
 ### Step 2: Wait for automation and AI review
 
@@ -57,22 +59,12 @@ gh pr view --json number,url,headRefName,baseRefName,state,title
 - 指定がなければ最初に 8 分待つ。
 - checks が queued / in progress の間、または期待する AI review がまだ出ていない間は、3 分間隔で最大 3 回追加 poll する。
 - AI review が wait budget 内に出ない場合は、CI inspection だけ続けて、AI review が未検出だったことを報告する。
-
-```bash
-sleep 300
-```
+- wait / poll command は `references/followup-workflow-details.md` を使う。
 
 ### Step 3: Inspect CI and review state
 
 CI を先に確認してください。
-
-```bash
-gh pr checks <pr-number-or-url>
-```
-
-- checks が pass または skipped なら結果を記録する。
-- GitHub Actions check が fail している場合は `gh-fix-ci` に委譲する。
-- GitHub Actions 以外の external check が fail している場合は URL を報告し、`gh-fix-ci` で inspect できると仮定しない。
+CI command と判定詳細は `references/followup-workflow-details.md` を使ってください。
 
 次に AI review と unresolved review comment を確認してください。
 
@@ -86,18 +78,17 @@ gh pr checks <pr-number-or-url>
 - CI failure と actionable review comment が両方ある場合は、別 lane に分ける。
 - CI lane は `gh-fix-ci` に委譲する。
 - review lane は `address-pr-comments` または `gh-address-comments` に委譲する。
-- separate worktree、separate session、または disjoint file set がある場合だけ並列化する。
-- 同じ working tree で files が重なる場合は serialize する。
 - 子スキルの approval point を守る。
 - 作業が片方だけなら、その専門スキルだけ実行する。
 - どちらも作業がなければ Step 7 に進む。
+- 並列化と統合の詳細は `references/followup-workflow-details.md` を使う。
 
 ### Step 5: Integrate and verify
 
 - CI lane と review lane の出力を集める。
-- separate worktree / session が patch を作った場合は、1 つずつ適用して combined diff を確認する。
 - 子スキルが既に lint / test を実行していても、統合後に最小の combined check を実行する。
 - review lane が既に commit / push / PR description 更新 / reply / resolve を完了している場合は、その commit を記録し、重複して commit / push しない。
+- patch 統合と副作用の重複防止は `references/followup-workflow-details.md` に従う。
 
 ### Step 6: Commit and push remaining follow-up fixes
 
@@ -106,10 +97,7 @@ gh pr checks <pr-number-or-url>
 - already-open PR に対して `create-pr` を再実行しない。
 - push 後に Step 2 の default で再度待ち、Step 3 で確認する。
 - file change がなく、review lane が既に push 済みなら Step 7 に進む。
-
-```bash
-git push
-```
+- push command は `references/followup-workflow-details.md` を使う。
 
 ### Step 7: Report
 
