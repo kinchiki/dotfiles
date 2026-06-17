@@ -37,7 +37,7 @@ description: >-
 - ユーザーが弱い model または低い reasoning 設定で続行を明示した場合だけ、その trade-off を明記して進める。
 - default branch では作業しない。
 - `## タスク` checkbox を更新するのは orchestrator だけにする。
-- parallel worker は plan file を編集しない。
+- `task-implementer` worker は plan file を編集しない。
 - `## スコープ外` から逸脱しない。
 - plan から逸脱が必要な場合は、理由を添えて停止し、ユーザーに確認する。
 - test を弱める、削除する、skip / pending にする行為は禁止する。
@@ -86,9 +86,12 @@ git switch -c <type>/<plan-id>-<slug>
 - 各 task の `test` と `done_when` を満たす。
 - task 完了後、orchestrator が checkbox を `- [x]` に変える。
 - sequential execution を default にする。
-- ready task が `parallel: yes` で、`files` が重ならない場合だけ parallel worker を使う。
-- parallel worker には担当 task、触ってよい files、実装内容、追加または更新する test だけを渡す。
-- parallel worker は commit、branch 作成、plan file 編集を行わない。
+- ready task が `parallel: yes` で、`files` が他 task と重ならない場合だけ `task-implementer` worker を使う。
+- `task-implementer` worker は low / medium risk の実装 task にだけ使う。
+- `task-implementer` worker には task name、intent、expected outcome、allowed file set、追加または更新する test、local conventions を渡す。
+- high-risk、cross-cutting、曖昧、または allowed file set 外の変更が必要な task は `task-implementer` worker に渡さず、orchestrator が serialize する。
+- `task-implementer` worker が `status: blocked` または `needs-strong-implementer` を返した場合は checkbox を完了にせず、orchestrator が serialize するかユーザーに確認する。
+- `task-implementer` worker は commit、branch 作成、plan file 編集を行わない。
 - files が重なる場合や dependency がある場合は serialize する。
 
 ### Step 3: Run quality gate
