@@ -72,7 +72,7 @@ Skill 本体は `agent-resources/skills/` 配下に、Agent definition 本体は
 Agent definition は `agent-resources/agents/<agent-name>/` に以下の 3 ファイルで構成する。
 
 - `instructions.md` — AI 共通の実行指示。ツール非依存のロジック・制約・ワークフローを書く。
-- `claude.md` — Claude Code 用定義。`instructions.md` を `@` で参照しつつ、Claude Code 固有の設定や指示を追加する。
+- `CLAUDE.md` — Claude Code 用定義。`instructions.md` を `@` で参照しつつ、Claude Code 固有の設定や指示を追加する。
 - `codex.toml` — Codex 用定義。`instructions.md` を `instruction_file` で参照しつつ、Codex 固有の設定を TOML 形式で書く。
 
 ### Step 4: Create repository symlinks

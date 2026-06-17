@@ -29,7 +29,7 @@ Publish an updated agent definition to `.agents/`, `.claude/`, and `.codex/`.
 
 ```bash
 ln -sfn ../../agent-resources/agents/<agent-name>/instructions.md .agents/agents/<agent-name>.md
-ln -sfn ../../agent-resources/agents/<agent-name>/claude.md .claude/agents/<agent-name>.md
+ln -sfn ../../agent-resources/agents/<agent-name>/CLAUDE.md .claude/agents/<agent-name>.md
 ln -sfn ../../agent-resources/agents/<agent-name>/codex.toml .codex/agents/<agent-name>.toml
 ```
 
