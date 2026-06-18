@@ -65,64 +65,40 @@ No findings
 
 Use read-only or plan mode.
 Tell the reviewer not to edit production code, skill files, or the plan file.
-Write the review packet to `REVIEW_PROMPT_FILE` before running either command.
-Create `REVIEW_PROMPT_FILE` and reviewer output files under a fresh `mktemp -d` directory for each review run.
-Print the reviewer output before shell exit cleanup removes the temporary directory.
+Write the review packet to `REVIEW_PROMPT_FILE` before running a reviewer script.
+The review packet must already exist before script execution.
+The reviewer scripts only run the selected reviewer; they do not select the reviewer, build the review packet, handle findings, or update the plan.
+The reviewer scripts create their own fresh temporary directory for reviewer output and stderr.
 
 If Claude Code created the draft plan, use Codex as the reviewer:
 
 ```bash
 REPO="<absolute repo path>"
-REVIEW_DIR="$(mktemp -d "${TMPDIR:-/tmp}/planning-review-codex.XXXXXX")"
-REVIEW_PROMPT_FILE="$REVIEW_DIR/prompt.md"
-CODEX_REVIEW_OUT="$REVIEW_DIR/review.md"
-CODEX_REVIEW_EVENTS="$REVIEW_DIR/review.jsonl"
-CODEX_REVIEW_ERR="$REVIEW_DIR/review.err"
-CODEX_REVIEW_MODEL="${CODEX_REVIEW_MODEL:-gpt-5.4}"
-CODEX_REVIEW_EFFORT="${CODEX_REVIEW_EFFORT:-medium}"
+REVIEW_PROMPT_FILE="<review packet file>"
 
-cleanup() {
-  rm -rf "$REVIEW_DIR"
-}
-trap cleanup EXIT
-
-codex exec \
-  --cd "$REPO" \
-  --sandbox read-only \
-  --model "$CODEX_REVIEW_MODEL" \
-  -c "model_reasoning_effort=\"$CODEX_REVIEW_EFFORT\"" \
-  --json \
-  --output-last-message "$CODEX_REVIEW_OUT" \
-  - < "$REVIEW_PROMPT_FILE" > "$CODEX_REVIEW_EVENTS" 2> "$CODEX_REVIEW_ERR"
-
-cat "$CODEX_REVIEW_OUT"
+agent-resources/skills/ticket-to-plan/scripts/run-codex-planning-review.sh \
+  --repo "$REPO" \
+  --prompt-file "$REVIEW_PROMPT_FILE"
 ```
 
 If Codex created the draft plan, use Claude Code as the reviewer:
 
 ```bash
 REPO="<absolute repo path>"
-REVIEW_DIR="$(mktemp -d "${TMPDIR:-/tmp}/planning-review-claude.XXXXXX")"
-REVIEW_PROMPT_FILE="$REVIEW_DIR/prompt.md"
-CLAUDE_REVIEW_OUT="$REVIEW_DIR/review.md"
-CLAUDE_REVIEW_ERR="$REVIEW_DIR/review.err"
-CLAUDE_REVIEW_MODEL="${CLAUDE_REVIEW_MODEL:-sonnet}"
-CLAUDE_REVIEW_EFFORT="${CLAUDE_REVIEW_EFFORT:-medium}"
+REVIEW_PROMPT_FILE="<review packet file>"
 
-cleanup() {
-  rm -rf "$REVIEW_DIR"
-}
-trap cleanup EXIT
+agent-resources/skills/ticket-to-plan/scripts/run-claude-planning-review.sh \
+  --repo "$REPO" \
+  --prompt-file "$REVIEW_PROMPT_FILE"
+```
 
-cd "$REPO"
-claude -p \
-  --permission-mode plan \
-  --model "$CLAUDE_REVIEW_MODEL" \
-  --effort "$CLAUDE_REVIEW_EFFORT" \
-  "標準入力の review packet を読み、ticket-to-plan の draft plan をレビューしてください。編集は禁止です。" \
-  < "$REVIEW_PROMPT_FILE" > "$CLAUDE_REVIEW_OUT" 2> "$CLAUDE_REVIEW_ERR"
+Use the common runner directly only as the low-level API:
 
-cat "$CLAUDE_REVIEW_OUT"
+```bash
+agent-resources/skills/ticket-to-plan/scripts/run-planning-reviewer.sh \
+  --repo "$REPO" \
+  --reviewer codex \
+  --prompt-file "$REVIEW_PROMPT_FILE"
 ```
 
 If the current environment has a multi-agent or review tool that is more cost-effective and still uses the selected reviewer AI, use that tool instead.
