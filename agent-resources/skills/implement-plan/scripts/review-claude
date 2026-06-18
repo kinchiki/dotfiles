@@ -1,0 +1,45 @@
+#!/usr/bin/env bash
+# Independent review via Claude Code on the uncommitted working tree.
+# Requires CLAUDE_REVIEW_MODEL. Prints the review body and a trust verdict. Exit 0 only when TRUSTED.
+set -uo pipefail
+
+: "${CLAUDE_REVIEW_MODEL:?Set CLAUDE_REVIEW_MODEL to the strongest reasoning-capable Claude Code model available.}"
+
+REVIEW_DIR="$(mktemp -d "${TMPDIR:-/tmp}/claude-review.XXXXXX")"
+CLAUDE_REVIEW_OUT="$REVIEW_DIR/review.md"
+CLAUDE_REVIEW_ERR="$REVIEW_DIR/review.err"
+
+cleanup() {
+  rm -rf "$REVIEW_DIR"
+}
+trap cleanup EXIT
+
+git status --short
+git diff --stat HEAD
+PENDING="$(git status --porcelain --untracked-files=all)"
+if [[ -z "$PENDING" ]]; then
+  echo "UNTRUSTED: empty review range (no uncommitted changes)"
+  exit 3
+fi
+
+CLAUDE_REVIEW_PROMPT="このリポジトリの未コミット差分をコードレビューしてください。
+編集は禁止です。
+まず git status --short, git diff --stat HEAD, git diff --cached, git diff を確認してください。
+指摘は [P1]/[P2]/[P3] の重大度、file:line、根拠、修正案を含めて日本語で返してください。
+Style / line-length 指摘は repo linter で確定検証し、byte count だけで日本語など multibyte text を違反判定しないでください。
+問題がなければ、確認した差分の概要を示してから no findings と書いてください。"
+claude -p --model "$CLAUDE_REVIEW_MODEL" --permission-mode plan "$CLAUDE_REVIEW_PROMPT" >| "$CLAUDE_REVIEW_OUT" 2>| "$CLAUDE_REVIEW_ERR"
+CLAUDE_RC=$?
+
+echo "Claude Code exit=$CLAUDE_RC"
+
+if [[ "$CLAUDE_RC" -eq 0 && -s "$CLAUDE_REVIEW_OUT" ]]; then
+  echo "TRUSTED"
+  echo "----- review -----"
+  cat "$CLAUDE_REVIEW_OUT"
+  exit 0
+fi
+
+echo "UNTRUSTED: rerun once; if still untrusted, stop and report the blocker"
+[[ -s "$CLAUDE_REVIEW_ERR" ]] && { echo "----- stderr -----"; cat "$CLAUDE_REVIEW_ERR"; }
+exit 4

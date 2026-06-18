@@ -12,139 +12,67 @@ description: >-
 
 # implement-plan
 
-承認済み plan file を読み、実装、検証、AI review、commit、PR follow-up まで進めるスキルです。
-承認済み plan が契約なので、勝手に再計画せず、`## タスク` を進捗の単一の真実として扱ってください。
-
-## Scope
-
-- 承認済み plan file を実装する。
-- feature branch を作る。
-- `## タスク` を dependency order で進める。
-- task ごとに必要な test を追加または更新する。
-- lint / test を green にする。
-- risk に応じて independent AI review を行う。
-- 最後に `commit-changes` と `create-pr-followup` へ引き継ぐ。
+Execute an approved plan end to end: branch, implement `## タスク` with tests, get lint/test green, run risk-based independent review, then hand off to commit-changes and create-pr-followup.
+The approved plan is the contract. Do not re-plan unless implementation must leave `## スコープ外`.
 
 ## Resources
 
-- `references/independent-ai-review.md`: Step 4 で medium / high risk の independent AI review が必要になったら読む。
+- `references/review-policy.md`: read only after lint/test is green and the actual diff is classified medium or high risk. Never load it for low risk.
 
-## Hard constraints
+## Load
 
-- Plan mode が active なら、実装開始前に短い実行 outline だけで plan mode を抜ける。
-- Plan mode 中に plan を再検証、再作成、書き換えしない。
-- Orchestrator は top reasoning session（現在の AI agent で利用できる最上位推論モデル + 最大 reasoning / thinking 設定）を使い、そうでない場合はその旨を伝えて再実行を推奨する。
-- ユーザーが弱い model または低い reasoning 設定で続行を明示した場合だけ、その trade-off を明記して進める。
-- default branch では作業しない。
-- `## タスク` checkbox を更新するのは orchestrator だけにする。
-- `task-implementer` worker は plan file を編集しない。
-- `## スコープ外` から逸脱しない。
-- plan から逸脱が必要な場合は、理由を添えて停止し、ユーザーに確認する。
-- test を弱める、削除する、skip / pending にする行為は禁止する。
-- lint / test 修正 loop は最大 3 round にする。
+Read the provided absolute plan file and the repo `CLAUDE.md`.
+Extract only this execution state; do not summarize the full plan:
+- goal: one line
+- acceptance criteria: checklist ids
+- unchecked tasks: id, deps, files, test, done_when, parallel
+- scope_out: exact constraints
+- lint/test commands (plan overrides CLAUDE.md)
+- unresolved blocking risks
 
-## Workflow
+Use `## タスク` checkboxes as the only source of progress.
 
-### Step 0a: Exit plan mode if active
+## Invariants
 
-このスキルは execution phase です。
-plan mode が active なら、1 から 2 行の実行 outline だけを出して plan mode を終了してください。
+- If plan mode is active, exit with a one or two line execution outline only; do not re-present or re-discuss the plan.
+- Do not work on the default branch.
+- Only the orchestrator edits `## タスク` checkboxes.
+- Do not leave `## スコープ外`; if a scope change is required, stop and explain why.
+- Do not weaken, delete, or skip/pend tests.
+- Use the most capable available model at the highest available reasoning effort for orchestration. Otherwise warn once before continuing, and proceed at a weaker setting only if the user explicitly accepts the trade-off.
+- The lint/test fix loop is at most 3 rounds.
 
-Example outline:
+## Execute
 
-```text
-承認済みプランを実行します: ブランチ作成 → タスク実装(+テスト) → lint/test → リスク別AIレビュー → commit-changes → create-pr-followup。
-```
+1. Require a clean working tree except for plan file changes. Otherwise stop.
+2. Create a feature branch from a clean tree: `git switch -c <type>/<plan-id>-<slug>`. Use `<type>` per repo convention; reuse the ticket branch if one already exists.
+3. Implement unchecked tasks in dependency order. Prefer sequential.
+4. Delegate to `task-implementer` workers only for ready tasks marked `parallel: yes` with disjoint `files`, and only at low/medium risk. Serialize everything else.
+   - Worker brief: task name, intent, expected outcome, allowed file set, tests to add or update, local conventions.
+   - Workers must not commit, create branches, or edit the plan file.
+   - If a worker returns `status: blocked` or `needs-strong-implementer`, do not check the task off. Serialize it or ask the user.
+5. Run targeted lint/test after a task only when it touches production code, changes behavior, is medium/high risk, or failures would be hard to localize later. Docs/copy/type-only tasks may be batched.
+6. Mark a task `- [x]` only after its `test` and `done_when` pass.
+7. Before review or handoff, run the relevant full lint/test suite. Fix failures and rerun, at most 3 rounds. If it still fails, stop and report the output.
+8. After lint/test is green, classify the actual diff:
+   - low: docs/comments/copy/tiny type/test/UI text/style → self-review only.
+   - medium: normal feature/bugfix/UI behavior/API-adjacent → independent review once.
+   - high: auth/billing/permissions/data deletion/migration/security/production data/broad refactor/unknown blast radius → independent review; after P1/P2 fixes, re-review once.
+9. For medium/high only, read `references/review-policy.md` and run the independent reviewer. P1/P2 are blocking: fix, rerun lint/test, rerun review as required. Fix cheap P3; list skipped P3 in the PR body.
+10. Finish only when all `## タスク` are checked, lint/test are green, and no blocking review finding remains.
 
-plan の内容を再提示したり、再議論したりしないでください。
+## Report and hand off
 
-### Step 0: Read the plan and repo conventions
+Report in Japanese: 変更概要 / 主な変更ファイル / lint・test 最終結果 / risk 分類と AI review 結果 / 解決した blocking finding / 残した nit。
+Then use `commit-changes` to create logical commits. After commit, use `create-pr-followup` for PR creation and the first follow-up.
 
-- 渡された absolute path の plan file を読む。
-- `## ゴール`、`## 受入基準`、`## 背景・影響するコード`、`## タスク`、`## テスト方針`、`## スコープ外` を確認する。
-- `## タスク` checkbox を進捗管理の単一ソースにする。
-- repo の `CLAUDE.md` を読み、convention と lint / test command を確認する。
-- plan に command が書かれている場合は、それを優先する。
-- plan file が missing、ambiguous、または一部 checked off の場合は、最初の unchecked task から再開できるか確認する。
+## Stop conditions
 
-### Step 1: Create a feature branch
-
-clean tree から feature branch を作ってください。
-
-```bash
-git switch -c <type>/<plan-id>-<slug>
-```
-
-- `<type>` は repo convention に合わせる。
-- ticket 用 branch が既にある場合は確認する。
-- plan file 以外の変更が working tree にある場合は、勝手に進めず確認する。
-
-### Step 2: Implement tasks
-
-- `## タスク` を dependency order で実装する。
-- 各 task の `files` だけを中心に変更する。
-- 各 task の `test` と `done_when` を満たす。
-- task 完了後、orchestrator が checkbox を `- [x]` に変える。
-- sequential execution を default にする。
-- ready task が `parallel: yes` で、`files` が他 task と重ならない場合だけ `task-implementer` worker を使う。
-- `task-implementer` worker は low / medium risk の実装 task にだけ使う。
-- `task-implementer` worker には task name、intent、expected outcome、allowed file set、追加または更新する test、local conventions を渡す。
-- high-risk、cross-cutting、曖昧、または allowed file set 外の変更が必要な task は `task-implementer` worker に渡さず、orchestrator が serialize する。
-- `task-implementer` worker が `status: blocked` または `needs-strong-implementer` を返した場合は checkbox を完了にせず、orchestrator が serialize するかユーザーに確認する。
-- `task-implementer` worker は commit、branch 作成、plan file 編集を行わない。
-- files が重なる場合や dependency がある場合は serialize する。
-
-### Step 3: Run quality gate
-
-各 task または parallel batch の後に、対象範囲の lint / test を実行してください。
-
-```bash
-<lint command>
-<test command>
-```
-
-- 失敗した場合は code を直して再実行する。
-- 修正と再実行は最大 3 round にする。
-- 3 round 後も失敗する場合は停止し、失敗 output を報告する。
-- Step 4 の前に、関連する full suite をもう一度実行する。
-
-### Step 4: Run risk-based AI review
-
-lint / test が green になった後で、実 diff を見て risk を分類してください。
-
-- Low risk: docs、comments、copy-only、small type / test fix、tiny UI text / styling。
-  Self-review と green lint / test でよい。
-- Medium risk: 通常の feature、small bug fix、UI behavior、API-adjacent change。
-  Independent AI review を 1 回行う。
-- High risk: auth、billing、permissions、data deletion、migration、security、production data、broad refactor、blast radius 不明。
-  Independent AI review を 1 回行い、P1 / P2 修正後に最大 1 回 re-review する。
-
-- `## リスク・未解決の論点` を参考にする。
-- 最終判断は actual diff から行う。
-- Medium / high risk の場合は `references/independent-ai-review.md` を読んで実行する。
-- Claude Code 実装時は Codex に review させる。
-- Codex 実装時は Claude Code に review させる。
-- 同じ agent に自己レビューさせて independent review と呼ばない。
-- P1 / P2 は blocking として修正する。
-- P3 は cheap なものだけ直し、残す場合は PR body に書く。
-- high risk または曖昧な P1 / P2 の確認が必要な場合だけ 3 回目の review を行う。
-
-### Step 5: Report and hand off
-
-finish line を確認してください。
-
-- すべての `## タスク` が `- [x]` である。
-- lint / test が green である。
-- 必要な AI review の blocking finding が残っていない。
-
-日本語で次を報告してください。
-
-- 変更概要。
-- 主な変更ファイル。
-- lint / test の最終結果。
-- risk 分類と AI review 結果。
-- 解決した blocking finding。
-- 残した nit。
-
-その後、`commit-changes` を使って logical commit を作成してください。
-commit 完了後、`create-pr-followup` を使って PR 作成と初回 follow-up を進めてください。
+Stop and report when:
+- the plan is missing or ambiguous and the next unchecked task cannot be identified
+- unrelated changes exist in the working tree
+- an existing branch or ticket conflict cannot be resolved safely
+- a scope change is required
+- lint/test still fails after 3 fix rounds
+- the required independent reviewer cannot run
+- a blocking P1/P2 remains
