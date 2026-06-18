@@ -7,10 +7,18 @@ Never load it for low risk.
 
 - The reviewer must be independent from the AI session that implemented the change.
 - Claude or non-Codex implementation: review with Codex CLI via `scripts/review-codex`.
-- Codex or non-Claude implementation: review with Claude Code via `scripts/review-claude`. Set `CLAUDE_REVIEW_MODEL` to the strongest reasoning-capable model available.
+- Codex or non-Claude implementation: review with Claude Code via `scripts/review-claude`.
 - Never count the same agent's self-review as independent review.
 - Pass only purpose, acceptance criteria, and special risks. Do not pass a long implementation narrative.
 - If the required independent reviewer cannot run, stop and report `status: blocked`.
+
+## Model and effort
+
+- Codex code review default: `CODEX_REVIEW_MODEL=${CODEX_REVIEW_MODEL:-codex-auto-review}` and `CODEX_REVIEW_EFFORT=${CODEX_REVIEW_EFFORT:-medium}`.
+- Claude code review default: `CLAUDE_REVIEW_MODEL=${CLAUDE_REVIEW_MODEL:-sonnet}` and `CLAUDE_REVIEW_EFFORT=${CLAUDE_REVIEW_EFFORT:-medium}`.
+- Use `CODEX_REVIEW_EFFORT=high` or `CLAUDE_REVIEW_EFFORT=high` for high-risk diffs.
+- Use `xhigh` or `max` only when explicitly requested.
+- Environment variables override the defaults.
 
 ## Run
 

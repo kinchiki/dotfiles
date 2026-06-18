@@ -7,6 +7,8 @@ REVIEW_DIR="$(mktemp -d "${TMPDIR:-/tmp}/codex-review.XXXXXX")"
 REVIEW_OUT="$REVIEW_DIR/review.md"
 REVIEW_JSON="$REVIEW_DIR/review.jsonl"
 REVIEW_ERR="$REVIEW_DIR/review.err"
+CODEX_REVIEW_MODEL="${CODEX_REVIEW_MODEL:-codex-auto-review}"
+CODEX_REVIEW_EFFORT="${CODEX_REVIEW_EFFORT:-medium}"
 
 cleanup() {
   rm -rf "$REVIEW_DIR"
@@ -21,7 +23,12 @@ if [[ -z "$PENDING" ]]; then
   exit 3
 fi
 
-codex exec review --uncommitted --json -o "$REVIEW_OUT" >| "$REVIEW_JSON" 2>| "$REVIEW_ERR"
+codex exec review \
+  --uncommitted \
+  --model "$CODEX_REVIEW_MODEL" \
+  -c "model_reasoning_effort=\"$CODEX_REVIEW_EFFORT\"" \
+  --json \
+  -o "$REVIEW_OUT" >| "$REVIEW_JSON" 2>| "$REVIEW_ERR"
 CODEX_RC=$?
 
 CMD_EXEC="$(grep -c '"type":"command_execution"' "$REVIEW_JSON" 2>/dev/null || true)"

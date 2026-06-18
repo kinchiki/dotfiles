@@ -15,8 +15,19 @@ The goal is to improve the plan before approval, not to approve the plan on the 
 - If the user specified a reviewer AI, use that AI.
 - If Claude Code created the draft plan, use Codex as the reviewer.
 - If Codex created the draft plan, use Claude Code as the reviewer.
-- If another AI created the draft plan, use the strongest available AI that is different from the planner.
+- If another AI created the draft plan, use a cost-effective independent reviewer that is different from the planner.
 - If the requested or required reviewer is unavailable, stop before user approval and report the blocker.
+
+## Select model and effort
+
+Use cost-effective defaults for review.
+Raise effort only when the plan involves auth, billing, permissions, data deletion, migration, security, production data, broad refactor, or unknown blast radius.
+Prefer explicit environment overrides when the user or repo provides them.
+
+- Codex reviewer default: `CODEX_REVIEW_MODEL=${CODEX_REVIEW_MODEL:-gpt-5.4}` and `CODEX_REVIEW_EFFORT=${CODEX_REVIEW_EFFORT:-medium}`.
+- Claude reviewer default: `CLAUDE_REVIEW_MODEL=${CLAUDE_REVIEW_MODEL:-sonnet}` and `CLAUDE_REVIEW_EFFORT=${CLAUDE_REVIEW_EFFORT:-medium}`.
+- High-risk plan review default: set the selected reviewer effort env var to `high`.
+- Use `xhigh` or `max` only when explicitly requested.
 
 ## Build the review packet
 
@@ -64,12 +75,14 @@ REVIEW_PROMPT_FILE="/tmp/planning-review-prompt.md"
 CODEX_REVIEW_OUT="/tmp/planning-review-codex.md"
 CODEX_REVIEW_EVENTS="/tmp/planning-review-codex.jsonl"
 CODEX_REVIEW_ERR="/tmp/planning-review-codex.err"
-: "${CODEX_REVIEW_MODEL:?Set CODEX_REVIEW_MODEL to the strongest Codex model available.}"
+CODEX_REVIEW_MODEL="${CODEX_REVIEW_MODEL:-gpt-5.4}"
+CODEX_REVIEW_EFFORT="${CODEX_REVIEW_EFFORT:-medium}"
 
 codex exec \
   --cd "$REPO" \
   --sandbox read-only \
   --model "$CODEX_REVIEW_MODEL" \
+  -c "model_reasoning_effort=\"$CODEX_REVIEW_EFFORT\"" \
   --json \
   --output-last-message "$CODEX_REVIEW_OUT" \
   - < "$REVIEW_PROMPT_FILE" > "$CODEX_REVIEW_EVENTS" 2> "$CODEX_REVIEW_ERR"
@@ -82,17 +95,19 @@ REPO="<absolute repo path>"
 REVIEW_PROMPT_FILE="/tmp/planning-review-prompt.md"
 CLAUDE_REVIEW_OUT="/tmp/planning-review-claude.md"
 CLAUDE_REVIEW_ERR="/tmp/planning-review-claude.err"
-: "${CLAUDE_REVIEW_MODEL:?Set CLAUDE_REVIEW_MODEL to the strongest Claude Code model available.}"
+CLAUDE_REVIEW_MODEL="${CLAUDE_REVIEW_MODEL:-sonnet}"
+CLAUDE_REVIEW_EFFORT="${CLAUDE_REVIEW_EFFORT:-medium}"
 
 cd "$REPO"
 claude -p \
   --permission-mode plan \
   --model "$CLAUDE_REVIEW_MODEL" \
+  --effort "$CLAUDE_REVIEW_EFFORT" \
   "標準入力の review packet を読み、ticket-to-plan の draft plan をレビューしてください。編集は禁止です。" \
   < "$REVIEW_PROMPT_FILE" > "$CLAUDE_REVIEW_OUT" 2> "$CLAUDE_REVIEW_ERR"
 ```
 
-If the current environment has a multi-agent or review tool that is stronger and still uses the selected reviewer AI, use that tool instead.
+If the current environment has a multi-agent or review tool that is more cost-effective and still uses the selected reviewer AI, use that tool instead.
 
 ## Handle findings
 
