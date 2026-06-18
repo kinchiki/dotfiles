@@ -6,8 +6,8 @@ Never load it for low risk.
 ## Independence
 
 - The reviewer must be independent from the AI session that implemented the change.
-- Claude or non-Codex implementation: review with Codex CLI via `scripts/review-codex`.
-- Codex or non-Claude implementation: review with Claude Code via `scripts/review-claude`.
+- Claude or non-Codex implementation: review with Codex CLI via `scripts/review-codex.sh`.
+- Codex or non-Claude implementation: review with Claude Code via `scripts/review-claude.sh`.
 - Never count the same agent's self-review as independent review.
 - Pass only purpose, acceptance criteria, and special risks. Do not pass a long implementation narrative.
 - If the required independent reviewer cannot run, stop and report `status: blocked`.
@@ -22,7 +22,7 @@ Never load it for low risk.
 
 ## Run
 
-- Run from the repo root: `agent-resources/skills/implement-plan/scripts/review-codex` or `.../scripts/review-claude`.
+- Run from the repo root: `agent-resources/skills/implement-plan/scripts/review-codex.sh` or `.../scripts/review-claude.sh`.
 - Each script reviews the uncommitted working tree, verifies the reviewer actually explored the diff, prints the review body, and reports a `TRUSTED` or `UNTRUSTED` verdict with a matching exit code.
 - Trust a clean ("no findings") result only when the script reports `TRUSTED` and the output references the actual diff.
 - If `UNTRUSTED`, rerun once. If still `UNTRUSTED`, stop and report the blocker.
