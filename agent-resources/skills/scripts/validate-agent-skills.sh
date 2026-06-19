@@ -6,6 +6,26 @@ VALIDATOR="${SKILL_VALIDATOR:-"$HOME/.codex/skills/.system/skill-creator/scripts
 PYTHON_BIN="${PYTHON:-python3}"
 PYTHONPATH_PREFIX="$ROOT/agent-resources/skills/scripts/pythonpath"
 
+validate_script_names() {
+  local skill_dir="$1"
+  local scripts_dir="$skill_dir/scripts"
+  local invalid_paths=()
+
+  [[ -d "$scripts_dir" ]] || return 0
+
+  while IFS= read -r path; do
+    invalid_paths+=("$path")
+  done < <(find "$scripts_dir" -type f ! -name '*.sh' -print | sort)
+
+  if [[ "${#invalid_paths[@]}" -eq 0 ]]; then
+    return 0
+  fi
+
+  echo "script file names must end with .sh:" >&2
+  printf '  %s\n' "${invalid_paths[@]#$ROOT/}" >&2
+  return 1
+}
+
 if [[ ! -f "$VALIDATOR" ]]; then
   echo "quick_validate.py not found: $VALIDATOR" >&2
   exit 1
@@ -26,4 +46,5 @@ fi
 for skill_dir in "${skill_dirs[@]}"; do
   echo "==> ${skill_dir#$ROOT/}"
   "$PYTHON_BIN" "$VALIDATOR" "$skill_dir"
+  validate_script_names "$skill_dir"
 done
