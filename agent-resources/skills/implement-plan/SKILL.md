@@ -21,20 +21,20 @@ The approved plan is the contract. Do not re-plan unless implementation must lea
 
 ## Load
 
-Read the provided absolute plan file and the repo `CLAUDE.md`.
+Read the provided absolute plan file and the repo convention file (`CLAUDE.md` / `AGENTS.md`).
 Extract only this execution state; do not summarize the full plan:
 - goal: one line
 - acceptance criteria: checklist ids
 - unchecked tasks: id, deps, files, test, done_when, parallel
 - scope_out: exact constraints
-- lint/test commands (plan overrides CLAUDE.md)
+- lint/test commands (plan overrides the repo convention file)
 - unresolved blocking risks
 
 Use `## タスク` checkboxes as the only source of progress.
 
 ## Invariants
 
-- If plan mode is active, exit with a one or two line execution outline only; do not re-present or re-discuss the plan.
+- If a planning or approval mode is active, exit with a one or two line execution outline only; do not re-present or re-discuss the plan.
 - Do not work on the default branch.
 - Only the orchestrator edits `## タスク` checkboxes.
 - Do not leave `## スコープ外`; if a scope change is required, stop and explain why.
