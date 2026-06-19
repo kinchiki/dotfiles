@@ -6,11 +6,12 @@ Never load it for low risk.
 ## Independence
 
 - The reviewer must be independent from the AI session that implemented the change.
-- Claude or non-Codex implementation: review with Codex CLI via `scripts/review-codex.sh`.
-- Codex or non-Claude implementation: review with Claude Code via `scripts/review-claude.sh`.
+- Prefer a cross-family reviewer: Claude or non-Codex implementation uses Codex CLI via `scripts/review-codex.sh`; Codex or non-Claude implementation uses Claude Code via `scripts/review-claude.sh`.
+- Before running `scripts/review-claude.sh`, get explicit user consent for sending the reviewed uncommitted diff to Claude Code.
+- Pass `CLAUDE_REVIEW_CONSENT=yes` only after that consent.
 - Never count the same agent's self-review as independent review.
 - Pass only purpose, acceptance criteria, and special risks. Do not pass a long implementation narrative.
-- If the required independent reviewer cannot run, stop and report `status: blocked`.
+- If the required reviewer cannot run after explicit consent, stop and report `status: blocked`.
 
 ## Model and effort
 
@@ -25,7 +26,9 @@ Never load it for low risk.
 - Run from the repo root: `agent-resources/skills/implement-plan/scripts/review-codex.sh` or `.../scripts/review-claude.sh`.
 - Each script reviews the uncommitted working tree, verifies the reviewer actually explored the diff, prints the review body, and reports a `TRUSTED` or `UNTRUSTED` verdict with a matching exit code.
 - Trust a clean ("no findings") result only when the script reports `TRUSTED` and the output references the actual diff.
-- If `UNTRUSTED`, rerun once. If still `UNTRUSTED`, stop and report the blocker.
+- If `UNTRUSTED`, rerun once when the same reviewer can run without new blocked approval.
+- If rerun is blocked because explicit consent has not been recorded yet, stop, obtain consent, set `CLAUDE_REVIEW_CONSENT=yes`, and rerun.
+- If rerun still reports `UNTRUSTED`, stop and report the blocker.
 - To review an already committed range instead of the working tree, adjust the range manually; this pipeline reviews pre-commit, so the working tree is the default.
 
 ## Findings

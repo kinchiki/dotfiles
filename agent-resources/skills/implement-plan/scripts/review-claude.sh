@@ -23,6 +23,11 @@ if [[ -z "$PENDING" ]]; then
   exit 3
 fi
 
+if [[ "${CLAUDE_REVIEW_CONSENT:-}" != "yes" ]]; then
+  echo "BLOCKED: set CLAUDE_REVIEW_CONSENT=yes after explicit user consent to send the uncommitted diff to Claude Code"
+  exit 5
+fi
+
 CLAUDE_REVIEW_PROMPT="このリポジトリの未コミット差分をコードレビューしてください。
 編集は禁止です。
 まず git status --short, git diff --stat HEAD, git diff --cached, git diff を確認してください。
@@ -45,6 +50,6 @@ if [[ "$CLAUDE_RC" -eq 0 && -s "$CLAUDE_REVIEW_OUT" ]]; then
   exit 0
 fi
 
-echo "UNTRUSTED: rerun once; if still untrusted, stop and report the blocker"
+echo "UNTRUSTED: rerun once after confirming CLAUDE_REVIEW_CONSENT=yes"
 [[ -s "$CLAUDE_REVIEW_ERR" ]] && { echo "----- stderr -----"; cat "$CLAUDE_REVIEW_ERR"; }
 exit 4

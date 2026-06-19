@@ -74,5 +74,5 @@ Stop and report when:
 - an existing branch or ticket conflict cannot be resolved safely
 - a scope change is required
 - lint/test still fails after 3 fix rounds
-- the required independent reviewer cannot run
+- the required independent reviewer cannot run after explicit consent
 - a blocking P1/P2 remains
