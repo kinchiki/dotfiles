@@ -63,7 +63,7 @@ No findings
 
 ## Run the reviewer
 
-Use read-only or plan mode.
+Use a read-only mode.
 Tell the reviewer not to edit production code, skill files, or the plan file.
 Write the review packet to `REVIEW_PROMPT_FILE` before running a reviewer script.
 The review packet must already exist before script execution.
