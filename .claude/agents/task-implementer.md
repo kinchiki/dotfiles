@@ -1,1 +1,1 @@
-../../agent-resources/agents/task-implementer/claude.md
+../../agent-resources/agents/task-implementer/CLAUDE.md

@@ -16,7 +16,7 @@ description: >-
   auth/security, billing/payments, migrations, data backfills, concurrency,
   transactions, queues, public API compatibility, and production incident fixes;
   use a stronger implementer or the orchestrator for those cases.
-model: claude-sonnet-4-6
+model: sonnet
 effort: medium
 tools: Read, Edit, Write, Bash, Grep, Glob
 ---
