@@ -95,6 +95,7 @@
       "mcp__linear__list_issue_statuses"
     ]
   },
+  "model": "opus[1m]",
   "hooks": {
     "Notification": [
       {
@@ -113,10 +114,12 @@
     "command": "~/.claude/statusline.sh"
   },
   "effortLevel": "high",
+  "plansDirectory": ".claude/plans",
   "theme": "dark",
+  "preferredNotifChannel": "terminal_bell",
   "inputNeededNotifEnabled": true,
   "agentPushNotifEnabled": true,
-  "preferredNotifChannel": "terminal_bell",
-  "plansDirectory": ".claude/plans",
-  "model": "opus[1m]"
+  "enabledPlugins": {
+    "ruby-lsp@claude-plugins-official": true
+  }
 }
