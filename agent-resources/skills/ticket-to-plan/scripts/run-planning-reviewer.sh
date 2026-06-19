@@ -179,6 +179,10 @@ case "$reviewer" in
       - < "$prompt_file" > "$review_events" 2> "$review_err" || status=$?
     ;;
   claude)
+    if [[ "${CLAUDE_REVIEW_CONSENT:-}" != "yes" ]]; then
+      echo "BLOCKED: set CLAUDE_REVIEW_CONSENT=yes after explicit user consent to send the review packet to Claude Code" >&2
+      exit 5
+    fi
     (
       cd "$repo"
       claude -p \

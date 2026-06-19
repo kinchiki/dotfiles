@@ -69,6 +69,9 @@ Write the review packet to `REVIEW_PROMPT_FILE` before running a reviewer script
 The review packet must already exist before script execution.
 The reviewer scripts only run the selected reviewer; they do not select the reviewer, build the review packet, handle findings, or update the plan.
 The reviewer scripts create their own fresh temporary directory for reviewer output and stderr.
+If Claude Code is the selected reviewer, ask the user for explicit permission before sending the review packet.
+Set `CLAUDE_REVIEW_CONSENT=yes` only after that permission is recorded.
+If the run is blocked because consent has not been recorded yet, stop, obtain consent, set the variable, and rerun.
 
 If Claude Code created the draft plan, use Codex as the reviewer:
 
