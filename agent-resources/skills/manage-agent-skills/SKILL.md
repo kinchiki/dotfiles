@@ -1,123 +1,89 @@
 ---
 name: manage-agent-skills
 description: >-
-  dotfiles リポジトリの agent-resources を作成、更新、整理するときに使う。
-  SKILL.md 作成・編集ルールに従い、以下のディレクトリ構成を維持する。
-    - agent-resources/skills 配下の実体と `.agents/skills` と `.claude/skills`
-    - agent-resources/agents 配下の実体と `.agents/agents`、`.claude/agents`、`.codex/agents`
-  例: 「新しいスキルを作って」「対応するスキルを更新して」
+  dotfiles リポジトリの agent-resources で skill または agent definition を作成・更新・整理するときに使う。
+  `agent-resources/skills` と `agent-resources/agents` を source of truth とし、`.agents`、`.claude`、`.codex` への公開 symlink と検証を維持する。
+  例: 「新しいスキルを作って」「対応するスキルを更新して」「agentを追加して」
 ---
 
 # manage-agent-skills
 
-このリポジトリで agent skill を作成または更新するためのスキルです。
-Skill 本体は `agent-resources/skills/` 配下に、Agent definition 本体は `agent-resources/agents/` 配下に置いてください。
+このリポジトリで agent skill と agent definition を作成・更新する。
 
-## Scope
+## Canonical paths
 
-- `agent-resources/skills/<skill-name>/SKILL.md` を作成または更新する。
-- Skill 実行時に参照資料が必要な場合は `agent-resources/skills/<skill-name>/references/`、再利用する補助コマンドが必要な場合は `agent-resources/skills/<skill-name>/scripts/`、画像・テンプレートなどの素材が必要な場合は `agent-resources/skills/<skill-name>/assets/` を追加する。
-- UI metadata が必要な場合は `agent-resources/skills/<skill-name>/agents/openai.yaml` を作成または更新する。
-- 反復的で決定的な保守作業は script に切り出し、追加後はその script を実行する。
-- シンボリックリンクの作成・更新は Step 4 に従う。
-- `agent-resources/skills/scripts/validate-agent-skills.sh` で touched skill を検証する。
-  `scripts/` 配下に file を追加した場合は、validator が file name の `.sh` も検証する。
+* Skill: `agent-resources/skills/<skill-name>/SKILL.md`
+* Optional skill resources: `references/`, `scripts/`, `assets/`, `agents/openai.yaml`
+* Agent definition: `agent-resources/agents/<agent-name>/instructions.md`, `CLAUDE.md`, `codex.toml`
+* Public skill links: `.agents/skills`, `.claude/skills`
+* Public agent links: `.agents/agents`, `.claude/agents`, `.codex/agents`
+
+Use lowercase letters, digits, and hyphens only for `<skill-name>` and `<agent-name>`.
+
+## Rules
+
+* Preserve Markdown structure, YAML frontmatter, headings, lists, tables, fenced code blocks, and code-block line breaks.
+* Keep normal paragraphs mostly one sentence per line and list items one item per line.
+* Use direct imperative language, positive instructions, exact relative paths, and `If X, do Y. Otherwise, do Z.` conditionals.
+* Use negative wording only for hard prohibitions, safety boundaries, data-loss risks, formatting risks, and non-negotiable constraints.
+* Keep `SKILL.md` operational; move long examples, schemas, mappings, command conventions, background, and detailed rules into reference files.
+* Keep each convention in one canonical location and avoid single-use abstractions, speculative flexibility, and unnecessary resource directories.
+* Add shell scripts only as `scripts/*.sh`.
+* Report shell or validator output as command, pass/fail, and required error lines only.
 
 ## Resources
 
-- `references/repository-links.md`: Step 4 で Skill または agent definition の公開 symlink を作成・検証するときに読む。
-- `scripts/maintain-skill.sh`: Step 4 と Step 5 で skill の公開 symlink 作成・検証と validator 実行をまとめて行うときに使う。
-- `scripts/maintain-agent-definition.sh`: Step 4 と Step 5 で agent definition の公開 symlink 作成・検証を行うときに使う。
-
-## Hard Constraints
-
-- `SKILL.md` の Markdown 構造を壊さない。
-- Frontmatter、headings、lists、tables、fenced code blocks を維持する。
-- Normal paragraph は実用的な範囲で 1 sentence per line にする。
-- Fenced code block の line break を維持する。
-- List item は 1 item per line にする。
-- Trigger conditions、scope、hard constraints、workflow、resources、expected output を見つけやすい場所に置く。
-- Direct imperative language を使う。
-- Positive instructions を優先する。
-- Negative wording は hard prohibitions、safety boundaries、data-loss risks、formatting risks、non-negotiable constraints に限る。
-- Conditional rule は `If X, do Y. Otherwise, do Z.` の形にする。
-- Referenced files、scripts、assets は exact relative paths で書く。
-- `scripts/` 配下に shell script を追加する場合は、file name に `.sh` を必須にする。
-- 参照リソースは、いつ読むべきかを明記する。
-- `SKILL.md` は operational に保つ。
-- Long examples、schemas、background information、reference material は separate files に移す。
-- Convention、path format、command example、schema、root mapping は 1 つの canonical location に集約する。
-- Detailed rule を reference file に置く場合、`SKILL.md` には読むタイミングと短い operational instruction だけを書く。
-- Task-specific、non-obvious、convention-specific guidance だけを含める。
-- Single-use abstraction、speculative flexibility、不要な resource directory を追加しない。
-- validator や shell の出力は、command、pass / fail、必要な error 行だけを報告する。
+* Read `references/repository-links.md` before creating or validating public symlinks.
+* Use `scripts/maintain-skill.sh <skill-name>` for skill symlinks and validation.
+* Use `scripts/maintain-agent-definition.sh <agent-name>` for agent definition symlinks.
 
 ## Workflow
 
-### Step 1: Confirm scope
+### 1. Confirm scope
 
-- Skill name と agent name は lowercase letters、digits、hyphens だけにする。
-- Skill folder は `agent-resources/skills/<skill-name>/` にする。
-- Agent definition folder は `agent-resources/agents/<agent-name>/` にする。
-- User request が ambiguous な場合は、実装前に短く確認する。
-- Existing skill または agent definition を更新する場合は、既存構造と style を読む。
-- Existing skill を更新する場合は、同じ concept を説明している `SKILL.md` section、references、scripts、assets を探し、どこを canonical location にするか決めてから編集する。
+If the request is ambiguous, ask a short clarification before editing.
+If updating existing content, read the current structure and style first.
+If updating a skill, find related `SKILL.md` sections, references, scripts, and assets, then choose the canonical location before editing.
 
-### Step 2: Create or update the skill body
+### 2. Create or update skill
 
-- New skill を作る場合は `skill-creator` の initializer を使う。
-- `SKILL.md` frontmatter は原則 `name` と `description` だけにする。
-- `description` には what the skill does と when to use it を含める。
-- Body には trigger information を重複させず、実行時に必要な workflow と constraints を書く。
-- 反復的で決定的な作業がある場合は、対象 skill の `scripts/` または `agent-resources/skills/manage-agent-skills/scripts/` に切り出してから実行する。
-- shell script を追加する場合は、対象 skill の `scripts/*.sh` として作成する。
-- Resources を作る場合は、`SKILL.md` から exact relative path で参照する。
-- `SKILL.md` と reference file の両方に同じ detail が必要に見える場合は、reference file に detail を置き、`SKILL.md` から参照する。
+If creating a new skill, use the `skill-creator` initializer.
+Keep `SKILL.md` frontmatter to `name` and `description`.
+Put what the skill does and when to use it in `description`.
+Put runtime workflow, constraints, and resource usage in the body.
+If work is repetitive and deterministic, move it into `scripts/` and run it.
+If a resource is needed, create it under the skill and reference it from `SKILL.md` with an exact relative path.
+If detail belongs in both `SKILL.md` and a reference file, keep the detail in the reference file and keep only read timing plus short instruction in `SKILL.md`.
 
-### Step 3: Create or update agent definitions
+### 3. Create or update agent definition
 
-Agent definition は `agent-resources/agents/<agent-name>/` に以下の 3 ファイルで構成する。
+Create or update:
 
-- `instructions.md` — AI 共通の実行指示。ツール非依存のロジック・制約・ワークフローを書く。
-- `CLAUDE.md` — Claude Code 用定義。`instructions.md` を `@` で参照しつつ、Claude Code 固有の設定や指示を追加する。
-- `codex.toml` — Codex 用定義。`instructions.md` を `instruction_file` で参照しつつ、Codex 固有の設定を TOML 形式で書く。
+* `instructions.md`: shared tool-independent logic, constraints, and workflow.
+* `CLAUDE.md`: Claude Code-specific settings; reference `instructions.md` with `@`.
+* `codex.toml`: Codex-specific TOML config; reference `instructions.md` with `instruction_file`.
 
-### Step 4: Create repository symlinks
+### 4. Link and validate
 
-#### Skill links
-
-このリポジトリでは skill 実体を `agent-resources/skills/<skill-name>/` に置きます。
-作成または更新した skill は、`references/repository-links.md` を読んでから `scripts/maintain-skill.sh <skill-name>` を実行して `.agents/` と `.claude/` へ公開してください。
-既存 path が意図した symlink ではない場合は、script が失敗するので置き換える前に停止して確認してください。
-
-#### Agent definition links
-
-このリポジトリでは agent definition 実体を `agent-resources/agents/<agent-name>/` に置きます。
-作成または更新した agent definition は、`references/repository-links.md` を読んでから `scripts/maintain-agent-definition.sh <agent-name>` を実行して `.agents/`、`.claude/`、`.codex/` へ公開してください。
-既存 path が意図した symlink ではない場合は、script が失敗するので置き換える前に停止して確認してください。
-
-### Step 5: Validate
-
-After creating or updating skills, run the repository validator before finishing.
-Prefer validating the current diff first.
-Expand to wider checks only if needed.
+For a touched skill, run:
 
 ```bash
 agent-resources/skills/manage-agent-skills/scripts/maintain-skill.sh <skill-name>
 ```
 
-If `scripts/maintain-skill.sh` reports issues in touched files, fix them and run it again.
-If validation cannot be run, report why and state what was checked manually.
-Agent definition changes currently have no dedicated validator, so run `scripts/maintain-agent-definition.sh <agent-name>` and read the linked files before finishing.
+For a touched agent definition, run:
+
+```bash
+agent-resources/skills/manage-agent-skills/scripts/maintain-agent-definition.sh <agent-name>
+```
+
+If an existing public path is not the expected symlink, stop before replacing it and ask for confirmation.
+If validation reports touched-file issues, fix them and rerun.
+Agent definitions have no dedicated validator; run `maintain-agent-definition.sh` and read linked files before finishing.
+If validation cannot run, report why and state what was checked manually.
 Before finishing, review the diff for duplicated concepts, copied examples, and repeated path or command conventions.
-If duplication remains because it is needed for standalone execution, keep it and report why.
+If intentional duplication remains for standalone execution, report why.
 
-## Expected Output
+## Expected output
 
-- 変更した skill path を報告する。
-- 変更した agent definition path を報告する。
-- 作成または確認した symlink path を報告する。
-- 実行した script command と結果を報告する。
-- 実行した validator command と結果を報告する。
-- Validation を省略した場合は理由を報告する。
-- 意図して残した重複があれば、その理由を報告する。
+Report changed skill paths, changed agent definition paths, created or verified symlink paths, script commands and results, validator commands and results, skipped validation reasons, and intentional duplication reasons.
