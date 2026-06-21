@@ -14,6 +14,16 @@ gh pr view --json number,url,headRefName,baseRefName,state,title
 ## Wait And Poll
 
 Use the wait policy in `SKILL.md` Step 2.
+Use the helper script first.
+
+```bash
+agent-resources/skills/create-pr-followup/scripts/poll-pr-signals.sh --pr <pr-number-or-url-or-branch> --initial-wait-seconds 480 --poll-interval-seconds 180 --max-polls 3
+```
+
+The script prints a compact summary including `CHECKS_STATUS`, `CHECKS_FAIL_COUNT`, `CHECKS_PENDING_COUNT`, `UNRESOLVED_THREAD_COUNT`, and `AI_REVIEW_DETECTED`.
+Use `--initial-wait-seconds` when the user specifies a custom wait interval.
+
+If the script cannot run, use fallback commands.
 The existing quick command example is:
 
 ```bash
@@ -26,6 +36,9 @@ If it is not detected, continue CI inspection and report the missing review sign
 ## Inspect Checks
 
 Inspect CI before review comments.
+
+When available, use `poll-pr-signals.sh` output as the primary CI signal.
+Use the command below as a fallback or to drill into specific check details.
 
 ```bash
 gh pr checks <pr-number-or-url>
