@@ -1,7 +1,7 @@
 # Planning AI Review Reference
 
-Use this reference from `../SKILL.md` Step 4 before asking the user to approve a draft plan.
-The goal is to improve the plan before approval, not to approve the plan on the user's behalf.
+Use this reference from `../SKILL.md` Step 5 after the user finished reviewing the draft plan and before the final approval request.
+The goal is to improve the user-reviewed plan before final approval, not to approve the plan on the user's behalf.
 
 ## Contents
 
@@ -16,7 +16,7 @@ The goal is to improve the plan before approval, not to approve the plan on the 
 - If Claude Code created the draft plan, use Codex as the reviewer.
 - If Codex created the draft plan, use Claude Code as the reviewer.
 - If another AI created the draft plan, use a cost-effective independent reviewer that is different from the planner.
-- If the requested or required reviewer is unavailable, stop before user approval and report the blocker.
+- If the requested or required reviewer is unavailable, stop before final approval and report the blocker.
 
 ## Select model and effort
 
@@ -56,7 +56,7 @@ Ask the reviewer to return findings in this format:
 
 ```text
 [P1] <blocking issue that would likely make implementation fail or violate requirements>
-[P2] <important issue that should be addressed before user approval>
+[P2] <important issue that should be addressed before final approval>
 [P3] <nice-to-have improvement>
 No findings
 ```
@@ -109,9 +109,9 @@ If the current environment has a multi-agent or review tool that is more cost-ef
 ## Handle findings
 
 - Treat P1 and P2 findings as requiring either a plan update or an explicit planner rejection with rationale.
-- Apply accepted findings to the draft plan and task breakdown before asking the user for approval.
+- Apply accepted findings to the draft plan and task breakdown before asking the user for final approval.
 - If a finding changes assumptions or affected files, re-read the relevant ticket or code context before updating the plan.
 - Address cheap P3 findings when they make the plan clearer.
-- Record skipped P2 / P3 findings and the reason in `事前AIレビュー` or `リスク・未解決の論点`.
+- Record skipped P2 / P3 findings and the reason in `AIレビュー` or `リスク・未解決の論点`.
 - If a P1 or P2 finding causes a material redesign, run the same reviewer once more on the updated draft.
-- Present the reviewer, key findings, and planner disposition together with the reviewed plan.
+- Present the reviewer, key findings, and planner disposition together with the final approval request.
