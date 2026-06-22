@@ -36,6 +36,7 @@ Include:
 
 - Source kind and 3 to 6 line source summary.
 - Original source reference or user request excerpt.
+- User-reviewed intent changes, accepted behaviors, and explicit non-goals when the user clarified them during draft review.
 - Draft plan, including goal, acceptance criteria, scoped approach, risks, and out-of-scope items.
 - Draft `## タスク` breakdown with `files`, `depends_on`, `parallel`, `test`, and `done_when`.
 - File paths and existing patterns the planner inspected.
@@ -44,6 +45,7 @@ Include:
 Ask the reviewer to check:
 
 - Missing requirements from the source.
+- Whether the plan preserves explicit user intent and intentionally accepted behavior unless there is a concrete conflict with safety, data integrity, implementation feasibility, or repository constraints.
 - For ticket sources, check comments, labels, linked issues / PRs, and acceptance criteria.
 - For user request sources, check whether inferred assumptions and acceptance criteria are explicit enough for implementation.
 - Missed affected files, data flow, auth / permission, background job, API, migration, or compatibility concerns.
@@ -51,6 +53,10 @@ Ask the reviewer to check:
 - Test coverage, lint / test commands, and observable `done_when` conditions.
 - Scope creep or unnecessary abstraction.
 - Whether the plan is self-contained enough for a fresh implementation session.
+
+Tell the reviewer to treat the original source and user-reviewed intent as the source of truth.
+Tell the reviewer not to suggest changing behavior that the user explicitly asked to keep unless the finding cites a concrete risk such as security, data loss, implementation infeasibility, or a hard repository constraint.
+Tell the reviewer to cite the relevant source excerpt, user-reviewed intent, or inspected codebase evidence for every P1 or P2 finding.
 
 Ask the reviewer to return findings in this format:
 

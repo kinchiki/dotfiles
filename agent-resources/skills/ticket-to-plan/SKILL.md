@@ -41,7 +41,7 @@ Planning と implementation は分けてください。
 - 承認後もこのセッションで実装しない。
 - plan file は、source を再取得しなくても実装者が開始できる程度に self-contained にする。
 - planning 中に実装可否や受入基準を左右する不明点が見つかった場合は、推測で埋めずにユーザーへ確認する。
-- ユーザーレビュー後、`references/planning-ai-review.md` に従って最新の draft plan と task breakdown を別 AI でレビューする。
+- ユーザーレビュー後、`references/planning-ai-review.md` に従って、元の依頼内容とユーザー確認済みの意図を踏まえた最新の draft plan と task breakdown を別 AI でレビューする。
 - AI review 反映後に plan が変わった場合は、plan file 保存前に更新版をユーザーへ再提示して最終承認を得る。
 
 ## Workflow
@@ -148,6 +148,7 @@ approval affordance がある環境では、それを使ってください。
 ### Step 5: Run cross-AI planning review
 
 ユーザーレビューが完了した draft plan に対して、`references/planning-ai-review.md` を読んで AI review を実行してください。
+review packet には、元の依頼内容とユーザー確認済みの意図や維持したい挙動も含めてください。
 Planning AI は review 内容を確認し、採用する指摘を plan と task breakdown へ反映してください。
 採用しない重要指摘は、理由を plan に残してください。
 
