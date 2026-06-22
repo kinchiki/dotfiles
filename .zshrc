@@ -211,7 +211,7 @@ bindkey '^[\e[D' backward-word
 bindkey ";5C" forward-word
 bindkey ";5D" backward-word
 
-FZF_CTRL_R_OPTS="--no-sort --layout=reverse --preview 'echo {}' --preview-window 'up:2:wrap'"
+FZF_CTRL_R_OPTS="--no-sort --layout=reverse --no-multi-line --preview 'echo {}' --preview-window 'up:2:wrap'"
 # [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
 
 # fzf
