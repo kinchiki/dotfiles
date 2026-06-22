@@ -26,6 +26,7 @@ Planning と implementation は分けてください。
 
 ## Resources
 
+- `../ask-user-questions/SKILL.md`: Step 1 と Step 2 で、repo 調査では解けない open question をユーザーへ確認する直前に読む。
 - `references/planning-ai-review.md`: Step 5 でユーザーレビュー後の AI 相互レビューを行う直前に読む。
 - `references/plan-template.md`: Step 7 で plan file を書く直前に読む。
 
@@ -35,7 +36,7 @@ Planning と implementation は分けてください。
 - Ticket source では ticket title と body と body 記載の各URL先をもとにplanを作る。
 - Ticket source では comments、labels、linked issues / PRs、acceptance criteria を確認する。
 - User request source では依頼文と会話 context を source of truth とし、抽出した前提、受入基準、open questions を plan に明記する。
-- source が曖昧な場合は 1 つだけ短く確認する。
+- repo 調査では解けない open question の確認は `../ask-user-questions/SKILL.md` に従う。
 - read-only planning が使える場合は、調査中に code を編集しない。
 - ユーザー承認は「この plan でよい」という意味であり、このセッションで実装を始める許可ではない。
 - 承認後もこのセッションで実装しない。
@@ -104,7 +105,7 @@ User request source では次を抽出してください。
 
 取得または抽出後、3 から 6 行の source summary をユーザーに返してください。
 source が薄い、矛盾している、または acceptance criteria が欠けている場合は、その gap を plan の open question として扱ってください。
-その gap が plan の成否や実装範囲に影響する場合は、Step 2 の調査中または調査後すぐにユーザーへ確認してください。
+その gap が plan の成否や実装範囲に影響する場合は、`../ask-user-questions/SKILL.md` を読んで、Step 2 の調査中または調査後すぐにユーザーへ確認してください。
 
 ### Step 2: Research and plan
 
@@ -119,7 +120,7 @@ read-only planning で codebase を調査してください。
 
 plan は、source や codebase を読んでいない session でも正しく実装できる粒度にしてください。
 曖昧な plan は失敗です。
-調査で実装に関わる不明点が見つかった場合は、draft plan を固め切る前にユーザーへ確認してください。
+調査で実装に関わる不明点が見つかった場合は、`../ask-user-questions/SKILL.md` を読んで、draft plan を固め切る前にユーザーへ確認してください。
 
 ### Step 3: Break the plan into tasks
 

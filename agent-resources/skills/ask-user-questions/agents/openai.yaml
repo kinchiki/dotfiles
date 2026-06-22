@@ -1,0 +1,4 @@
+interface:
+  display_name: "Ask User Questions"
+  short_description: "調査や実装前の不明点を短く整理してユーザーに確認する"
+  default_prompt: "Use $ask-user-questions to resolve the user-facing open questions before continuing the task."
