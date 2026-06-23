@@ -57,7 +57,7 @@ PR を作成し、初回の CI と AI レビューを待って、必要な follo
 ### Step 2: Wait for automation and AI review
 
 - ユーザー指定の wait interval があればそれを使う。
-- 指定がなければ最初に 8 分待つ。
+- 指定がなければ最初に 5 分待つ。
 - checks が queued / in progress の間、または期待する AI review がまだ出ていない間は、3 分間隔で最大 3 回追加 poll する。
 - AI review が wait budget 内に出ない場合は、CI inspection だけ続けて、AI review が未検出だったことを報告する。
 - wait / poll と状態集約は `scripts/poll-pr-signals.sh` を使う。
@@ -120,7 +120,7 @@ CI command と判定詳細は `scripts/poll-pr-signals.sh` の出力を優先し
 |------|--------|-------|
 | 0 | Confirm follow-up scope | Hand dirty tree to `commit-changes`. |
 | 1 | Create and resolve PR | Use `create-pr`. |
-| 2 | Wait and poll | Default 8 min, then 3 polls. |
+| 2 | Wait and poll | Default 5 min, then 3 polls. |
 | 3 | Inspect CI and review | CI first, comments second. |
 | 4 | Split lanes | Parallelize only isolated work. |
 | 5 | Integrate and verify | Run combined check. |

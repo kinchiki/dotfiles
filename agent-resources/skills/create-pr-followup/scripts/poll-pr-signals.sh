@@ -9,7 +9,7 @@ Usage:
 Options:
   --pr <value>                    Pull request number, URL, or branch.
   --repo <owner/repo>             Optional repository override for gh commands.
-  --initial-wait-seconds <n>      Initial wait before first inspection. Default: 480.
+  --initial-wait-seconds <n>      Initial wait before first inspection. Default: 300.
   --poll-interval-seconds <n>     Poll interval while waiting. Default: 180.
   --max-polls <n>                 Maximum additional polls after first inspection. Default: 3.
   -h, --help                      Show help.
@@ -40,7 +40,7 @@ parse_owner_repo_from_url() {
 
 pr_ref=""
 repo_override=""
-initial_wait_seconds=480
+initial_wait_seconds=300
 poll_interval_seconds=180
 max_polls=3
 
@@ -121,7 +121,7 @@ ai_author_pattern='(copilot|coderabbit|openai|gpt|claude|gemini|ai[-_]?review|ai
 collect_signals() {
   last_checks_json="$(gh pr checks "$pr_ref" "${gh_args[@]}" --json name,state,bucket,link,workflow,event 2>/dev/null || echo '[]')"
   last_reviews_json="$(gh pr view "$pr_ref" "${gh_args[@]}" --json reviews --jq '.reviews // []')"
-  last_threads_json="$(gh api graphql "${gh_args[@]}" -f query='query($owner:String!,$repo:String!,$pr:Int!){ repository(owner:$owner,name:$repo){ pullRequest(number:$pr){ reviewThreads(first:100){ nodes{ id isResolved isOutdated } } } } }' -F owner="$owner" -F repo="$repo" -F pr="$pr_number" --jq '.data.repository.pullRequest.reviewThreads.nodes // []')"
+  last_threads_json="$(gh api graphql -f query='query($owner:String!,$repo:String!,$pr:Int!){ repository(owner:$owner,name:$repo){ pullRequest(number:$pr){ reviewThreads(first:100){ nodes{ id isResolved isOutdated } } } } }' -F owner="$owner" -F repo="$repo" -F pr="$pr_number" --jq '.data.repository.pullRequest.reviewThreads.nodes // []')"
 
   ai_review_count="$(jq --arg p "$ai_author_pattern" '[.[] | select(.author.login != null) | .author.login | ascii_downcase | select(test($p))] | length' <<<"$last_reviews_json")"
   if ((ai_review_count > 0)); then

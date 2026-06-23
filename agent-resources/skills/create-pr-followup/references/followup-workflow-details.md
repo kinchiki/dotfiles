@@ -17,7 +17,7 @@ Use the wait policy in `SKILL.md` Step 2.
 Use the helper script first.
 
 ```bash
-agent-resources/skills/create-pr-followup/scripts/poll-pr-signals.sh --pr <pr-number-or-url-or-branch> --initial-wait-seconds 480 --poll-interval-seconds 180 --max-polls 3
+agent-resources/skills/create-pr-followup/scripts/poll-pr-signals.sh --pr <pr-number-or-url-or-branch> --initial-wait-seconds 300 --poll-interval-seconds 180 --max-polls 3
 ```
 
 The script prints a compact summary including `CHECKS_STATUS`, `CHECKS_FAIL_COUNT`, `CHECKS_PENDING_COUNT`, `UNRESOLVED_THREAD_COUNT`, and `AI_REVIEW_DETECTED`.
