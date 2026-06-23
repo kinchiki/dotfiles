@@ -15,7 +15,8 @@ This skill owns only commit planning, staging, and commit messages.
 ## Language policy
 
 - Keep UI-facing metadata, including the frontmatter `description`, in Japanese.
-- Keep this `SKILL.md` body in English.
+- Write commit messages in Japanese (repository language).
+- Keep this `SKILL.md` body in English for shared reference across agents.
 - Report results to the user in Japanese unless a more specific instruction overrides it.
 
 ## Scope
@@ -78,6 +79,7 @@ git commit
 - Make the staged diff non-empty and understandable on its own.
 - Reread the staged diff from the reviewer's perspective and confirm that it can be reviewed without context from another commit.
 - Write messages that communicate why the change exists, not just what changed.
+- Write all commit messages in Japanese, using Conventional Commit format where applicable (e.g., `feat: 新機能説明`, `fix: バグ修正説明`, `refactor: リファクタリング説明`, `docs: ドキュメント更新`, `test: テスト追加`).
 - Keep each commit buildable / testable where practical.
 
 ### Step 4: Report
