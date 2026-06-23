@@ -98,7 +98,7 @@ if ((initial_wait_seconds > 0)); then
   sleep "$initial_wait_seconds"
 fi
 
-pr_meta_json="$(gh pr view "$pr_ref" "${gh_args[@]}" --json number,url,headRefName,baseRefName,state,title)"
+pr_meta_json="$(gh pr view "$pr_ref" ${gh_args[@]+"${gh_args[@]}"} --json number,url,headRefName,baseRefName,state,title)"
 pr_number="$(jq -r '.number' <<<"$pr_meta_json")"
 pr_url="$(jq -r '.url' <<<"$pr_meta_json")"
 
@@ -119,8 +119,8 @@ ai_review_detected=false
 ai_author_pattern='(copilot|coderabbit|openai|gpt|claude|gemini|ai[-_]?review|ai[-_]?bot|\[bot\]$)'
 
 collect_signals() {
-  last_checks_json="$(gh pr checks "$pr_ref" "${gh_args[@]}" --json name,state,bucket,link,workflow,event 2>/dev/null || echo '[]')"
-  last_reviews_json="$(gh pr view "$pr_ref" "${gh_args[@]}" --json reviews --jq '.reviews // []')"
+  last_checks_json="$(gh pr checks "$pr_ref" ${gh_args[@]+"${gh_args[@]}"} --json name,state,bucket,link,workflow,event 2>/dev/null || echo '[]')"
+  last_reviews_json="$(gh pr view "$pr_ref" ${gh_args[@]+"${gh_args[@]}"} --json reviews --jq '.reviews // []')"
   last_threads_json="$(gh api graphql -f query='query($owner:String!,$repo:String!,$pr:Int!){ repository(owner:$owner,name:$repo){ pullRequest(number:$pr){ reviewThreads(first:100){ nodes{ id isResolved isOutdated } } } } }' -F owner="$owner" -F repo="$repo" -F pr="$pr_number" --jq '.data.repository.pullRequest.reviewThreads.nodes // []')"
 
   ai_review_count="$(jq --arg p "$ai_author_pattern" '[.[] | select(.author.login != null) | .author.login | ascii_downcase | select(test($p))] | length' <<<"$last_reviews_json")"
