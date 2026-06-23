@@ -64,8 +64,9 @@ gh pr create --base <default-branch> --title "<title>" --body "<body>" --assigne
 ```
 
 - Title は repo の通常言語に合わせて簡潔に書く。
+- Title は `<チケット名> <実装内容概要>` の形式で書く。
 - team が日本語で PR を書く場合は日本語にする。
-- ticket key を title に含める convention がある場合は従う。
+- ticket key を title に含める convention がある場合は `<チケット名>` に反映し、なければ `<チケット名> ` は空にする。
 - Body は plan と ticket から生成する。
 - `.github/pull_request_template.md` がある場合は、generic body ではなく template を埋める。
 - repo 固有 template がない場合は `references/pr-body-template.md` の generic body を使う。
