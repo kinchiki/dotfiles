@@ -16,11 +16,6 @@ Fill it from the plan, ticket, and verification results.
 ## テスト
 - <ユーザーが記載するためなにも記載しない>
 
-## レビュー（AI）
-- レビュー担当: <Claude Code実装時はCodex / Codex実装時はClaude Code / 低リスクskip>
-- 残した nit: <あれば。なければ「なし」>
-- レビュー方針: <低リスクskip / 独立AIレビュー1回 / P1-P2修正後の再レビュー など>
-
 ## 受入基準
 - [x] <プランの Acceptance criteria を転記し、満たしたものをチェック>
 ```
