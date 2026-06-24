@@ -1,4 +1,0 @@
-interface:
-  display_name: "Create PR Follow-up"
-  short_description: "PR作成後のCI失敗とAIレビュー指摘を後追い対応する"
-  default_prompt: "Use $create-pr-followup to create the PR, wait for CI and AI review, then address follow-up items."

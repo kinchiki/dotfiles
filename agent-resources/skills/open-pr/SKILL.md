@@ -1,5 +1,5 @@
 ---
-name: create-pr
+name: open-pr
 description: >-
   コミット済みの現在ブランチを push して GitHub PR を作成する。
   PR を開きたいとき、または implement-plan / commit-changes 完了後の PR 作成引き継ぎで使う。
@@ -8,10 +8,10 @@ description: >-
   push / gh pr create は外向きの操作なので、実行前にユーザー確認を取る。
 ---
 
-# create-pr
+# open-pr
 
 既に commit 済みの branch を push し、チームの期待に沿った pull request を作るスキルです。
-`ticket-to-plan` → `implement-plan` → `commit-changes` → `create-pr` の最後の段階として使えます。
+`ticket-to-plan` → `implement-plan` → `commit-changes` → `open-pr` の最後の段階として使えます。
 
 ## Scope
 
@@ -38,7 +38,7 @@ description: >-
 
 ### Step 0: Prefer project conventions
 
-- `.claude/skills/create-pr/local.SKILL.md` など、repo 固有の PR skill があるか確認する。
+- `.claude/skills/open-pr/local.SKILL.md` など、repo 固有の PR skill があるか確認する。
 - `.github/pull_request_template.md` がある場合は、その template を使う。
 - repo に明文化された convention がある場合は、この generic skill より優先する。
 
@@ -78,7 +78,7 @@ gh pr create --base <default-branch> --title "<title>" --body "<body>" --assigne
 - PR URL
 - PR title
 - 何を publish したかの 1 行 recap
-- follow-up が必要なら `create-pr-followup` が次 step であること
+- follow-up が必要なら `open-pr-followup` が次 step であること
 
 ```bash
 gh pr view --json url,title

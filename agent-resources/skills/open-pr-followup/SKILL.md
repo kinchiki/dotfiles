@@ -1,19 +1,19 @@
 ---
-name: create-pr-followup
+name: open-pr-followup
 description: >-
   PR 作成後に一定時間待ち、GitHub Actions CI と AI レビュー / レビューコメントを確認して、既存スキルへ切り出して後追い対応する。
-  PR 作成は create-pr、CI 失敗は GitHub plugin の gh-fix-ci、レビューコメント対応は address-pr-comments または GitHub plugin の gh-address-comments を使う。
-  例: 「PR作って、CIとAIレビューまで見て」「PR作成後にレビュー指摘とCI失敗も対応して」「create-pr のあとしばらく待って後追いして」。
+  PR 作成は open-pr、CI 失敗は GitHub plugin の gh-fix-ci、レビューコメント対応は address-pr-comments または GitHub plugin の gh-address-comments を使う。
+  例: 「PR作って、CIとAIレビューまで見て」「PR作成後にレビュー指摘とCI失敗も対応して」「open-pr のあとしばらく待って後追いして」。
   implement-plan / commit-changes 完了後に、PR 作成だけで止めずに CI と AI レビューの初回フォローまで進めたいときに使う。
 ---
 
-# create-pr-followup
+# open-pr-followup
 
 PR を作成し、初回の CI と AI レビューを確認して、必要な follow-up を専門スキルに委譲する orchestrator です。
 
 ## Scope
 
-- `create-pr` で PR を作る。
+- `open-pr` で PR を作る。
 - CI と AI review / unresolved review comments を確認する。
 - CI failure は `gh-fix-ci` に委譲する。
 - review comments は `address-pr-comments` 優先、または `gh-address-comments` に委譲する。
@@ -26,7 +26,7 @@ PR を作成し、初回の CI と AI レビューを確認して、必要な fo
 
 ## Hard constraints
 
-- PR 作成だけなら `create-pr` で止める。
+- PR 作成だけなら `open-pr` で止める。
 - dirty tree は `commit-changes` に引き渡す。
 - push と GitHub writeback は確認ポイントを守る。
 - concrete PR が必要。
@@ -39,12 +39,12 @@ PR を作成し、初回の CI と AI レビューを確認して、必要な fo
 ### Step 0: Prerequisites
 
 ユーザーが post-PR follow-up を求めているか確認する。
-working tree が clean か `create-pr` に渡せるなら進める。
-dirty tree は `commit-changes` に引き渡し、initial PR 作成は `create-pr` に委譲する。
+working tree が clean か `open-pr` に渡せるなら進める。
+dirty tree は `commit-changes` に引き渡し、initial PR 作成は `open-pr` に委譲する。
 
 ### Step 1: Create PR and get identity
 
-`create-pr` を実行する。
+`open-pr` を実行する。
 PR URL、number、head branch、base branch を確認する。
 PR metadata command は `references/followup-workflow-details.md` を参照。
 

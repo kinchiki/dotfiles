@@ -3,16 +3,16 @@ name: implement-plan
 description: >-
   承認済みの実装プランファイルを、新しいセッションで端から端まで実行する。
   feature branch を作成し、プランの `## タスク` をテスト込みで進め、lint / test を緑にする。
-  リスクに応じた AI レビューを受け、commit-changes で論理コミットを作り、create-pr-followup で PR 作成後の CI と AI レビュー初回フォローまで進める。
+  リスクに応じた AI レビューを受け、commit-changes で論理コミットを作り、open-pr-followup で PR 作成後の CI と AI レビュー初回フォローまで進める。
   承認済みプランを渡されて実装を始めるときに使う。
   例: 「implement-plan スキルで実装して」「プランを実装して」
   ticket-to-plan がプランファイルを指す実装セッションを起動したときにも使う。
-  これは ticket-to-plan → implement-plan → commit-changes → create-pr-followup パイプラインの実装フェーズである。
+  これは ticket-to-plan → implement-plan → commit-changes → open-pr-followup パイプラインの実装フェーズである。
 ---
 
 # implement-plan
 
-Execute an approved plan end to end: branch, implement `## タスク` with tests, get lint/test green, run risk-based independent review, then hand off to commit-changes and create-pr-followup.
+Execute an approved plan end to end: branch, implement `## タスク` with tests, get lint/test green, run risk-based independent review, then hand off to commit-changes and open-pr-followup.
 The approved plan is the contract. Do not re-plan unless implementation must leave `## スコープ外`.
 
 ## Resources
@@ -64,7 +64,7 @@ Use `## タスク` checkboxes as the only source of progress.
 ## Report and hand off
 
 Report in Japanese: 変更概要 / 主な変更ファイル / lint・test 最終結果 / risk 分類と AI review 結果 / 解決した blocking finding / 残した nit。
-Then use `commit-changes` to create logical commits. After commit, use `create-pr-followup` for PR creation and the first follow-up.
+Then use `commit-changes` to create logical commits. After commit, use `open-pr-followup` for PR creation and the first follow-up.
 
 ## Stop conditions
 

@@ -2,7 +2,7 @@
 name: commit-changes
 description: >-
   未コミット差分を確認し、レビューしやすい粒度の論理コミットに分割して作成する。
-  コミットしてほしいとき、PR 作成前に差分をコミットする必要があるとき、または implement-plan 完了後に create-pr / create-pr-followup へ渡す前に使う。
+  コミットしてほしいとき、PR 作成前に差分をコミットする必要があるとき、または implement-plan 完了後に open-pr / open-pr-followup へ渡す前に使う。
   例: 「コミットして」「変更をコミット」「commit」「PR 前にコミット」。
   push / PR 作成 / GitHub への書き戻しは行わない。
 ---
@@ -24,7 +24,7 @@ This skill owns only commit planning, staging, and commit messages.
 - Create local commits.
 - Split changes into multiple commits when that makes the review easier.
 - Do not push, create PRs, or write to GitHub.
-- If a PR is needed, use `create-pr` or `create-pr-followup` after this skill.
+- If a PR is needed, use `open-pr` or `open-pr-followup` after this skill.
 
 ## Hard constraints
 
@@ -88,4 +88,4 @@ Report the following in Japanese.
 
 - Created commit hashes and subjects.
 - Whether the working tree is clean or dirty.
-- If moving to a PR, state that `create-pr` or `create-pr-followup` is the next step.
+- If moving to a PR, state that `open-pr` or `open-pr-followup` is the next step.
