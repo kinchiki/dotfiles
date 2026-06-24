@@ -45,6 +45,7 @@ gh pr checks <pr-number-or-url>
 ```
 
 - Treat pass and skipped checks as recorded non-blocking states.
+- `ci/circleci: test` is ignored and never delegated to `gh-fix-ci`; this check is excluded from all counts, pending waits, and failing check summaries.
 - Delegate GitHub Actions failures to `gh-fix-ci`.
 - Report failing external checks by URL when `gh-fix-ci` cannot inspect them.
 

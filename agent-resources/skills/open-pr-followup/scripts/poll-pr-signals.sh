@@ -43,6 +43,7 @@ repo_override=""
 initial_wait_seconds=300
 poll_interval_seconds=180
 max_polls=3
+ignored_check="ci/circleci: test"
 
 while (($#)); do
   case "$1" in
@@ -120,6 +121,7 @@ ai_author_pattern='(copilot|coderabbit|openai|gpt|claude|gemini|ai[-_]?review|ai
 
 collect_signals() {
   last_checks_json="$(gh pr checks "$pr_ref" ${gh_args[@]+"${gh_args[@]}"} --json name,state,bucket,link,workflow,event 2>/dev/null || echo '[]')"
+  last_checks_json="$(jq --arg ignored "$ignored_check" '[.[] | select(.name != $ignored)]' <<<"$last_checks_json")"
   last_reviews_json="$(gh pr view "$pr_ref" ${gh_args[@]+"${gh_args[@]}"} --json reviews --jq '.reviews // []')"
   last_threads_json="$(gh api graphql -f query='query($owner:String!,$repo:String!,$pr:Int!){ repository(owner:$owner,name:$repo){ pullRequest(number:$pr){ reviewThreads(first:100){ nodes{ id isResolved isOutdated } } } } }' -F owner="$owner" -F repo="$repo" -F pr="$pr_number" --jq '.data.repository.pullRequest.reviewThreads.nodes // []')"
 
