@@ -1,9 +1,11 @@
 {
   "cSpell.words": [
     "Ghostty",
+    "githubcopilot",
     "gpush",
     "gtagpush",
     "LBUFFER",
+    "netrc",
     "Notif",
     "Prezto",
     "rmstar",
@@ -12,6 +14,7 @@
     "statusline",
     "tolower",
     "toplevel",
+    "Unsandboxed",
     "vimrc",
     "WORDCHARS",
     "worktree",

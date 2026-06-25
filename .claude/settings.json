@@ -121,5 +121,83 @@
   "agentPushNotifEnabled": true,
   "enabledPlugins": {
     "ruby-lsp@claude-plugins-official": true
+  },
+  "sandbox": {
+    "enabled": true,
+    "failIfUnavailable": true,
+    "autoAllowBashIfSandboxed": true,
+    "allowUnsandboxedCommands": false,
+    // User (このファイル) では . は ~/.claude の意味
+    // https://code.claude.com/docs/ja/sandboxing
+    "filesystem": {
+      "allowWrite": [
+        "/tmp",
+        ".",
+        "~/src/"
+      ],
+      "denyWrite": [
+        "/etc"
+      ],
+      "allowRead": [
+        ".",
+        "~/src/",
+        "~/.zshrc",
+        "~/.gitconfig",
+        "~/.codex/",
+        "~/.copilot/"
+      ],
+      "denyRead": [
+        "~/"
+      ]
+    },
+    "credentials": {
+      "files": [
+        { "path": "~/.ssh", "mode": "deny" },
+        { "path": "~/.aws", "mode": "deny" },
+        { "path": "~/.config/gh", "mode": "deny" },
+        { "path": "~/.npmrc", "mode": "deny" },
+        { "path": "~/.netrc", "mode": "deny" },
+        { "path": "~/.git-credentials", "mode": "deny" },
+        { "path": "~/.docker/config.json", "mode": "deny" }
+      ],
+      "envVars": [
+        { "name": "GITHUB_TOKEN", "mode": "deny" },
+        { "name": "GH_TOKEN", "mode": "deny" },
+        { "name": "NPM_TOKEN", "mode": "deny" },
+        { "name": "AWS_ACCESS_KEY_ID", "mode": "deny" },
+        { "name": "AWS_SECRET_ACCESS_KEY", "mode": "deny" },
+        { "name": "AWS_SESSION_TOKEN", "mode": "deny" }
+      ]
+    },
+    "network": {
+      "allowedDomains": [
+        "api.openai.com",
+        "*.api.openai.com",
+        "auth.openai.com",
+        "chatgpt.com",
+        "*.chatgpt.com",
+        "*.openai.com",
+
+        "github.com",
+        "api.github.com",
+        "*.github.com",
+        "*.githubusercontent.com",
+        "copilot-proxy.githubusercontent.com",
+        "origin-tracker.githubusercontent.com",
+        "*.githubcopilot.com",
+        "*.individual.githubcopilot.com",
+        "*.business.githubcopilot.com",
+        "*.enterprise.githubcopilot.com",
+
+        "collector.github.com",
+        "copilot-telemetry.githubusercontent.com",
+        "default.exp-tas.com",
+
+        "npmjs.org",
+        "*.npmjs.org",
+        "registry.npmjs.org"
+      ],
+      "allowLocalBinding": true
+    }
   }
 }
