@@ -46,8 +46,8 @@ dirty tree は `commit-changes` に引き渡し、initial PR 作成は `open-pr`
 ### Step 1: Create PR and get identity
 
 `open-pr` を実行する。
-PR URL、number、head branch、base branch を確認する。
-PR metadata command は `references/followup-workflow-details.md` を参照。
+`scripts/poll-pr-signals.sh --pr <pr> --metadata-only` で PR URL、number、head branch、base branch を取得する。
+Script 実行不可なら `references/followup-workflow-details.md` の fallback (`gh pr view`) を使う。
 
 ### Step 2: Wait and poll
 

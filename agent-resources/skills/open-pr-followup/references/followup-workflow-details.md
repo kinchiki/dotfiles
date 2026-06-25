@@ -6,6 +6,13 @@ It holds command recipes and lane integration details so `SKILL.md` stays focuse
 ## Resolve PR Metadata
 
 After `open-pr` succeeds, fetch the concrete PR identity.
+Use the helper script first; it prints `PR_URL`, `PR_NUMBER`, `HEAD_REF`, and `BASE_REF` without waiting or collecting signals.
+
+```bash
+agent-resources/skills/open-pr-followup/scripts/poll-pr-signals.sh --pr <pr-number-or-url-or-branch> --metadata-only
+```
+
+If the script cannot run, use the fallback command.
 
 ```bash
 gh pr view --json number,url,headRefName,baseRefName,state,title

@@ -9,6 +9,7 @@ Usage:
 Options:
   --pr <value>                    Pull request number, URL, or branch.
   --repo <owner/repo>             Optional repository override for gh commands.
+  --metadata-only                 Print PR identity only, then exit. Skips wait, poll, and signal collection.
   --initial-wait-seconds <n>      Initial wait before first inspection. Default: 300.
   --poll-interval-seconds <n>     Poll interval while waiting. Default: 180.
   --max-polls <n>                 Maximum additional polls after first inspection. Default: 3.
@@ -40,6 +41,7 @@ parse_owner_repo_from_url() {
 
 pr_ref=""
 repo_override=""
+metadata_only=false
 initial_wait_seconds=300
 poll_interval_seconds=180
 max_polls=3
@@ -56,6 +58,10 @@ while (($#)); do
       (($# >= 2)) || die "--repo requires a value"
       repo_override="$2"
       shift 2
+      ;;
+    --metadata-only)
+      metadata_only=true
+      shift
       ;;
     --initial-wait-seconds)
       (($# >= 2)) || die "--initial-wait-seconds requires a value"
@@ -93,6 +99,15 @@ require_cmd jq
 gh_args=()
 if [[ -n "$repo_override" ]]; then
   gh_args+=(--repo "$repo_override")
+fi
+
+if [[ "$metadata_only" == "true" ]]; then
+  pr_meta_json="$(gh pr view "$pr_ref" ${gh_args[@]+"${gh_args[@]}"} --json number,url,headRefName,baseRefName,state,title)"
+  echo "PR_URL=$(jq -r '.url' <<<"$pr_meta_json")"
+  echo "PR_NUMBER=$(jq -r '.number' <<<"$pr_meta_json")"
+  echo "HEAD_REF=$(jq -r '.headRefName' <<<"$pr_meta_json")"
+  echo "BASE_REF=$(jq -r '.baseRefName' <<<"$pr_meta_json")"
+  exit 0
 fi
 
 if ((initial_wait_seconds > 0)); then
