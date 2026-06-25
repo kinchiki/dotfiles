@@ -56,6 +56,7 @@ gh pr checks <pr-number-or-url>
 - Delegate review comments to `address-pr-comments`, or to `gh-address-comments` when the local Skill is unavailable.
 - Parallelize only with separate worktrees, separate sessions, or disjoint file sets.
 - Serialize work in one working tree when files overlap.
+- Each follow-up lane must obtain user confirmation before committing its fixes.
 - If a review lane already committed, pushed, updated the PR description, replied, and resolved threads, record that result and do not repeat those side effects.
 
 ## Push Remaining Fixes

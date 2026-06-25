@@ -28,6 +28,7 @@ PR を作成し、初回の CI と AI レビューを確認して、必要な fo
 
 - PR 作成だけなら `open-pr` で止める。
 - dirty tree は `commit-changes` に引き渡す。
+- follow-up 修正 (review 指摘・CI 失敗) の commit は、実行前にユーザー確認を取る。
 - push と GitHub writeback は確認ポイントを守る。
 - concrete PR が必要。
 - test を弱める・削除・skip する行為は禁止。
@@ -58,6 +59,7 @@ AI review が検出できなくても CI inspection は続ける。
 
 CI failure がある場合は `gh-fix-ci` に委譲する。
 Actionable review comments がある場合は `address-pr-comments` 優先、または `gh-address-comments` に委譲する。
+委譲先には、修正後の commit を実行する前にユーザー確認を取るよう指示する。
 各スキルが commit / push / PR description 更新 / reply / resolve を完了するまで待つ。
 
 ### Step 4: Commit and push remaining changes
