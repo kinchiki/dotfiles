@@ -4,6 +4,7 @@ description: >-
   dotfiles リポジトリの agent-resources で skill または agent definition を作成・更新・整理するときに使う。
   `agent-resources/skills` と `agent-resources/agents` を source of truth とし、`.agents`、`.claude`、`.codex` への公開 symlink と検証を維持する。
   例: 「新しいスキルを作って」「対応するスキルを更新して」「agentを追加して」
+disable-model-invocation: true
 ---
 
 # manage-agent-skills

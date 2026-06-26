@@ -2,7 +2,7 @@
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../.." && pwd)"
-VALIDATOR="${SKILL_VALIDATOR:-"$HOME/.codex/skills/.system/skill-creator/scripts/quick_validate.py"}"
+VALIDATOR="${SKILL_VALIDATOR:-"$ROOT/agent-resources/skills/scripts/quick_validate.py"}"
 PYTHON_BIN="${PYTHON:-python3}"
 PYTHONPATH_PREFIX="$ROOT/agent-resources/skills/scripts/pythonpath"
 
