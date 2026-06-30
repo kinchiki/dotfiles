@@ -2,10 +2,13 @@
 
 Use these commands in Step 1 to fetch unresolved review feedback and in Step 8 to reply and resolve implemented inline review threads.
 Keep review summary bodies as implementation inputs only; they are not inline thread reply or resolve targets.
+Treat this file as the canonical source for fetch, reply, resolve, and writeback command rules.
 
 ## Fetch Review Threads
 
-Use GraphQL `reviewThreads` as the primary source and filter out resolved threads.
+Use GraphQL `reviewThreads` as the primary source.
+Keep only `isResolved == false` threads and carry the GraphQL `id` into later reply and resolve steps.
+Keep `isOutdated` and the full `comments.nodes` payload as triage input.
 
 ```bash
 gh api graphql -f query='
@@ -18,7 +21,7 @@ query($owner:String!,$repo:String!,$pr:Int!){
       }}
     }
   }
-}' -F owner=OWNER -F repo=REPO -F pr=N
+}' -F owner=OWNER -F repo=REPO -F pr=N --jq '.data.repository.pullRequest.reviewThreads.nodes[] | select(.isResolved == false)'
 ```
 
 Fetch review summary bodies separately.
@@ -29,7 +32,10 @@ gh pr view N --json reviews --jq '.reviews[] | select(.body != "") | {author:.au
 
 ## Reply To Implemented Threads
 
-Reply only after the implemented fix has been pushed and the commit URL is available.
+Reply only after the implemented fix has been pushed.
+Reply only for implemented inline review threads.
+Do not reply to review summary bodies.
+Do not reply to `recommend-skip` threads unless the user explicitly approved that writeback.
 
 ```bash
 gh api graphql -f query='
@@ -37,12 +43,12 @@ mutation($thread:ID!,$body:String!){
   addPullRequestReviewThreadReply(input:{pullRequestReviewThreadId:$thread,body:$body}){
     comment{url}
   }
-}' -F thread=THREAD_ID -f body='対応済み COMMIT_URL'
+}' -F thread=THREAD_ID -f body='対応済み'
 ```
 
 ## Resolve Replied Threads
 
-Resolve only after the reply mutation succeeds.
+Resolve only after the reply mutation succeeds for the same inline thread.
 
 ```bash
 gh api graphql -f query='
