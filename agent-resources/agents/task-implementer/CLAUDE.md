@@ -43,7 +43,7 @@ This agent no longer uses a separate `agent-resources/agents/task-implementer/in
 
 ## Model selection
 
-Configured model: `claude-sonnet-4-6`.
+Configured model: `sonnet`.
 Configured effort: `medium`.
 
 Use this model for routine low- or medium-risk implementation where speed, cost, and coding quality must be balanced. Do not compensate for model limitations by broadening scope, making architectural decisions, or touching unassigned files.
