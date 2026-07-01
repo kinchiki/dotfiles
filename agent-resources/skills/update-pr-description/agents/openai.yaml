@@ -1,0 +1,4 @@
+interface:
+  display_name: "Update PR Description"
+  short_description: "既存のGitHub PR descriptionを最小差分で更新する"
+  default_prompt: "Use $update-pr-description to inspect the current PR body and update only the sections that no longer match the implementation."

@@ -61,6 +61,7 @@ gh pr checks <pr-number-or-url>
 - Split CI failure and actionable review comments into separate lanes.
 - Delegate CI to `gh-fix-ci`.
 - Delegate review comments to `address-pr-comments`, or to `gh-address-comments` when the local Skill is unavailable.
+- If the review lane did not update the PR description itself, run `update-pr-description` as a separate lane before declaring writeback complete.
 - Parallelize only with separate worktrees, separate sessions, or disjoint file sets.
 - Serialize work in one working tree when files overlap.
 - Each follow-up lane must obtain user confirmation before committing its fixes.

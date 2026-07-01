@@ -2,7 +2,7 @@
 name: open-pr-followup
 description: >-
   PR 作成後に一定時間待ち、GitHub Actions CI と AI レビュー / レビューコメントを確認して、既存スキルへ切り出して後追い対応する。
-  PR 作成は open-pr、CI 失敗は GitHub plugin の gh-fix-ci、レビューコメント対応は address-pr-comments または GitHub plugin の gh-address-comments を使う。
+  PR 作成は open-pr、CI 失敗は GitHub plugin の gh-fix-ci、レビューコメント対応は address-pr-comments または GitHub plugin の gh-address-comments を使い、必要なら `update-pr-description` で PR 本文も同期する。
   例: 「PR作って、CIとAIレビューまで見て」「PR作成後にレビュー指摘とCI失敗も対応して」「open-pr のあとしばらく待って後追いして」。
   implement-plan / commit-changes 完了後に、PR 作成だけで止めずに CI と AI レビューの初回フォローまで進めたいときに使う。
 ---
@@ -17,6 +17,7 @@ PR を作成し、初回の CI と AI レビューを確認して、必要な fo
 - CI と AI review / unresolved review comments を確認する。
 - CI failure は `gh-fix-ci` に委譲する。
 - review comments は `address-pr-comments` 優先、または `gh-address-comments` に委譲する。
+- 必要なら `update-pr-description` で PR description の整合性を取り直す。
 - 残った未コミット差分は `commit-changes` で commit し、ユーザー確認後に push する。
 
 ## Resources
@@ -60,6 +61,8 @@ AI review が検出できなくても CI inspection は続ける。
 CI failure がある場合は `gh-fix-ci` に委譲する。
 Actionable review comments がある場合は `address-pr-comments` 優先、または `gh-address-comments` に委譲する。
 委譲先には、修正後の commit を実行する前にユーザー確認を取るよう指示する。
+review lane が `address-pr-comments` 以外の場合は、PR description 更新まで完了したか確認する。
+review lane が PR description 更新を扱わない場合は、`update-pr-description` を追加で実行する。
 各スキルが commit / push / PR description 更新 / reply / resolve を完了するまで待つ。
 
 ### Step 4: Commit and push remaining changes
