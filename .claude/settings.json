@@ -127,8 +127,6 @@
     "failIfUnavailable": true,
     "autoAllowBashIfSandboxed": true,
     "allowUnsandboxedCommands": false,
-    // User (このファイル) では . は ~/.claude の意味
-    // https://code.claude.com/docs/ja/sandboxing
     "filesystem": {
       "allowWrite": [
         "/tmp",
