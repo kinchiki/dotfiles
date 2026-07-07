@@ -113,60 +113,16 @@
     "type": "command",
     "command": "~/.claude/statusline.sh"
   },
-  "effortLevel": "high",
-  "plansDirectory": ".claude/plans",
-  "theme": "dark",
-  "preferredNotifChannel": "terminal_bell",
-  "inputNeededNotifEnabled": true,
-  "agentPushNotifEnabled": true,
   "enabledPlugins": {
-    "ruby-lsp@claude-plugins-official": true
+    "ruby-lsp@claude-plugins-official": true,
+    "typescript-lsp@claude-plugins-official": true,
+    "context7@claude-plugins-official": true
   },
   "sandbox": {
     "enabled": true,
     "failIfUnavailable": true,
     "autoAllowBashIfSandboxed": true,
     "allowUnsandboxedCommands": false,
-    "filesystem": {
-      "allowWrite": [
-        "/tmp",
-        ".",
-        "~/src/"
-      ],
-      "denyWrite": [
-        "/etc"
-      ],
-      "allowRead": [
-        ".",
-        "~/src/",
-        "~/.zshrc",
-        "~/.gitconfig",
-        "~/.codex/",
-        "~/.copilot/"
-      ],
-      "denyRead": [
-        "~/"
-      ]
-    },
-    "credentials": {
-      "files": [
-        { "path": "~/.ssh", "mode": "deny" },
-        { "path": "~/.aws", "mode": "deny" },
-        { "path": "~/.config/gh", "mode": "deny" },
-        { "path": "~/.npmrc", "mode": "deny" },
-        { "path": "~/.netrc", "mode": "deny" },
-        { "path": "~/.git-credentials", "mode": "deny" },
-        { "path": "~/.docker/config.json", "mode": "deny" }
-      ],
-      "envVars": [
-        { "name": "GITHUB_TOKEN", "mode": "deny" },
-        { "name": "GH_TOKEN", "mode": "deny" },
-        { "name": "NPM_TOKEN", "mode": "deny" },
-        { "name": "AWS_ACCESS_KEY_ID", "mode": "deny" },
-        { "name": "AWS_SECRET_ACCESS_KEY", "mode": "deny" },
-        { "name": "AWS_SESSION_TOKEN", "mode": "deny" }
-      ]
-    },
     "network": {
       "allowedDomains": [
         "api.openai.com",
@@ -175,7 +131,6 @@
         "chatgpt.com",
         "*.chatgpt.com",
         "*.openai.com",
-
         "github.com",
         "api.github.com",
         "*.github.com",
@@ -186,16 +141,130 @@
         "*.individual.githubcopilot.com",
         "*.business.githubcopilot.com",
         "*.enterprise.githubcopilot.com",
-
         "collector.github.com",
         "copilot-telemetry.githubusercontent.com",
         "default.exp-tas.com",
-
+        "npm.flatt.tech",
         "npmjs.org",
         "*.npmjs.org",
-        "registry.npmjs.org"
+        "registry.npmjs.org",
+        "mise.jdx.dev"
+      ],
+      "allowUnixSockets": [
+        "~/.colima/default/docker.sock",
+        "~/.colima/docker.sock",
+        "/var/run/docker.sock"
+      ],
+      "allowMachLookup": [
+        "com.apple.trustd.agent"
       ],
       "allowLocalBinding": true
+    },
+    "filesystem": {
+      "allowWrite": [
+        "/tmp",
+        ".",
+        "~/src/",
+        "~/.local/share/mise/",
+        "~/.local/state/mise/",
+        "~/.config/mise/",
+        "~/Library/Caches/mise/",
+        "~/.npm/",
+        "~/.colima/",
+        "~/.docker/",
+        "~/.config/gh/"
+      ],
+      "denyWrite": [
+        "/etc"
+      ],
+      "denyRead": [
+        "~/"
+      ],
+      "allowRead": [
+        ".",
+        "~/src/",
+        "~/.zshrc",
+        "~/.gitconfig",
+        "~/.codex/",
+        "~/.copilot/",
+        "~/.local/share/mise/",
+        "~/.local/state/mise/",
+        "~/.config/mise/",
+        "~/Library/Caches/mise/",
+        "~/.docker/",
+        "~/.colima/",
+        "~/.lima/",
+        "~/.config/gh/"
+      ]
+    },
+    "credentials": {
+      "files": [
+        {
+          "path": "~/.zshrc.local",
+          "mode": "deny"
+        },
+        {
+          "path": "~/.config/gh/hosts.yml",
+          "mode": "deny"
+        },
+        {
+          "path": "~/.ssh",
+          "mode": "deny"
+        },
+        {
+          "path": "~/.aws",
+          "mode": "deny"
+        },
+        {
+          "path": "~/.npmrc",
+          "mode": "deny"
+        },
+        {
+          "path": "~/.netrc",
+          "mode": "deny"
+        },
+        {
+          "path": "~/.git-credentials",
+          "mode": "deny"
+        },
+        {
+          "path": "~/.docker/config.json",
+          "mode": "deny"
+        }
+      ],
+      "envVars": [
+        {
+          "name": "NPM_TOKEN",
+          "mode": "mask",
+          "injectHosts": [
+            "npm.flatt.tech",
+            "npmjs.org",
+            "*.npmjs.org"
+          ]
+        },
+        {
+          "name": "GITHUB_TOKEN",
+          "mode": "deny"
+        },
+        {
+          "name": "AWS_ACCESS_KEY_ID",
+          "mode": "deny"
+        },
+        {
+          "name": "AWS_SECRET_ACCESS_KEY",
+          "mode": "deny"
+        },
+        {
+          "name": "AWS_SESSION_TOKEN",
+          "mode": "deny"
+        }
+      ]
     }
-  }
+  },
+  "effortLevel": "high",
+  "plansDirectory": ".claude/plans",
+  "theme": "dark",
+  "preferredNotifChannel": "terminal_bell",
+  "inputNeededNotifEnabled": true,
+  "agentPushNotifEnabled": true
 }
