@@ -15,8 +15,12 @@
       "Bash(gh issue view:*)",
       "Bash(gh release list:*)",
       "Bash(git add:*)",
+      "Bash(git branch:*)",
+      "Bash(git commit:*)",
       "Bash(git fetch:*)",
       "Bash(git stash:*)",
+      "Bash(git switch:*)",
+      "Bash(git worktree:*)",
       "WebFetch(domain:github.com)",
       "WebFetch(domain:raw.githubusercontent.com)",
       "WebFetch(domain:docs.anthropic.com)",
@@ -35,11 +39,7 @@
       "mcp__github__search_repositories",
       "mcp__github__pull_request_read",
       "Bash(codex review:*)",
-      "Bash(codex exec review:*)",
-      "Bash(git switch:*)",
-      "Bash(git branch:*)",
-      "Bash(git worktree:*)",
-      "Bash(git commit:*)"
+      "Bash(codex exec review:*)"
     ],
     "deny": [
       "Bash(env:*)",
@@ -201,10 +201,6 @@
       "files": [
         {
           "path": "~/.zshrc.local",
-          "mode": "deny"
-        },
-        {
-          "path": "~/.config/gh/hosts.yml",
           "mode": "deny"
         },
         {
