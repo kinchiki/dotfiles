@@ -1,7 +1,8 @@
 ---
 name: ticket-to-plan
 description: >-
-  GitHub や Linear のチケット、またはユーザーの自然言語の変更依頼を十分に調査し、承認済みの実装プランファイルに変換して、実装を別セッションへ引き継ぐ。
+  GitHub や Linear のチケット、またはユーザーの自然言語の変更依頼を十分に調査し、承認済みの実装プランファイルに変換する。
+  コンテキストに余裕があれば同一セッションで implement-plan による実装まで続け、コンテキスト不足が予想されるときだけ別セッションへ引き継ぐ。
   ユーザーがチケットを指しただけのとき、チケットを import したとき、またはチケットなしでコーディング前に plan / 計画を求めたときに使う。
   例: 「https://github.com/foo/bar/issues/42」「plan ENG-1234」「このissueの実装計画」「github.com/foo/bar/issues/42 のプラン」「ticket-to-plan で X を Y にしたい」「X に変えるプラン」
   issue / PR / Linear ID または自然言語の変更依頼を参照して、すぐ実装するのではなく設計、スコープ確定、タスク分解を求める場合にも使う。
@@ -10,8 +11,8 @@ description: >-
 # ticket-to-plan
 
 GitHub や Linear のタスク管理ツールのチケット、またはユーザーの自然言語の変更依頼から、fresh session がそのまま実装できる durable plan file を作るスキルです。
-Planning と implementation は分けてください。
-このセッションでは実装せず、承認済み plan file を保存して実装セッションへ引き継ぎます。
+planning フェーズは read-only で行い、production code を編集しません。
+承認と plan file 保存の後は、コンテキスト状況に応じて同一セッションで `implement-plan` による実装まで続けるか、別セッションへ引き継ぎます。
 
 ## Scope
 
@@ -21,8 +22,8 @@ Planning と implementation は分けてください。
 - codebase を調査して設計と task breakdown を作る。
 - ユーザー承認を得る。
 - plan file を現在の AI agent に対応する plan directory の `<plan-id>/` 配下に保存する。
-- `implement-plan` を使う別セッションへ引き継ぐ。
-- このセッションでは production code を編集しない。
+- 承認後、同一セッション継続か別セッション引き継ぎかを判断する。
+- planning フェーズでは production code を編集しない。
 
 ## Resources
 
@@ -38,8 +39,7 @@ Planning と implementation は分けてください。
 - User request source では依頼文と会話 context を source of truth とし、抽出した前提、受入基準、open questions を plan に明記する。
 - repo 調査では解けない open question の確認は `../ask-user-questions/SKILL.md` に従う。
 - read-only planning が使える場合は、調査中に code を編集しない。
-- ユーザー承認は「この plan でよい」という意味であり、このセッションで実装を始める許可ではない。
-- 承認後もこのセッションで実装しない。
+- ユーザー承認は plan 内容の承認であり、実装開始とセッション選択は Step 8 の判断に従う。
 - plan file は、source を再取得しなくても実装者が開始できる程度に self-contained にする。
 - planning 中に実装可否や受入基準を左右する不明点が見つかった場合は、推測で埋めずにユーザーへ確認する。
 - ユーザーレビュー後、`references/planning-ai-review.md` に従って、元の依頼内容とユーザー確認済みの意図を踏まえた最新の draft plan と task breakdown を別 AI でレビューする。
@@ -178,11 +178,20 @@ Project が明確に別 convention を持つ場合は従い、保存先を報告
 TZ=Asia/Tokyo date +%Y%m%d
 ```
 
-### Step 8: Hand off implementation
+### Step 8: Continue or hand off implementation
 
-implementation は新しいセッションに引き継いでください。
-このセッションでは実装しません。
-新しいセッションを開いてそこに貼り付ける self-contained な引き継ぎテキストを、1 つの fenced code block で提示してください。
+plan file 保存後、同一セッションで実装を続けるか、別セッションへ引き継ぐかを判断してください。
+デフォルトは同一セッションでの継続です。
+別セッションを選ぶのは、そのほうがトークン効率と出力品質が上がると見込めるときだけです。
+
+次のいずれかに当てはまる場合は、別セッションへ引き継いでください。
+
+- planning でコンテキストを大きく消費した、または compaction / 要約が既に発生していて、残りコンテキストで実装まで通す余裕が乏しい。
+- plan が大規模または high risk（タスク数が多い、touch するファイルが広い、risk 分類が high など）で、実装とレビューで残りコンテキストを超えると見込まれる。
+
+同一セッションで続ける場合は、`implement-plan` skill をこのセッションで起動し、保存した plan file を contract として実装へ進んでください。
+
+別セッションへ引き継ぐ場合は、このセッションでは実装せず、新しいセッションに貼り付ける self-contained な引き継ぎテキストを 1 つの fenced code block で提示してください。
 特定 agent の CLI コマンドや起動ツールは使わないでください。
 
 引き継ぎテキストには次を含めます。
@@ -200,7 +209,9 @@ plan file: <absolute-plan-file-path>
 Implement this plan with the `implement-plan` skill.
 ```
 
-最後に、plan の保存先と、引き継ぎテキストを提示したことを報告して停止してください。
+選んだ経路とその理由を報告してください。
+同一セッション継続を選んだ場合は、その旨と理由を報告してから `implement-plan` を起動してください。
+別セッション引き継ぎを選んだ場合は、plan の保存先と引き継ぎテキストを提示したことを報告して停止してください。
 
 ## Expected output
 
@@ -211,5 +222,5 @@ Implement this plan with the `implement-plan` skill.
 - task breakdown の概要
 - AI review の reviewer と planning AI の採否判断
 - 保存した plan file の path
-- 新規セッション用の引き継ぎテキストを提示したか
-- この session では実装していないこと
+- 選んだ経路（同一セッション継続 / 別セッション引き継ぎ）とその理由
+- 同一セッション継続なら実装を続ける旨、別セッション引き継ぎなら引き継ぎテキストを提示して停止した旨
