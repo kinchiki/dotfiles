@@ -31,7 +31,7 @@ description: >-
 - default branch から PR を作らない。
 - working tree が dirty の場合は停止する。
 - push と `gh pr create` の前にユーザー確認を取る。
-- PR assignee には必ず `kinchiki` を指定する。
+- PR assignee ログイン中のユーザー `"@me"` を指定する。
 - コマンド出力は、PR URL、title、失敗要点だけを報告する。
 
 ## Workflow
@@ -60,7 +60,7 @@ git status --short
 
 ```bash
 git push -u origin HEAD
-gh pr create --base <default-branch> --title "<title>" --body "<body>" --assignee kinchiki
+gh pr create --base <default-branch> --title "<title>" --body "<body>" --assignee "@me"
 ```
 
 - Title は repo の通常言語に合わせて簡潔に書く。
