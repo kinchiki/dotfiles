@@ -15,9 +15,9 @@ Never load it for low risk.
 
 ## Model and effort
 
-- Codex code review default: `CODEX_REVIEW_MODEL=${CODEX_REVIEW_MODEL:-codex-auto-review}` and `CODEX_REVIEW_EFFORT=${CODEX_REVIEW_EFFORT:-medium}`. This is the dedicated model for the `codex exec review` subcommand; it intentionally differs from ticket-to-plan's plan-review default, which runs a plain `codex exec` prompt.
+- Codex code review default: `CODEX_REVIEW_MODEL=${CODEX_REVIEW_MODEL:-gpt-5.6-terra}` and `CODEX_REVIEW_EFFORT=${CODEX_REVIEW_EFFORT:-medium}`. This is the balanced model for the `codex exec review` subcommand. Use `CODEX_REVIEW_MODEL=gpt-5.6-sol` with `CODEX_REVIEW_EFFORT=high` for high-risk diffs.
 - Claude code review default: `CLAUDE_REVIEW_MODEL=${CLAUDE_REVIEW_MODEL:-sonnet}` and `CLAUDE_REVIEW_EFFORT=${CLAUDE_REVIEW_EFFORT:-medium}`.
-- Use `CODEX_REVIEW_EFFORT=high` or `CLAUDE_REVIEW_EFFORT=high` for high-risk diffs.
+- Use `CODEX_REVIEW_MODEL=gpt-5.6-sol CODEX_REVIEW_EFFORT=high` or `CLAUDE_REVIEW_EFFORT=high` for high-risk diffs.
 - Use `xhigh` or `max` only when explicitly requested.
 - Environment variables override the defaults.
 

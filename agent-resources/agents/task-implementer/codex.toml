@@ -38,7 +38,7 @@ production incident fixes, or any task with ambiguous scope. Use a stronger
 implementer or the orchestrator for those cases.
 """
 
-model = "gpt-5.4-mini"
+model = "gpt-5.6-luna"
 model_reasoning_effort = "medium"
 sandbox_mode = "workspace-write"
 

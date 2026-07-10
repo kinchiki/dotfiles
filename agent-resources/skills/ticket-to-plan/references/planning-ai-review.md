@@ -24,7 +24,7 @@ Use cost-effective defaults for review.
 Raise effort only when the plan involves auth, billing, permissions, data deletion, migration, security, production data, broad refactor, or unknown blast radius.
 Prefer explicit environment overrides when the user or repo provides them.
 
-- Codex reviewer default: `CODEX_REVIEW_MODEL=${CODEX_REVIEW_MODEL:-gpt-5.4}` and `CODEX_REVIEW_EFFORT=${CODEX_REVIEW_EFFORT:-medium}`. plain `codex exec` によるプラン文書レビューの default。`implement-plan` の diff review 専用モデル（`codex-auto-review`）とは意図的に別。
+- Codex reviewer default: `CODEX_REVIEW_MODEL=${CODEX_REVIEW_MODEL:-gpt-5.6-terra}` and `CODEX_REVIEW_EFFORT=${CODEX_REVIEW_EFFORT:-medium}`. plain `codex exec` によるプラン文書レビューの balanced default。高リスク計画では `CODEX_REVIEW_MODEL=gpt-5.6-sol` と `CODEX_REVIEW_EFFORT=high` を指定する。
 - Claude reviewer default: `CLAUDE_REVIEW_MODEL=${CLAUDE_REVIEW_MODEL:-sonnet}` and `CLAUDE_REVIEW_EFFORT=${CLAUDE_REVIEW_EFFORT:-medium}`.
 - High-risk plan review default: set the selected reviewer effort env var to `high`.
 - Use `xhigh` or `max` only when explicitly requested.
