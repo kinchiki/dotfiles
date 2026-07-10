@@ -33,7 +33,7 @@ Use `request-<slug>` for user request sources.
 - **ソース:** GitHub | Linear | User request
 - **参照:** <完全な URL、ID、または元依頼の短い引用>
 - **Plan ID:** <plan-id>
-- **計画者:** <AI agent 名、モデル ID、reasoning effort 設定。例: codex / best-available-reasoning-model / reasoning effort: max>
+- **計画者:** <AI agent 名、モデル ID、reasoning effort 設定。例: codex / gpt-5.6-sol / reasoning effort: high>
 - **日付:** <YYYY-MM-DD>
 - **ステータス:** 承認済み - 実装可能
 

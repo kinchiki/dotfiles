@@ -144,9 +144,9 @@ esac
 
 case "$reviewer" in
   codex)
-    # gpt-5.4 is the general-purpose default model (matches the user's codex config.toml);
+    # GPT-5.6 Terra is the balanced default for planning review;
     # this path runs a plain `codex exec` prompt review, not the `codex exec review` subcommand.
-    model="${model:-${CODEX_REVIEW_MODEL:-gpt-5.4}}"
+    model="${model:-${CODEX_REVIEW_MODEL:-gpt-5.6-terra}}"
     effort="${effort:-${CODEX_REVIEW_EFFORT:-medium}}"
     ;;
   claude)
