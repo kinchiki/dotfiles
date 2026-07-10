@@ -1,0 +1,4 @@
+interface:
+  display_name: "Address PR Comments"
+  short_description: "GitHub PRの未解決レビューコメントをトリアージして修正する"
+  default_prompt: "Use $address-pr-comments to triage unresolved PR review comments and implement the approved fixes."

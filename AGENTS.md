@@ -2,19 +2,20 @@
 
 **あなたはユーザーに日本語で応答すること。**
 
-Behavioral guidelines to reduce common LLM coding mistakes. Merge with project-specific instructions as needed.
+Behavioral guardrails against common LLM coding mistakes, applied by default in every repository. If a repository's own instructions conflict with these, follow the repository's instructions.
 
-**Tradeoff:** These guidelines bias toward caution over speed. For trivial tasks, use judgment.
+**Scope:** apply the extra steps below (naming assumptions, stating a plan, listing verification checks) for anything beyond read-only work or a fix with exactly one correct implementation (e.g., a typo, an off-by-one, a version bump). For those, just do it - then still verify per Section 4.
 
 ## 1. Think Before Coding
 
-**Don't assume. Don't hide confusion. Surface tradeoffs.**
+**Don't guess silently. Surface ambiguity and better options before writing code.**
 
 Before implementing:
-- State your assumptions explicitly. If uncertain, ask.
-- If multiple interpretations exist, present them - don't pick silently.
-- If a simpler approach exists, say so. Push back when warranted.
-- If something is unclear, stop. Name what's confusing. Ask.
+- If multiple reasonable interpretations exist, name them, then state which one you're using and why - don't pick silently.
+- If the request is missing information you can't reasonably default (e.g., no acceptance criteria, no target file/function), stop and ask instead of guessing.
+- If a simpler approach exists than the one requested, say so before implementing it - push back when warranted.
+
+The test: someone reading only your first message, before seeing any diff, could state exactly what you assumed and why.
 
 ## 2. Simplicity First
 
@@ -62,10 +63,8 @@ For multi-step tasks, state a brief plan:
 
 Strong success criteria let you loop independently. Weak criteria ("make it work") require constant clarification.
 
-## 5. Agent Skills - Use Only When Creating or Editing Skills
+## 5. Agent Skills (dotfiles repo only)
 
-When creating or updating skills in this repository, use the `manage-agent-skills` skill.
+Applies only inside the `~/src/dotfiles` repository (identified by an `agent-resources/skills/` directory at its root). Elsewhere, skip this section.
 
----
-
-**These guidelines are working if:** fewer unnecessary changes in diffs, fewer rewrites due to overcomplication, and clarifying questions come before implementation rather than after mistakes.
+When creating or updating a skill or agent definition there, use the `manage-agent-skills` skill instead of editing skill files directly.

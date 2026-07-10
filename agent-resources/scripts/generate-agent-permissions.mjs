@@ -16,6 +16,8 @@ const decisionByKind = {
   deny: "forbidden",
 };
 
+const checkOnly = process.argv.includes("--check");
+
 const source = readJson(sourcePath);
 
 const claudePermissions = {};
@@ -28,9 +30,10 @@ for (const kind of ["allow", "deny", "ask"]) {
   });
 }
 
-const claudeSettings = readJson(claudeSettingsPath);
+const claudeSettingsBefore = fs.readFileSync(claudeSettingsPath, "utf8");
+const claudeSettings = JSON.parse(claudeSettingsBefore);
 claudeSettings.permissions = claudePermissions;
-writeText(claudeSettingsPath, `${JSON.stringify(claudeSettings, null, 2)}\n`);
+const claudeSettingsAfter = `${JSON.stringify(claudeSettings, null, 2)}\n`;
 
 const codexRules = [];
 for (const kind of ["allow", "ask", "deny"]) {
@@ -45,7 +48,25 @@ for (const kind of ["allow", "ask", "deny"]) {
   }
 }
 
-writeText(codexRulesPath, renderCodexRules(codexRules));
+const codexRulesAfter = renderCodexRules(codexRules);
+const codexRulesBefore = fs.existsSync(codexRulesPath) ? fs.readFileSync(codexRulesPath, "utf8") : null;
+
+if (checkOnly) {
+  const drift = [];
+  if (claudeSettingsAfter !== claudeSettingsBefore) drift.push(".claude/settings.json");
+  if (codexRulesAfter !== codexRulesBefore) drift.push(".codex/rules/default.rules");
+  if (drift.length > 0) {
+    console.error("agent-resources/permissions.json is out of sync with:");
+    for (const file of drift) console.error(`  - ${file}`);
+    console.error("Run: node agent-resources/scripts/generate-agent-permissions.mjs");
+    process.exit(1);
+  }
+  console.log("agent-resources/permissions.json is in sync.");
+  process.exit(0);
+}
+
+writeText(claudeSettingsPath, claudeSettingsAfter);
+writeText(codexRulesPath, codexRulesAfter);
 
 function readJson(filePath) {
   return JSON.parse(fs.readFileSync(filePath, "utf8"));

@@ -15,8 +15,12 @@
       { "claude": "Bash(gh issue view:*)" },
       { "claude": "Bash(gh release list:*)" },
       { "claude": "Bash(git add:*)" },
+      { "claude": "Bash(git branch:*)" },
+      { "claude": "Bash(git commit:*)" },
       { "claude": "Bash(git fetch:*)" },
       { "claude": "Bash(git stash:*)" },
+      { "claude": "Bash(git switch:*)" },
+      { "claude": "Bash(git worktree:*)" },
       { "claude": "WebFetch(domain:github.com)" },
       { "claude": "WebFetch(domain:raw.githubusercontent.com)" },
       { "claude": "WebFetch(domain:docs.anthropic.com)" },
@@ -35,11 +39,7 @@
       { "claude": "mcp__github__search_repositories" },
       { "claude": "mcp__github__pull_request_read" },
       { "claude": "Bash(codex review:*)" },
-      { "claude": "Bash(codex exec review:*)" },
-      { "claude": "Bash(git switch:*)" },
-      { "claude": "Bash(git branch:*)" },
-      { "claude": "Bash(git worktree:*)" },
-      { "claude": "Bash(git commit:*)" }
+      { "claude": "Bash(codex exec review:*)" }
     ],
     "deny": [
       {

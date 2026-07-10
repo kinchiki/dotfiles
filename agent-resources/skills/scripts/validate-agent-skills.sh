@@ -34,6 +34,9 @@ fi
 export PYTHONPATH="$PYTHONPATH_PREFIX${PYTHONPATH:+:$PYTHONPATH}"
 export PYTHONDONTWRITEBYTECODE=1
 
+echo "==> agent-resources/permissions.json sync check"
+node "$ROOT/agent-resources/scripts/generate-agent-permissions.mjs" --check
+
 if [[ "$#" -gt 0 ]]; then
   skill_dirs=("$@")
 else

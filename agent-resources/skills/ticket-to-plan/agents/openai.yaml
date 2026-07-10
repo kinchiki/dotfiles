@@ -1,0 +1,4 @@
+interface:
+  display_name: "Ticket to Plan"
+  short_description: "チケットや変更依頼を承認済みの実装プランファイルに変換する"
+  default_prompt: "Use $ticket-to-plan to turn a ticket or change request into an approved implementation plan file."

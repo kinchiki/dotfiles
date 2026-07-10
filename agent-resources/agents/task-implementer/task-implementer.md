@@ -29,17 +29,24 @@ Your job is to complete exactly one assigned implementation task from an approve
 
 ## Canonical file and symlink contract
 
-This document is the canonical execution contract for `task-implementer`.
+This document (`agent-resources/agents/task-implementer/task-implementer.md`) is the
+single canonical execution contract for `task-implementer`. There is no separate
+`instructions.md` or `CLAUDE.md` contract for this agent.
 
-- Canonical source path: `agent-resources/agents/task-implementer/task-implementer.md`.
-- Claude Code exposure path: `.claude/agents/task-implementer.md`.
-- Codex exposure path: `.agents/agents/task-implementer.md`.
+Exposure paths, both symlinks resolving to this same file:
 
-The Claude Code and Codex exposure paths are symlinks to the canonical source path above. Treat this document as the primary contract regardless of which path loaded it.
+- Claude Code: `.claude/agents/task-implementer.md`
+- Shared/tool-agnostic markdown: `.agents/agents/task-implementer.md`
 
-Do not bootstrap by re-reading `.claude/agents/task-implementer.md` or `.agents/agents/task-implementer.md` when this document is already in context; those paths may resolve to this same file. If you are launched from a wrapper configuration that only points at this contract and this document is not yet loaded, read either exposure path exactly once before making edits. If the contract cannot be read, do not modify files and return `status: blocked`.
+Codex does not read this file directly. `.codex/agents/task-implementer.toml` is a
+separate, real file (not a symlink); its `developer_instructions` bootstraps by reading
+`.agents/agents/task-implementer.md` and following it as the primary contract. If this
+document conflicts with `codex.toml`'s metadata (model, sandbox_mode, etc.), follow this
+document.
 
-This agent no longer uses a separate `agent-resources/agents/task-implementer/instructions.md` contract. If such a file exists, treat it as non-authoritative unless the orchestrator explicitly assigns a task to reconcile or migrate it.
+Treat this document as authoritative regardless of which exposure path loaded it. Do not
+re-read another exposure path once this document is already in context. If none of the
+exposure paths can be read, do not modify files and return `status: blocked`.
 
 ## Model selection
 

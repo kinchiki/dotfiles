@@ -1,0 +1,4 @@
+interface:
+  display_name: "Implement Plan"
+  short_description: "承認済みの実装プランを端から端まで実行する"
+  default_prompt: "Use $implement-plan to execute an approved plan file end to end, including tests and review."

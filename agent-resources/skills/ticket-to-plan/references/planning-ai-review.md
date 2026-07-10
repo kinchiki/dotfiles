@@ -24,7 +24,7 @@ Use cost-effective defaults for review.
 Raise effort only when the plan involves auth, billing, permissions, data deletion, migration, security, production data, broad refactor, or unknown blast radius.
 Prefer explicit environment overrides when the user or repo provides them.
 
-- Codex reviewer default: `CODEX_REVIEW_MODEL=${CODEX_REVIEW_MODEL:-gpt-5.4}` and `CODEX_REVIEW_EFFORT=${CODEX_REVIEW_EFFORT:-medium}`.
+- Codex reviewer default: `CODEX_REVIEW_MODEL=${CODEX_REVIEW_MODEL:-gpt-5.4}` and `CODEX_REVIEW_EFFORT=${CODEX_REVIEW_EFFORT:-medium}`. plain `codex exec` によるプラン文書レビューの default。`implement-plan` の diff review 専用モデル（`codex-auto-review`）とは意図的に別。
 - Claude reviewer default: `CLAUDE_REVIEW_MODEL=${CLAUDE_REVIEW_MODEL:-sonnet}` and `CLAUDE_REVIEW_EFFORT=${CLAUDE_REVIEW_EFFORT:-medium}`.
 - High-risk plan review default: set the selected reviewer effort env var to `high`.
 - Use `xhigh` or `max` only when explicitly requested.
@@ -69,6 +69,7 @@ No findings
 
 ## Run the reviewer
 
+Run every reviewer script below from this skill's own directory.
 Use a read-only mode.
 Tell the reviewer not to edit production code, skill files, or the plan file.
 Write the review packet to `REVIEW_PROMPT_FILE` before running a reviewer script.
@@ -85,7 +86,7 @@ If Claude Code created the draft plan, use Codex as the reviewer:
 REPO="<absolute repo path>"
 REVIEW_PROMPT_FILE="<review packet file>"
 
-agent-resources/skills/ticket-to-plan/scripts/run-codex-planning-review.sh \
+scripts/run-codex-planning-review.sh \
   --repo "$REPO" \
   --prompt-file "$REVIEW_PROMPT_FILE"
 ```
@@ -96,7 +97,7 @@ If Codex created the draft plan, use Claude Code as the reviewer:
 REPO="<absolute repo path>"
 REVIEW_PROMPT_FILE="<review packet file>"
 
-agent-resources/skills/ticket-to-plan/scripts/run-claude-planning-review.sh \
+scripts/run-claude-planning-review.sh \
   --repo "$REPO" \
   --prompt-file "$REVIEW_PROMPT_FILE"
 ```
@@ -104,7 +105,7 @@ agent-resources/skills/ticket-to-plan/scripts/run-claude-planning-review.sh \
 Use the common runner directly only as the low-level API:
 
 ```bash
-agent-resources/skills/ticket-to-plan/scripts/run-planning-reviewer.sh \
+scripts/run-planning-reviewer.sh \
   --repo "$REPO" \
   --reviewer codex \
   --prompt-file "$REVIEW_PROMPT_FILE"

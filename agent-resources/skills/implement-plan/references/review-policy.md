@@ -15,7 +15,7 @@ Never load it for low risk.
 
 ## Model and effort
 
-- Codex code review default: `CODEX_REVIEW_MODEL=${CODEX_REVIEW_MODEL:-codex-auto-review}` and `CODEX_REVIEW_EFFORT=${CODEX_REVIEW_EFFORT:-medium}`.
+- Codex code review default: `CODEX_REVIEW_MODEL=${CODEX_REVIEW_MODEL:-codex-auto-review}` and `CODEX_REVIEW_EFFORT=${CODEX_REVIEW_EFFORT:-medium}`. This is the dedicated model for the `codex exec review` subcommand; it intentionally differs from ticket-to-plan's plan-review default, which runs a plain `codex exec` prompt.
 - Claude code review default: `CLAUDE_REVIEW_MODEL=${CLAUDE_REVIEW_MODEL:-sonnet}` and `CLAUDE_REVIEW_EFFORT=${CLAUDE_REVIEW_EFFORT:-medium}`.
 - Use `CODEX_REVIEW_EFFORT=high` or `CLAUDE_REVIEW_EFFORT=high` for high-risk diffs.
 - Use `xhigh` or `max` only when explicitly requested.
@@ -23,7 +23,7 @@ Never load it for low risk.
 
 ## Run
 
-- Run from the repo root: `agent-resources/skills/implement-plan/scripts/review-codex.sh` or `.../scripts/review-claude.sh`.
+- Run `scripts/review-codex.sh` or `scripts/review-claude.sh` from this skill's own directory (the skill root, one level up from this `references/` directory).
 - Each script reviews the uncommitted working tree, verifies the reviewer actually explored the diff, prints the review body, and reports a `TRUSTED` or `UNTRUSTED` verdict with a matching exit code.
 - Trust a clean ("no findings") result only when the script reports `TRUSTED` and the output references the actual diff.
 - If `UNTRUSTED`, rerun once when the same reviewer can run without new blocked approval.

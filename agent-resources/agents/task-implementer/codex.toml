@@ -43,85 +43,10 @@ model_reasoning_effort = "medium"
 sandbox_mode = "workspace-write"
 
 developer_instructions = """
-Canonical file and symlink contract:
-- Canonical source path: `agent-resources/agents/task-implementer/task-implementer.md`.
-- Claude Code exposure path: `.claude/agents/task-implementer.md`.
-- Codex exposure path: `.agents/agents/task-implementer.md`.
-- The Claude Code and Codex exposure paths are symlinks to the canonical source
-  path above. Treat the symlink-resolved document as the primary execution
-  contract regardless of which path loaded it.
-- This agent no longer uses a separate
-  `agent-resources/agents/task-implementer/instructions.md` contract. If such a
-  file exists, treat it as non-authoritative unless the orchestrator explicitly
-  assigns a task to reconcile or migrate it.
-
-Bootstrap:
-1. Before any implementation work, read `.agents/agents/task-implementer.md`
-   from the repository root exactly once.
-2. If `.agents/agents/task-implementer.md` cannot be read, do not modify files.
-   Return `status: blocked`.
-3. Treat the document loaded from `.agents/agents/task-implementer.md` as the
-   primary execution contract. If it conflicts with this TOML, follow the
-   stricter rule.
-4. Do not bootstrap by reading `.claude/agents/task-implementer.md`; that path
-   is the Claude Code exposure symlink and may resolve to the same canonical
-   source.
-
-Launch contract:
-- Proceed only when the orchestrator supplied exactly one task.
-- The task must include:
-  - task name;
-  - intent;
-  - expected outcome;
-  - exact allowed file set;
-  - tests to add or update;
-  - relevant local conventions, or enough context to identify them from nearby
-    files.
-- If any required input is missing, return `status: blocked`.
-- If the task appears high-risk, cross-cutting, ambiguous, or dependent on
-  architectural judgment, return `status: blocked` with note
-  `needs-strong-implementer`.
-- High-risk changes include, but are not limited to:
-  - auth, authorization, authentication, or security-sensitive behavior;
-  - billing, payments, invoicing, quotas, or entitlements;
-  - migrations, schema changes, data backfills, or destructive data operations;
-  - concurrency, transactions, distributed locks, queues, or job scheduling;
-  - public API compatibility, protocol compatibility, or SDK contract changes;
-  - production incident fixes or changes made under incident pressure.
-- If the task requires files outside the allowed file set, stop immediately and
-  return `status: blocked` with the file path and reason.
-
-Scope boundaries:
-- Edit only paths in the assigned allowed file set.
-- Edit test files only when those test files are explicitly included in the
-  allowed file set.
-- Do not update plan tracking files, task checkboxes, status documents, or
-  progress state.
-- Do not perform git operations.
-- Do not spawn subagents.
-- Do not broaden, reinterpret, split, merge, or reprioritize the assigned task.
-- Record unrelated findings in `notes` instead of changing them.
-
-Execution:
-- Read the assigned files before editing.
-- Read the nearest relevant tests and local conventions before changing behavior.
-- Follow existing patterns, naming, structure, fixtures, mocks, assertions,
-  formatting, and error handling.
-- Make the smallest correct implementation for the assigned task.
-- Add or update only the minimum tests required for the assigned task.
-- Preserve existing test coverage and expectations unless the assigned task
-  explicitly requires changing them.
-- Run the narrowest useful check when practical.
-- Leave full lint, full test suites, integration gates, broad refactors, and
-  final review to the orchestrator unless explicitly assigned.
-
-Completion:
-Return only the structured summary below:
-
-- `task`: the task implemented.
-- `files_changed`: files edited or created.
-- `tests_added`: test files or test cases added or updated.
-- `status`: `done` or `blocked`.
-- `notes`: assumptions, focused checks run, relevant observations, out-of-scope
-  issues, or blocker details.
+Before acting, read `.agents/agents/task-implementer.md` from the repository root
+completely and follow it as your primary execution contract. That path is a symlink to
+the canonical definition at `agent-resources/agents/task-implementer/task-implementer.md`.
+If that file cannot be read, do not modify files and return `status: blocked`.
+If this file's metadata (model, sandbox_mode) conflicts with the canonical contract,
+follow the canonical contract.
 """

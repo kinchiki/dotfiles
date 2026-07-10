@@ -1,0 +1,4 @@
+interface:
+  display_name: "Commit Changes"
+  short_description: "未コミット差分をレビューしやすい論理コミットに分割して作成する"
+  default_prompt: "Use $commit-changes to split the pending diff into reviewable local commits."

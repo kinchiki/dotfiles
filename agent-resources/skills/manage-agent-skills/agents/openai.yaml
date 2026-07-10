@@ -1,4 +1,4 @@
 interface:
   display_name: "Manage Agent Skills"
-  short_description: "Create and maintain repo agent skills"
+  short_description: "リポジトリの agent skill を作成・保守する"
   default_prompt: "Use $manage-agent-skills to create or update an agent skill in this repository."

@@ -1,7 +1,8 @@
 # Follow-up Workflow Details
 
-Use this reference when executing Steps 1 through 6.
+Use this reference when executing Steps 0 through 5.
 It holds command recipes and lane integration details so `SKILL.md` stays focused on orchestration.
+Run every `scripts/` command below from this skill's own directory.
 
 ## Resolve PR Metadata
 
@@ -9,7 +10,7 @@ After `open-pr` succeeds, fetch the concrete PR identity.
 Use the helper script first; it prints `PR_URL`, `PR_NUMBER`, `HEAD_REF`, and `BASE_REF` without waiting or collecting signals.
 
 ```bash
-agent-resources/skills/open-pr-followup/scripts/poll-pr-signals.sh --pr <pr-number-or-url-or-branch> --metadata-only
+scripts/poll-pr-signals.sh --pr <pr-number-or-url-or-branch> --metadata-only
 ```
 
 If the script cannot run, use the fallback command.
@@ -24,7 +25,7 @@ Use the wait policy in `SKILL.md` Step 2.
 Use the helper script first.
 
 ```bash
-agent-resources/skills/open-pr-followup/scripts/poll-pr-signals.sh --pr <pr-number-or-url-or-branch> --initial-wait-seconds 300 --poll-interval-seconds 180 --max-polls 3
+scripts/poll-pr-signals.sh --pr <pr-number-or-url-or-branch> --initial-wait-seconds 300 --poll-interval-seconds 180 --max-polls 3
 ```
 
 The script prints a compact summary including `CHECKS_STATUS`, `CHECKS_FAIL_COUNT`, `CHECKS_PENDING_COUNT`, `UNRESOLVED_THREAD_COUNT`, and `AI_REVIEW_DETECTED`.

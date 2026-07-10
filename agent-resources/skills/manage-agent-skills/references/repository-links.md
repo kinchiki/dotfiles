@@ -25,4 +25,4 @@ Publish an updated agent definition to `.agents/`, `.claude/`, and `.codex/` wit
 agent-resources/skills/manage-agent-skills/scripts/maintain-agent-definition.sh <agent-name>
 ```
 
-This script verifies `instructions.md`, `CLAUDE.md`, and `codex.toml`, then ensures the published symlinks exist.
+This script verifies `<agent-name>.md` (canonical) and `codex.toml`, then ensures `.agents/agents/<agent-name>.md` and `.claude/agents/<agent-name>.md` symlink to the canonical file and `.codex/agents/<agent-name>.toml` symlinks to `codex.toml`.

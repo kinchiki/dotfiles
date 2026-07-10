@@ -14,6 +14,10 @@ Options:
   --poll-interval-seconds <n>     Poll interval while waiting. Default: 180.
   --max-polls <n>                 Maximum additional polls after first inspection. Default: 3.
   -h, --help                      Show help.
+
+Environment variables:
+  POLL_PR_SIGNALS_IGNORED_CHECK       Overrides the default ignored check name (ci/circleci: test).
+  POLL_PR_SIGNALS_AI_AUTHOR_PATTERN   Overrides the default AI reviewer author regex pattern.
 USAGE
 }
 
@@ -45,7 +49,7 @@ metadata_only=false
 initial_wait_seconds=300
 poll_interval_seconds=180
 max_polls=3
-ignored_check="ci/circleci: test"
+ignored_check="${POLL_PR_SIGNALS_IGNORED_CHECK:-ci/circleci: test}"
 
 while (($#)); do
   case "$1" in
@@ -132,7 +136,7 @@ last_checks_json='[]'
 last_reviews_json='[]'
 last_threads_json='[]'
 ai_review_detected=false
-ai_author_pattern='(copilot|coderabbit|openai|gpt|claude|gemini|ai[-_]?review|ai[-_]?bot|\[bot\]$)'
+ai_author_pattern="${POLL_PR_SIGNALS_AI_AUTHOR_PATTERN:-(copilot|coderabbit|openai|gpt|claude|gemini|ai[-_]?review|ai[-_]?bot|\[bot\]$)}"
 
 collect_signals() {
   last_checks_json="$(gh pr checks "$pr_ref" ${gh_args[@]+"${gh_args[@]}"} --json name,state,bucket,link,workflow,event 2>/dev/null || echo '[]')"

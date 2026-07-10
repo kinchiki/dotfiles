@@ -9,41 +9,34 @@ description: >-
 
 # commit-changes
 
-Use this skill to turn a verified working tree into one or more readable local commits.
-This skill owns only commit planning, staging, and commit messages.
-
-## Language policy
-
-- Keep UI-facing metadata, including the frontmatter `description`, in Japanese.
-- Write commit messages in Japanese (repository language).
-- Keep this `SKILL.md` body in English for shared reference across agents.
-- Report results to the user in Japanese unless a more specific instruction overrides it.
+検証済みの working tree を、レビューしやすい 1 つ以上の local commit に変えるスキルです。
+このスキルが担当するのは commit planning、staging、commit message の作成だけです。
 
 ## Scope
 
-- Create local commits.
-- Split changes into multiple commits when that makes the review easier.
-- Do not push, create PRs, or write to GitHub.
-- If a PR is needed, use `open-pr` or `open-pr-followup` after this skill.
+- local commit を作る。
+- レビューしやすくなる場合は複数 commit に分割する。
+- push、PR 作成、GitHub への書き戻しは行わない。
+- PR が必要な場合は、このスキルの後に `open-pr` または `open-pr-followup` を使う。
 
 ## Hard constraints
 
-- Do not commit on the default branch.
-- Inspect `git status --short`, `git diff`, and `git diff --staged` before staging.
-- If unrelated user changes are mixed in and cannot be separated safely, stop and ask.
-- Keep secrets, debug prints, generated noise, and unrelated files out of commits.
-- Follow the repository's commit message language, prefixes, and Conventional Commit rules.
-- If the user has not explicitly authorized commits in this turn, present the commit plan before proceeding.
+- default branch では commit しない。
+- staging 前に `git status --short`、`git diff`、`git diff --staged` を確認する。
+- 無関係なユーザー変更が混在していて安全に分離できない場合は、停止して確認する。
+- secrets、debug print、生成物の noise、無関係な file を commit に含めない。
+- repository の commit message 言語、prefix、Conventional Commit ルールに従う。
+- ユーザーがこの turn で commit を明示的に許可していない場合は、実行前に commit plan を提示する。
 
 ## Workflow
 
 ### Step 1: Inspect pending state
 
-- Check the current branch.
-- Read the full pending diff.
-- Read the staged diff when one exists.
-- If this is a standalone invocation and the lint / test commands are obvious, run them before committing.
-- If there is no pending diff, report that there is nothing to commit and stop.
+- 現在の branch を確認する。
+- pending diff の全体を読む。
+- staged diff がある場合はそれも読む。
+- standalone invocation で lint / test コマンドが明らかな場合は、commit 前に実行する。
+- pending diff がなければ、commit するものがない旨を報告して停止する。
 
 ```bash
 git branch --show-current
@@ -54,19 +47,19 @@ git diff --staged
 
 ### Step 2: Plan logical commits
 
-- Use the smallest number of commits that keeps the review story clear.
-- Make each commit understandable on its own, including purpose, impact, and verification points.
-- Order commits so the reviewer can follow the diff naturally.
-- Split separate concerns such as implementation and docs, production code and test-only cleanup, or meaningful generated output.
-- Split semantic changes from mechanical movement, formatting, or generated updates when doing so reduces review noise.
-- Keep tightly coupled code and tests in the same commit.
-- Avoid splits that force the reviewer to jump across multiple commits to understand one behavior change.
-- Do not split mechanically by file, task checkbox, or tiny edit.
-- Use one commit for one coherent concern.
+- レビューの流れが明確に保てる範囲で、最小の commit 数にする。
+- 各 commit を、目的・影響・検証ポイントを含めて単独で理解できるようにする。
+- reviewer が diff を自然に追える順序にする。
+- 実装と docs、production code と test 専用の cleanup、意味のある生成物など、関心事が別なら分割する。
+- semantic な変更と、機械的な移動・formatting・生成物更新は、分けたほうが review noise が減る場合に分割する。
+- 密結合な code と test は同じ commit にまとめる。
+- 1 つの挙動変更を理解するために reviewer が複数 commit をまたぐ必要が出る分割は避ける。
+- file 単位、task checkbox 単位、小さな edit 単位での機械的な分割はしない。
+- 1 つの commit は 1 つの一貫した関心事にする。
 
 ### Step 3: Stage and commit intentionally
 
-Inspect the staged diff for each commit.
+各 commit ごとに staged diff を確認してください。
 
 ```bash
 git add -p
@@ -74,18 +67,18 @@ git diff --staged
 git commit
 ```
 
-- Stage intentionally with `git add -p`, pathspecs, or both.
-- Use `git add -A` only when the entire remaining diff clearly belongs to the next commit.
-- Make the staged diff non-empty and understandable on its own.
-- Reread the staged diff from the reviewer's perspective and confirm that it can be reviewed without context from another commit.
-- Write messages that communicate why the change exists, not just what changed.
-- Write all commit messages in Japanese, using Conventional Commit format where applicable (e.g., `feat: 新機能説明`, `fix: バグ修正説明`, `refactor: リファクタリング説明`, `docs: ドキュメント更新`, `test: テスト追加`).
-- Keep each commit buildable / testable where practical.
+- `git add -p`、pathspec、またはその両方で意図的に stage する。
+- `git add -A` は、残り diff 全体が明らかに次の commit に属する場合だけ使う。
+- staged diff を空でない状態にし、それ単独で理解できるようにする。
+- reviewer の視点で staged diff を読み直し、他の commit の context なしにレビューできることを確認する。
+- 何が変わったかだけでなく、なぜその変更が必要かが伝わる message を書く。
+- commit message はすべて日本語で書き、該当する場合は Conventional Commit 形式を使う（例: `feat: 新機能説明`、`fix: バグ修正説明`、`refactor: リファクタリング説明`、`docs: ドキュメント更新`、`test: テスト追加`）。
+- 現実的な範囲で、各 commit を build / test 可能な状態に保つ。
 
 ### Step 4: Report
 
-Report the following in Japanese.
+日本語で次を報告してください。
 
-- Created commit hashes and subjects.
-- Whether the working tree is clean or dirty.
-- If moving to a PR, state that `open-pr` or `open-pr-followup` is the next step.
+- 作成した commit hash と subject。
+- working tree が clean か dirty か。
+- PR に進む場合は、次の step が `open-pr` または `open-pr-followup` であること。

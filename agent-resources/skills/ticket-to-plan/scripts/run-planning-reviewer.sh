@@ -144,6 +144,8 @@ esac
 
 case "$reviewer" in
   codex)
+    # gpt-5.4 is the general-purpose default model (matches the user's codex config.toml);
+    # this path runs a plain `codex exec` prompt review, not the `codex exec review` subcommand.
     model="${model:-${CODEX_REVIEW_MODEL:-gpt-5.4}}"
     effort="${effort:-${CODEX_REVIEW_EFFORT:-medium}}"
     ;;

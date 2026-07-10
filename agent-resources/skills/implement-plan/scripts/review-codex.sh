@@ -7,6 +7,8 @@ REVIEW_DIR="$(mktemp -d "${TMPDIR:-/tmp}/codex-review.XXXXXX")"
 REVIEW_OUT="$REVIEW_DIR/review.md"
 REVIEW_JSON="$REVIEW_DIR/review.jsonl"
 REVIEW_ERR="$REVIEW_DIR/review.err"
+# codex-auto-review is Codex's dedicated model for the `codex exec review` subcommand;
+# it intentionally differs from ticket-to-plan's general-purpose CODEX_REVIEW_MODEL default.
 CODEX_REVIEW_MODEL="${CODEX_REVIEW_MODEL:-codex-auto-review}"
 CODEX_REVIEW_EFFORT="${CODEX_REVIEW_EFFORT:-medium}"
 

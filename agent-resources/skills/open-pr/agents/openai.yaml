@@ -1,0 +1,4 @@
+interface:
+  display_name: "Open PR"
+  short_description: "コミット済みブランチをpushしてGitHub PRを作成する"
+  default_prompt: "Use $open-pr to push the current branch and open a GitHub pull request."
