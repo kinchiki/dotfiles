@@ -148,7 +148,11 @@
         "npmjs.org",
         "*.npmjs.org",
         "registry.npmjs.org",
-        "mise.jdx.dev"
+        "mise.jdx.dev",
+        "mcp.figma.com",
+        "mcp.linear.app",
+        "mcp.notion.com",
+        "mcp.sentry.dev"
       ],
       "allowUnixSockets": [
         "~/.colima/default/docker.sock",
@@ -161,26 +165,9 @@
       "allowLocalBinding": true
     },
     "filesystem": {
-      "allowWrite": [
-        "/tmp",
-        ".",
-        "~/src/",
-        "~/.local/share/mise/",
-        "~/.local/state/mise/",
-        "~/.config/mise/",
-        "~/Library/Caches/mise/",
-        "~/.npm/",
-        "~/.colima/",
-        "~/.docker/",
-        "~/.config/gh/"
-      ],
-      "denyWrite": [
-        "/etc"
-      ],
-      "denyRead": [
-        "~/"
-      ],
       "allowRead": [
+        "/dev/ttys",
+        "/dev/ptmx",
         ".",
         "~/src/",
         "~/.zshrc",
@@ -195,6 +182,28 @@
         "~/.colima/",
         "~/.lima/",
         "~/.config/gh/"
+      ],
+      "allowWrite": [
+        "/dev/ttys",
+        "/dev/ptmx",
+        "/tmp",
+        ".",
+        "~/src/",
+        "~/.codex/",
+        "~/.local/share/mise/",
+        "~/.local/state/mise/",
+        "~/.config/mise/",
+        "~/Library/Caches/mise/",
+        "~/.npm/",
+        "~/.colima/",
+        "~/.docker/",
+        "~/.config/gh/"
+      ],
+      "denyRead": [
+        "~/"
+      ],
+      "denyWrite": [
+        "/etc"
       ]
     },
     "credentials": {
