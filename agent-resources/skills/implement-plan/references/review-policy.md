@@ -23,7 +23,14 @@ Never load it for low risk.
 
 ## Run
 
-- Run `scripts/review-codex.sh` or `scripts/review-claude.sh` from this skill's own directory (the skill root, one level up from this `references/` directory).
+- Run the Codex review script using the following exact command:
+
+  ```sh
+  "$(git rev-parse --show-toplevel)/agent-resources/skills/implement-plan/scripts/review-codex.sh"
+  ```
+
+- A relative path or an absolute path expanded to `/Users/...` does not match the command above as specified in `sandbox.excludedCommands`. In that case, Codex remains sandboxed, causing its PTY-based command execution to fail with `UNTRUSTED`.- Run `scripts/review-claude.sh` from this skill's own directory (the skill root, one level up from this `references/` directory).
+- Run `scripts/review-claude.sh` from this skill's own directory (the skill root, one level up from this `references/` directory).
 - Each script reviews the uncommitted working tree, verifies the reviewer actually explored the diff, prints the review body, and reports a `TRUSTED` or `UNTRUSTED` verdict with a matching exit code.
 - Trust a clean ("no findings") result only when the script reports `TRUSTED` and the output references the actual diff.
 - If `UNTRUSTED`, rerun once when the same reviewer can run without new blocked approval.
