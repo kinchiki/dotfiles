@@ -1,0 +1,4 @@
+interface:
+  display_name: "Create Verification"
+  short_description: "差分から動作確認手順を生成または追記する"
+  default_prompt: "Use $create-verification to generate or update a verification checklist for the current branch or a PR."

@@ -14,10 +14,13 @@ description: >-
 
 承認済みプランを端から端まで実行する: feature branch を作成し、`## タスク` をテスト込みで実装し、lint / test を緑にし、risk に応じた独立レビューを受け、commit-changes と open-pr-followup へ引き継ぐ。
 承認済みプランは contract である。`## スコープ外` に出る必要がない限り re-plan しない。
+plan file に `## 動作確認` がある場合は、その指示も contract として扱う。
 
 ## Resources
 
 - `references/review-policy.md`: lint / test が緑になり、実際の diff が medium または high risk に分類された後にだけ読む。low risk では読まない。
+- `../create-verification/SKILL.md`: plan の `## 動作確認` が yes で、コミット前 verification の準備をする直前に読む。
+- `../run-verification/SKILL.md`: plan の `## 動作確認` が yes で、コミット前 verification を実行する直前に読む。
 
 ## Hard constraints
 
@@ -39,6 +42,7 @@ description: >-
   - goal: 1 行
   - acceptance criteria: checklist id
   - 未チェック task: id、depends_on、files、test、done_when、parallel
+  - `## 動作確認`: 要否、対象、各確認ポイント、skip 承認ルール
   - `## スコープ外`: 具体的な制約
   - lint / test コマンド（plan が repo convention file より優先）
   - 未解決の blocking risk
@@ -61,6 +65,8 @@ description: >-
 ### Step 3: Run the full suite and classify risk
 
 - review や引き継ぎの前に、該当する full lint / test suite を実行する。失敗した場合は修正して再実行し、最大 3 round までとする。それでも失敗する場合は停止して出力を報告する。
+- plan の `## 動作確認` が yes の場合は、full lint / test が緑になった後、commit 前に `create-verification` で verification を生成または更新し、`run-verification` を実行するかスキップするかをユーザーに確認する。
+- ユーザーが実行を選んだ場合は `run-verification` を進める。スキップを選んだ場合は、理由と承認を plan の運用記録として報告に残す。
 - lint / test が緑になったら、実際の diff を分類する。
   - low: docs・comment・copy・軽微な type / test / UI 文言・style の変更 → self-review のみ。
   - medium: 通常の feature・bugfix・UI 挙動・API 隣接の変更 → 独立 review を 1 回。

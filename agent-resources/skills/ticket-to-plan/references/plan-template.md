@@ -82,6 +82,12 @@ Use `request-<slug>` for user request sources.
 <カバーすべき edge case を書く。>
 <実装 gate が何を走らせるか分かるよう lint command も明記する。>
 
+## 動作確認
+<手動 verification が必要かを yes / no で明記する。>
+<yes の場合は、確認対象、`create-verification` を実行するタイミング、`run-verification` を聞くタイミングを具体的に書く。>
+<少なくとも「コミット前」と「レビュー / CI 対応後」の各ポイントで、run / skip をユーザー承認で決めることを書く。>
+<no の場合は、不要と判断した根拠を書く。>
+
 ## リスク・未解決の論点
 <注意点、先送りした判断、実装者が確認すべきことを書く。>
 <想定 risk を low / medium / high で書き、その理由も書く。>

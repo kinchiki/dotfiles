@@ -1,0 +1,4 @@
+interface:
+  display_name: "Run Verification"
+  short_description: "動作確認チェックリストを対話的に実行する"
+  default_prompt: "Use $run-verification to walk through a verification file and record each result."

@@ -24,12 +24,15 @@ PR を作成し、初回の CI と AI レビューを確認して、必要な fo
 
 - `references/followup-workflow-details.md`: PR metadata、poll fallback、CI inspection、lane integration、push command が必要なとき読む。
 - `scripts/poll-pr-signals.sh`: wait / poll / CI / AI review / unresolved thread の集約に使う。
+- `../create-verification/SKILL.md`: レビュー / CI 対応後の verification を追記する直前に読む。
+- `../run-verification/SKILL.md`: レビュー / CI 対応後の verification を実行する直前に読む。
 
 ## Hard constraints
 
 - PR 作成だけなら `open-pr` で止める。
 - dirty tree は `commit-changes` に引き渡す。
 - follow-up 修正 (review 指摘・CI 失敗) の commit は、実行前にユーザー確認を取る。
+- review 指摘や CI failure を直した後に手動 verification が必要なら、commit / push 前に run / skip をユーザー確認で決める。
 - push と GitHub writeback は確認ポイントを守る。
 - concrete PR が必要。
 - test を弱める・削除・skip する行為は禁止。
@@ -67,6 +70,9 @@ review lane が PR description 更新を扱わない場合は、`update-pr-descr
 
 ### Step 4: Commit and push remaining changes
 
+review 指摘または CI failure を受けて挙動が変わる修正を行った場合は、`create-verification` で既存 verification へ必要な確認を追記する。
+その後、`run-verification` を実行するかスキップするかをユーザーに確認する。
+スキップが選ばれた場合は、理由を報告へ残す。
 Delegated work 以外に未コミット差分がある場合は `commit-changes` で local commit を作る。
 ユーザー確認後に push する。
 次 cycle のため Step 2 で再度待つ。
