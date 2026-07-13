@@ -230,10 +230,6 @@
           "mode": "deny"
         },
         {
-          "path": "~/.npmrc",
-          "mode": "deny"
-        },
-        {
           "path": "~/.netrc",
           "mode": "deny"
         },
@@ -248,13 +244,8 @@
       ],
       "envVars": [
         {
-          "name": "NPM_TOKEN",
-          "mode": "mask",
-          "injectHosts": [
-            "npm.flatt.tech",
-            "npmjs.org",
-            "*.npmjs.org"
-          ]
+          "name": "GH_TOKEN",
+          "mode": "deny"
         },
         {
           "name": "GITHUB_TOKEN",
