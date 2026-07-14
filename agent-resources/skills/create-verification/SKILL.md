@@ -2,7 +2,7 @@
 name: create-verification
 description: >-
   現在のブランチまたは指定した PR の差分を読み、変更内容に応じた動作確認手順を
-  `.ai-loacl/verification/*.local.md` に生成または追記する。
+  `.ai-local/verification/*.local.md` に生成または追記する。
   実装完了後やレビュー / CI 対応後に、手動確認が必要な差分を確認可能なチェックリストへ変換したいときに使う。
   例: 「変更分の動作確認手順を作る」「PR 123 の verification を更新する」。
 ---
@@ -16,7 +16,7 @@ description: >-
 
 - 現在のブランチ、または指定した PR の差分を読む。
 - 変更された層から、手動確認が必要な確認観点を抽出する。
-- `.ai-loacl/verification/*.local.md` に verification ドキュメントを新規作成または追記する。
+- `.ai-local/verification/*.local.md` に verification ドキュメントを新規作成または追記する。
 - 既存 verification がある場合は、未完了項目を壊さずに保ちつつ新しい確認項目を追加する。
 
 ## Resources
@@ -25,7 +25,7 @@ description: >-
 
 ## Hard constraints
 
-- 保存先は `.ai-loacl/verification/` 配下の `.local.md` に固定する。
+- 保存先は `.ai-local/verification/` 配下の `.local.md` に固定する。
 - 新規作成時の保存名は `pr-<PR番号>-<ブランチ名スラッグ>.local.md` を優先し、PR番号が無い場合は `worktree-<ブランチ名スラッグ>.local.md` にする。
 - 追記時は、同じブランチまたは同じ PR に対応する既存ファイルを優先して再利用する。
 - 既存の `## チェックリスト` にある `✅` / `⏭️` / `□` は保持し、既存項目を勝手にリセットしない。
