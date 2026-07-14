@@ -35,7 +35,6 @@ description: >-
 - 現在の branch を確認する。
 - pending diff の全体を読む。
 - staged diff がある場合はそれも読む。
-- standalone invocation で lint / test コマンドが明らかな場合は、commit 前に実行する。
 - pending diff がなければ、commit するものがない旨を報告して停止する。
 
 ```bash
