@@ -119,7 +119,7 @@
     "context7@claude-plugins-official": true
   },
   "env": {
-    "USE_BUILTIN_RIPGREP": "0"
+    "ENABLE_TOOL_SEARCH": "true"
   },
   "sandbox": {
     "enabled": true,
