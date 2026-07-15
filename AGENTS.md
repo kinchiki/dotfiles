@@ -1,70 +1,18 @@
 # AGENTS.md
 
-**あなたはユーザーに日本語で応答すること。**
+このリポジトリ（`~/src/dotfiles`）固有の指示。全リポジトリ共通のグローバル guardrails は
+`.codex/AGENTS.md` を正本とし、ホームの `~/.claude/CLAUDE.md` などから別途読み込まれる。
 
-Behavioral guardrails against common LLM coding mistakes, applied by default in every repository. If a repository's own instructions conflict with these, follow the repository's instructions.
+## このリポジトリについて
 
-**Scope:** apply the extra steps below (naming assumptions, stating a plan, listing verification checks) for anything beyond read-only work or a fix with exactly one correct implementation (e.g., a typo, an off-by-one, a version bump). For those, just do it - then still verify per Section 4.
+dotfiles 管理リポジトリ。`install.sh` がリポジトリ内のファイルをホームディレクトリへ symlink する。
 
-## 1. Think Before Coding
+- ルート直下の dot ファイルは `~/` 直下へ、dot ディレクトリ配下のファイル/symlink は個別に `~/` 配下へリンクされる。
+- グローバル guardrails の正本は `.codex/AGENTS.md`。`.claude/CLAUDE.md`（`@../.codex/AGENTS.md` を import）と `.copilot/copilot-instructions.md`（symlink）がこれを参照する。
+- ルートの `CLAUDE.md`/`AGENTS.md`（このファイル）は `.` 始まりでないためホームへはリンクされず、このリポジトリで作業するときだけ効く。
 
-**Don't guess silently. Surface ambiguity and better options before writing code.**
+## agent / skill 定義
 
-Before implementing:
-- If multiple reasonable interpretations exist, name them, then state which one you're using and why - don't pick silently.
-- If the request is missing information you can't reasonably default (e.g., no acceptance criteria, no target file/function), stop and ask instead of guessing.
-- If a simpler approach exists than the one requested, say so before implementing it - push back when warranted.
+agent・skill 定義の実体は `agent-resources/` にあり、各ツール用ディレクトリ（`.claude`/`.codex`/`.agents`）から symlink して共有している。
 
-The test: someone reading only your first message, before seeing any diff, could state exactly what you assumed and why.
-
-## 2. Simplicity First
-
-**Minimum code that solves the problem. Nothing speculative.**
-
-- No features beyond what was asked.
-- No abstractions for single-use code.
-- No "flexibility" or "configurability" that wasn't requested.
-- No error handling for impossible scenarios.
-- If you write 200 lines and it could be 50, rewrite it.
-
-Ask yourself: "Would a senior engineer say this is overcomplicated?" If yes, simplify.
-
-## 3. Surgical Changes
-
-**Touch only what you must. Clean up only your own mess.**
-
-When editing existing code:
-- Don't "improve" adjacent code, comments, or formatting.
-- Don't refactor things that aren't broken.
-- Match existing style, even if you'd do it differently.
-- If you notice unrelated dead code, mention it - don't delete it.
-
-When your changes create orphans:
-- Remove imports/variables/functions that YOUR changes made unused.
-- Don't remove pre-existing dead code unless asked.
-
-The test: Every changed line should trace directly to the user's request.
-
-## 4. Goal-Driven Execution
-
-**Define success criteria. Loop until verified.**
-
-Transform tasks into verifiable goals:
-- "Add validation" → "Write tests for invalid inputs, then make them pass"
-- "Fix the bug" → "Write a test that reproduces it, then make it pass"
-- "Refactor X" → "Ensure tests pass before and after"
-
-For multi-step tasks, state a brief plan:
-```
-1. [Step] → verify: [check]
-2. [Step] → verify: [check]
-3. [Step] → verify: [check]
-```
-
-Strong success criteria let you loop independently. Weak criteria ("make it work") require constant clarification.
-
-## 5. Agent Skills (dotfiles repo only)
-
-Applies only inside the `~/src/dotfiles` repository (identified by an `agent-resources/skills/` directory at its root). Elsewhere, skip this section.
-
-When creating or updating a skill or agent definition there, use the `manage-agent-skills` skill instead of editing skill files directly.
+skill や agent 定義を作成・更新するときは、skill ファイルを直接編集せず `manage-agent-skills` スキルを使うこと。
