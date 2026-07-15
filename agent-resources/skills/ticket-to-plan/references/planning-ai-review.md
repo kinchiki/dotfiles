@@ -41,6 +41,7 @@ Include:
 - Draft `## タスク` breakdown with `files`, `depends_on`, `parallel`, `test`, and `done_when`.
 - File paths and existing patterns the planner inspected.
 - Assumptions, open questions, and known constraints.
+- `test-selection-policy.md` の内容。
 
 Ask the reviewer to check:
 
@@ -51,11 +52,13 @@ Ask the reviewer to check:
 - Missed affected files, data flow, auth / permission, background job, API, migration, or compatibility concerns.
 - Task ordering, dependency, and `parallel: yes` safety.
 - Test coverage, lint / test commands, and observable `done_when` conditions.
+- テストが DB・フレームワーク・ライブラリの標準保証だけを直接再検証していないこと。
 - Scope creep or unnecessary abstraction.
 - Whether the plan is self-contained enough for a fresh implementation session.
 
 Tell the reviewer to treat the original source and user-reviewed intent as the source of truth.
 Tell the reviewer not to suggest changing behavior that the user explicitly asked to keep unless the finding cites a concrete risk such as security, data loss, implementation infeasibility, or a hard repository constraint.
+Tell the reviewer not to request or report missing tests excluded by `test-selection-policy.md`.
 Tell the reviewer to cite the relevant source excerpt, user-reviewed intent, or inspected codebase evidence for every P1 or P2 finding.
 
 Ask the reviewer to return findings in this format:

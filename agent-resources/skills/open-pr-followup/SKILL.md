@@ -24,6 +24,7 @@ PR を作成し、初回の CI と AI レビューを確認して、必要な fo
 
 - `references/followup-workflow-details.md`: PR metadata、poll fallback、CI inspection、lane integration、push command が必要なとき読む。
 - `scripts/poll-pr-signals.sh`: wait / poll / CI / AI review / unresolved thread の集約に使う。
+- `../ticket-to-plan/references/test-selection-policy.md`: Step 3 で外部の follow-up lane へ委譲する直前に読む。
 - `../create-verification/SKILL.md`: レビュー / CI 対応後の verification を追記する直前に読む。
 - `../run-verification/SKILL.md`: レビュー / CI 対応後の verification を実行する直前に読む。
 
@@ -63,7 +64,7 @@ AI review が検出できなくても CI inspection は続ける。
 
 CI failure がある場合は `gh-fix-ci` に委譲する。
 Actionable review comments がある場合は `address-pr-comments` 優先、または `gh-address-comments` に委譲する。
-委譲先には、修正後の commit を実行する前にユーザー確認を取るよう指示する。
+委譲先には、修正後の commit を実行する前にユーザー確認を取り、`../ticket-to-plan/references/test-selection-policy.md` を適用するよう指示する。
 review lane が `address-pr-comments` 以外の場合は、PR description 更新まで完了したか確認する。
 review lane が PR description 更新を扱わない場合は、`update-pr-description` を追加で実行する。
 各スキルが commit / push / PR description 更新 / reply / resolve を完了するまで待つ。
