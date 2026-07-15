@@ -96,6 +96,9 @@
       "mcp__linear__create_issue",
       "mcp__linear__update_issue",
       "mcp__linear__list_issue_statuses"
+    ],
+    "additionalDirectories": [
+      "~/src/"
     ]
   },
   "model": "opus[1m]",
