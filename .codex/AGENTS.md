@@ -62,3 +62,13 @@ For multi-step tasks, state a brief plan:
 ```
 
 Strong success criteria let you loop independently. Weak criteria ("make it work") require constant clarification.
+
+## 5. Runtime / package manager
+
+明示的な指示がない限り、node, python, ruby, etc. は mise を使ってコマンドを実行する。
+
+コマンド例
+
+- `mise x -- node`
+- `mise x -- npm`
+- `mise x -- python`
