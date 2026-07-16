@@ -44,7 +44,11 @@ autoload -Uz compinit bashcompinit
 compinit
 bashcompinit
 
-command -v aws > /dev/null 2>&1 && complete -C '/usr/local/bin/aws_completer' aws
+# aws cli を公式のインストーラーでインストールした場合
+# 明確にパス確認
+# [[ ${commands[aws]:-} == /usr/local/bin/aws && -x /usr/local/bin/aws_completer ]] && complete -C /usr/local/bin/aws_completer aws
+# パス確認なし
+# (( $+commands[aws] )) && complete -C '/usr/local/bin/aws_completer' aws
 
 # 消しても補完が動くかも
 # command -v kubectl > /dev/null 2>&1 && source <(kubectl completion zsh)
@@ -214,9 +218,7 @@ FZF_CTRL_R_OPTS="--no-sort --layout=reverse --no-multi-line --preview 'echo {}' 
 # fzf
 # Homebrew版
 fzf_base=''
-if command -v brew >/dev/null 2>&1; then
-  fzf_base="$(brew --prefix fzf 2>/dev/null)"
-fi
+(( $+commands[brew] )) && fzf_base="$(brew --prefix fzf 2>/dev/null)"
 if [ -n "$fzf_base" ] && [ -d "$fzf_base/shell" ]; then
   source "$fzf_base/shell/completion.zsh"
   source "$fzf_base/shell/key-bindings.zsh"
@@ -334,8 +336,8 @@ print-symlink() {
 # マシン毎のローカルの設定読み込み
 [ -f ~/.zshrc.local ] && source ~/.zshrc.local
 
-# memo mise 公式は mise と direnv を一緒に使うことは推奨しない
+# memo: mise 公式は mise と direnv を一緒に使うことは推奨しない
   # https://mise.jdx.dev/direnv.html
-# 末尾の記載がよい？
+# 設定ファイル末尾の記載がよさそう
   # https://direnv.net/docs/hook.html
-command -v direnv >/dev/null 2>&1 && eval "$(direnv hook zsh)"
+(( $+commands[direnv] )) && eval "$(direnv hook zsh)"
