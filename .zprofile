@@ -39,7 +39,7 @@ export PAGER='less'
 # -U
   # unique の意味
   # 配列に重複が入らないようにする
-  # path 配列や PATH 変数に同じディレクトリが複数回入ったとき、自動で1つにする
+  # path 配列や PATH 変数に同じディレクトリが複数回入ったとき、自動でユニークにする
 typeset -U cdpath fpath mailpath path PATH
 
 # Set the the list of directories that cd searches.
@@ -50,8 +50,6 @@ typeset -U cdpath fpath mailpath path PATH
 # Set the list of directories that Zsh searches for programs.
 path=(
   $HOME/.local/bin
-  /opt/homebrew/bin
-  /opt/homebrew/sbin
   /usr/local/bin
   /usr/local/sbin
   $path
@@ -104,3 +102,5 @@ export DOCKER_BUILDKIT=1
 # export PYENV_ROOT="$HOME/.pyenv"
 
 export USE_GKE_GCLOUD_AUTH_PLUGIN=True
+
+[[ -x /opt/homebrew/bin/brew ]] && eval "$(/opt/homebrew/bin/brew shellenv)"

@@ -10,6 +10,11 @@ if [[ -s "${ZDOTDIR:-$HOME}/.zprezto/init.zsh" ]]; then
   source "${ZDOTDIR:-$HOME}/.zprezto/init.zsh"
 fi
 
+# '' と "" の使い分け
+  # 代入時に $VAR を展開したいなら ""
+  # 完全な文字列として固定したいなら ''
+  # ただし値に '' を多く含むなら、可読性優先で ""
+
 # 補完はpreztoで設定されているため、コメントアウト
 
 # Customize to your needs...
@@ -57,6 +62,8 @@ PROMPT="%* ${PROMPT}"
 # プロンプトを変える
 PURE_PROMPT_SYMBOL='$'
 
+WORDCHARS='*?[]~;=!#$%^(){}<>'
+
 # ../ の後は今いるディレクトリを補完しない
 zstyle ':completion:*' ignore-parents parent pwd ..
 
@@ -74,16 +81,6 @@ setopt hist_reduce_blanks
 
 # ベープ音を消す
 setopt no_beep
-
-
-# '' と "" の使い分け
-  # 代入時に $VAR を展開したいなら ""
-  # 完全な文字列として固定したいなら ''
-  # ただし値に '' を多く含むなら、可読性優先で ""
-
-########## env ##########
-[[ -x /opt/homebrew/bin/brew ]] && eval "$(/opt/homebrew/bin/brew shellenv)"
-WORDCHARS='*?[]~;=!#$%^(){}<>'
 
 ########## alias ##########
 # ls
