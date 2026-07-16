@@ -326,7 +326,10 @@ print-symlink() {
 }
 
 # mise
-command -v mise > /dev/null 2>&1 && eval "$(mise activate zsh)"
+(( ${+commands[mise]} )) && eval "$(mise activate zsh)"
+
+# aqua
+(( $+commands[aqua] )) && PATH="$(aqua root-dir)/bin:$PATH"
 
 # マシン毎のローカルの設定読み込み
 [ -f ~/.zshrc.local ] && source ~/.zshrc.local
