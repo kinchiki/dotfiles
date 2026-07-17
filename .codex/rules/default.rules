@@ -1,138 +1,91 @@
-# Generated from agent-resources/permissions.json.
-# Do not edit by hand; run `node agent-resources/scripts/generate-agent-permissions.mjs`.
+# Claude の settings.json に合わせている
 # Claude "ask" maps to Codex "prompt"; Claude "deny" maps to "forbidden".
 # These rules apply when Codex requests to run a command outside the sandbox.
+# Claude MCP, Read, Edit, NotebookEdit, and additionalDirectories permissions have
+# no equivalent in Codex command rules and are intentionally not represented here.
+
+# ---------------------------
+# git
+# ---------------------------
 
 prefix_rule(
-    pattern = ["curl"],
-    decision = "prompt",
-    justification = "Network fetches should be approved explicitly.",
-    match = [
-        "curl https://example.com",
+    pattern = [
+        "git",
+        [
+            "add",
+            "apply",
+            "branch",
+            "checkout",
+            "cherry-pick",
+            "commit",
+            "fetch",
+            "mv",
+            "rm",
+            "stash",
+            "switch",
+            "worktree",
+        ],
     ],
+    decision = "allow",
+    justification = "Allow repository-local Git mutations outside the sandbox.",
 )
 
 prefix_rule(
-    pattern = ["wget"],
-    decision = "prompt",
-    justification = "Network fetches should be approved explicitly.",
-    match = [
-        "wget https://example.com/file",
+    pattern = [
+        "git",
+        [
+            "merge",
+            "pull",
+            "push",
+            "rebase",
+            "reset",
+            "restore",
+            "tag",
+            "publish",
+        ],
     ],
-)
-
-prefix_rule(
-    pattern = ["rm"],
-    decision = "prompt",
-    justification = "Deleting files should be approved explicitly.",
-    match = [
-        "rm file.txt",
-        "rm -r build",
-    ],
-)
-
-prefix_rule(
-    pattern = ["git", "merge"],
     decision = "prompt",
     justification = "Git operations that mutate history, remotes, or the working tree require approval.",
     match = [
         "git merge main",
-    ],
-    not_match = [
-        "git fetch origin",
-        "git status",
-    ],
-)
-
-prefix_rule(
-    pattern = ["git", "pull"],
-    decision = "prompt",
-    justification = "Git operations that mutate history, remotes, or the working tree require approval.",
-    match = [
         "git pull",
-    ],
-    not_match = [
-        "git fetch origin",
-        "git status",
-    ],
-)
-
-prefix_rule(
-    pattern = ["git", "push"],
-    decision = "prompt",
-    justification = "Git operations that mutate history, remotes, or the working tree require approval.",
-    match = [
         "git push origin HEAD",
-    ],
-    not_match = [
-        "git fetch origin",
-        "git status",
-    ],
-)
-
-prefix_rule(
-    pattern = ["git", "rebase"],
-    decision = "prompt",
-    justification = "Git operations that mutate history, remotes, or the working tree require approval.",
-    match = [
         "git rebase main",
-    ],
-    not_match = [
-        "git fetch origin",
-        "git status",
-    ],
-)
-
-prefix_rule(
-    pattern = ["git", "reset"],
-    decision = "prompt",
-    justification = "Git operations that mutate history, remotes, or the working tree require approval.",
-    match = [
         "git reset --hard HEAD",
-    ],
-    not_match = [
-        "git fetch origin",
-        "git status",
-    ],
-)
-
-prefix_rule(
-    pattern = ["git", "restore"],
-    decision = "prompt",
-    justification = "Git operations that mutate history, remotes, or the working tree require approval.",
-    match = [
         "git restore .",
-    ],
-    not_match = [
-        "git fetch origin",
-        "git status",
-    ],
-)
-
-prefix_rule(
-    pattern = ["git", "tag"],
-    decision = "prompt",
-    justification = "Git operations that mutate history, remotes, or the working tree require approval.",
-    match = [
         "git tag v1.0.0",
-    ],
-    not_match = [
-        "git fetch origin",
-        "git status",
-    ],
-)
-
-prefix_rule(
-    pattern = ["git", "publish"],
-    decision = "prompt",
-    justification = "Git operations that mutate history, remotes, or the working tree require approval.",
-    match = [
         "git publish",
     ],
-    not_match = [
-        "git fetch origin",
-        "git status",
+)
+
+# ---------------------------
+# gh
+# ---------------------------
+
+prefix_rule(
+    pattern = [
+        "gh",
+        "pr",
+        [
+            "view",
+            "list",
+            "diff"
+        ]
     ],
+    decision = "allow",
+    justification = "Allow read-only GitHub pull request commands outside the sandbox.",
+)
+
+prefix_rule(
+    pattern = ["gh", "issue", "view"],
+    decision = "allow",
+    justification = "Allow read-only GitHub issue commands outside the sandbox.",
+)
+
+prefix_rule(
+    pattern = ["gh", "release", "list"],
+    decision = "allow",
+    justification = "Allow read-only GitHub release commands outside the sandbox.",
 )
 
 prefix_rule(
@@ -147,6 +100,58 @@ prefix_rule(
     ],
 )
 
+# ---------------------------
+# allow
+# ---------------------------
+
+prefix_rule(
+    pattern = [
+        [
+            "cat",
+            "cp",
+            "find",
+            "grep",
+            "jq",
+            "ls",
+            "rg",
+            "touch",
+        ],
+    ],
+    decision = "allow",
+    justification = "Allow the shell commands permitted by Claude settings.",
+)
+
+prefix_rule(
+    pattern = ["mise", "x", "--"],
+    decision = "allow",
+)
+
+# ---------------------------
+# prompt
+# ---------------------------
+
+prefix_rule(
+    pattern = [
+        [
+            "curl",
+            "wget",
+            "rm",
+        ],
+    ],
+    decision = "prompt",
+    justification = "Network fetches and file deletion should be approved explicitly.",
+    match = [
+        "curl https://example.com",
+        "wget https://example.com/file",
+        "rm file.txt",
+        "rm -r build",
+    ],
+)
+
+# ---------------------------
+# forbidden
+# ---------------------------
+
 prefix_rule(
     pattern = ["env"],
     decision = "forbidden",
@@ -158,49 +163,34 @@ prefix_rule(
 )
 
 prefix_rule(
-    pattern = ["mongod"],
+    pattern = [
+        [
+            "mongod",
+            "mysql",
+            "nc",
+            "op",
+            "psql",
+            "sudo",
+        ],
+    ],
     decision = "forbidden",
-    justification = "Starting database daemons is outside normal agent work.",
+    justification = "Database access, raw network connections, password-manager access, and privileged commands are not allowed.",
     match = [
         "mongod --config mongo.conf",
-    ],
-)
-
-prefix_rule(
-    pattern = ["mysql"],
-    decision = "forbidden",
-    justification = "Direct database access should not be performed by the agent.",
-    match = [
         "mysql -h localhost",
-    ],
-)
-
-prefix_rule(
-    pattern = ["nc"],
-    decision = "forbidden",
-    justification = "Raw network connections should not be opened by the agent.",
-    match = [
         "nc -vz example.com 443",
+        "op item get example",
+        "psql postgres://localhost/db",
+        "sudo ls /var/root",
     ],
 )
 
 prefix_rule(
-    pattern = ["npm", "remove"],
+    pattern = ["npm", ["remove", "uninstall"]],
     decision = "forbidden",
     justification = "Package removal should be requested explicitly by the user.",
     match = [
         "npm remove left-pad",
-    ],
-    not_match = [
-        "npm install",
-    ],
-)
-
-prefix_rule(
-    pattern = ["npm", "uninstall"],
-    decision = "forbidden",
-    justification = "Package removal should be requested explicitly by the user.",
-    match = [
         "npm uninstall left-pad",
     ],
     not_match = [
@@ -208,83 +198,30 @@ prefix_rule(
     ],
 )
 
-prefix_rule(
-    pattern = ["op"],
-    decision = "forbidden",
-    justification = "Password-manager access is not allowed.",
-    match = [
-        "op item get example",
-    ],
-)
+# ---------------------------
+# rm restrictions
+# ---------------------------
 
 prefix_rule(
-    pattern = ["psql"],
-    decision = "forbidden",
-    justification = "Direct database access should not be performed by the agent.",
-    match = [
-        "psql postgres://localhost/db",
+    pattern = [
+        "rm",
+        [
+            "-rf",
+            "-fr",
+            "-r",
+            "-f",
+            "--recursive",
+            "--force",
+        ],
     ],
-)
-
-prefix_rule(
-    pattern = ["rm", "-rf"],
     decision = "forbidden",
-    justification = "Recursive forced deletion is not allowed; use a narrower deletion after approval.",
+    justification = "Recursive or forced deletion options are not allowed.",
     match = [
         "rm -rf build",
-    ],
-)
-
-prefix_rule(
-    pattern = ["rm", "-fr"],
-    decision = "forbidden",
-    justification = "Recursive forced deletion is not allowed; use a narrower deletion after approval.",
-    match = [
         "rm -fr build",
-    ],
-)
-
-prefix_rule(
-    pattern = ["rm", "-r", "-f"],
-    decision = "forbidden",
-    justification = "Recursive forced deletion is not allowed; use a narrower deletion after approval.",
-    match = [
         "rm -r -f build",
-    ],
-)
-
-prefix_rule(
-    pattern = ["rm", "-f", "-r"],
-    decision = "forbidden",
-    justification = "Recursive forced deletion is not allowed; use a narrower deletion after approval.",
-    match = [
         "rm -f -r build",
-    ],
-)
-
-prefix_rule(
-    pattern = ["rm", "--recursive", "--force"],
-    decision = "forbidden",
-    justification = "Recursive forced deletion is not allowed; use a narrower deletion after approval.",
-    match = [
         "rm --recursive --force build",
-    ],
-)
-
-prefix_rule(
-    pattern = ["rm", "--force", "--recursive"],
-    decision = "forbidden",
-    justification = "Recursive forced deletion is not allowed; use a narrower deletion after approval.",
-    match = [
         "rm --force --recursive build",
-    ],
-)
-
-prefix_rule(
-    pattern = ["sudo"],
-    decision = "forbidden",
-    justification = "Privileged commands require direct user control.",
-    match = [
-        "sudo ls /var/root",
     ],
 )
