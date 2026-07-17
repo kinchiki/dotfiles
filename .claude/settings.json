@@ -4,6 +4,8 @@
   },
   "permissions": {
     "allow": [
+      "Bash(codex review:*)",
+      "Bash(codex exec review:*)",
       "Bash(cat:*)",
       "Bash(cp:*)",
       "Bash(find:*)",
@@ -18,9 +20,14 @@
       "Bash(gh issue view:*)",
       "Bash(gh release list:*)",
       "Bash(git add:*)",
+      "Bash(git apply:*)",
       "Bash(git branch:*)",
+      "Bash(git checkout:*)",
+      "Bash(git cherry-pick:*)",
       "Bash(git commit:*)",
       "Bash(git fetch:*)",
+      "Bash(git mv:*)",
+      "Bash(git rm:*)",
       "Bash(git stash:*)",
       "Bash(git switch:*)",
       "Bash(git worktree:*)",
@@ -40,9 +47,7 @@
       "mcp__github__get_me",
       "mcp__github__search_pull_requests",
       "mcp__github__search_repositories",
-      "mcp__github__pull_request_read",
-      "Bash(codex review:*)",
-      "Bash(codex exec review:*)"
+      "mcp__github__pull_request_read"
     ],
     "deny": [
       "Bash(env:*)",
@@ -59,23 +64,19 @@
       "NotebookEdit",
       "Read(.env.*)",
       "Read(.envrc)",
-      "Read(.mise.toml)",
       "Read(*.env)",
       "Read(**/*key*)",
       "Read(**/*token*)",
       "Read(id_ed25519)",
       "Read(id_rsa)",
-      "Read(mise.local.toml)",
       "Read(~/**/.ai-local/archive/**)",
       "Read(~/**/.claude/archive/**)",
       "Read(~/**/.codex/archive/**)",
       "Write(.env.*)",
       "Write(.env*)",
       "Write(.envrc)",
-      "Write(.mise.toml)",
       "Write(*.env)",
-      "Write(**/secrets/**)",
-      "Write(mise.local.toml)"
+      "Write(**/secrets/**)"
     ],
     "ask": [
       "Bash(curl:*)",
@@ -87,6 +88,7 @@
       "Bash(git rebase:*)",
       "Bash(git reset:*)",
       "Bash(git restore:*)",
+      "Bash(git revert:*)",
       "Bash(git tag:*)",
       "Bash(git publish:*)",
       "Bash(gh pr create:*)",
@@ -189,7 +191,8 @@
         "~/.npm/",
         "~/.colima/",
         "~/.docker/",
-        "~/.config/gh/"
+        "~/.config/gh/",
+        "~/.local/share/aquaproj-aqua/"
       ],
       "denyWrite": [
         "/etc"
@@ -213,7 +216,8 @@
         "~/.docker/",
         "~/.colima/",
         "~/.lima/",
-        "~/.config/gh/"
+        "~/.config/gh/",
+        "~/.local/share/aquaproj-aqua/"
       ]
     },
     "credentials": {
