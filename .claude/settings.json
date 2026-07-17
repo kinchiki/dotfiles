@@ -69,14 +69,14 @@
       "Read(**/*token*)",
       "Read(id_ed25519)",
       "Read(id_rsa)",
-      "Read(~/**/.ai-local/archive/**)",
-      "Read(~/**/.claude/archive/**)",
-      "Read(~/**/.codex/archive/**)",
-      "Write(.env.*)",
-      "Write(.env*)",
-      "Write(.envrc)",
-      "Write(*.env)",
-      "Write(**/secrets/**)"
+      "Read(~/src/**/.ai-local/**/archive/**)",
+      "Read(~/src/**/.claude/**/archive/**)",
+      "Read(~/src/**/.codex/**/archive/**)",
+      "Edit(.env.*)",
+      "Edit(.env*)",
+      "Edit(.envrc)",
+      "Edit(*.env)",
+      "Edit(**/secrets/**)"
     ],
     "ask": [
       "Bash(curl:*)",
