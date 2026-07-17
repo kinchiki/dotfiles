@@ -1,5 +1,7 @@
 #!/usr/bin/env node
 
+// 2026/07/17 運用できないため使っていない
+
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
