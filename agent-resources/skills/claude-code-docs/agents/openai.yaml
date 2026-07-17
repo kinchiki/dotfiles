@@ -1,0 +1,4 @@
+interface:
+  display_name: "Claude Code Docs"
+  short_description: "Claude Codeの最新公式ドキュメントを調査して回答する"
+  default_prompt: "Use $claude-code-docs to research current official Claude Code documentation and answer with sources."
