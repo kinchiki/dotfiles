@@ -31,6 +31,9 @@
       "Bash(git stash:*)",
       "Bash(git switch:*)",
       "Bash(git worktree:*)",
+      "Bash(terraform fmt:*)",
+      "Bash(tflint:*)",
+      "Bash(trivy:*)",
       "WebFetch(domain:github.com)",
       "WebFetch(domain:raw.githubusercontent.com)",
       "WebFetch(domain:docs.anthropic.com)",
@@ -244,7 +247,8 @@
         "~/.colima/",
         "~/.docker/",
         "~/.config/gh/",
-        "~/.local/share/aquaproj-aqua/"
+        "~/.local/share/aquaproj-aqua/",
+        "~/.cache/trivy/"
       ],
       "denyWrite": [
         "/etc"
@@ -325,7 +329,8 @@
       "codex exec review *",
       "codex review *",
       "~/src/dotfiles/agent-resources/skills/implement-plan/scripts/review-codex.sh*",
-      "$(git rev-parse --show-toplevel)/agent-resources/skills/implement-plan/scripts/review-codex.sh"
+      "$(git rev-parse --show-toplevel)/agent-resources/skills/implement-plan/scripts/review-codex.sh",
+      "tflint *"
     ]
   },
   "effortLevel": "high",
