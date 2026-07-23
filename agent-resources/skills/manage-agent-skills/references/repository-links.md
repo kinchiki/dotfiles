@@ -1,28 +1,28 @@
 # Repository Links
 
-Use this reference in Step 4 when creating or verifying published Skill and agent definition links.
-Run the repository maintenance scripts instead of calling `ln` directly.
-If a correct symlink already exists, the script leaves it in place.
-If the path exists but is not the intended symlink, the script fails so you can inspect it before replacing anything.
+公開済み Skill と agent definition のリンクを作成または検証する Step 4 で、この reference を使う。
+`ln` を直接呼び出さず、リポジトリのメンテナンススクリプトを実行する。
+正しい symlink が既に存在する場合、スクリプトはそのまま保持する。
+パスは存在するが意図した symlink でない場合、置き換え前に確認できるようスクリプトは失敗する。
 
 ## Skill Links
 
-Skill implementations live under `agent-resources/skills/<skill-name>/`.
-Publish an updated Skill to both `.agents/` and `.claude/` with `scripts/maintain-skill.sh`.
+Skill の実体は `agent-resources/skills/<skill-name>/` 配下に置く。
+更新した Skill は `scripts/maintain-skill.sh` を使い、`.agents/` と `.claude/` の両方へ公開する。
 
 ```bash
 agent-resources/skills/manage-agent-skills/scripts/maintain-skill.sh <skill-name>
 ```
 
-This script verifies `agent-resources/skills/<skill-name>/SKILL.md`, ensures the published symlinks exist, and runs the skill validator.
+このスクリプトは `agent-resources/skills/<skill-name>/SKILL.md` を検証し、公開 symlink が存在することを確認して、skill validator を実行する。
 
 ## Agent Definition Links
 
-Agent definition implementations live under `agent-resources/agents/<agent-name>/`.
-Publish an updated agent definition to `.agents/`, `.claude/`, and `.codex/` with `scripts/maintain-agent-definition.sh`.
+Agent definition の実体は `agent-resources/agents/<agent-name>/` 配下に置く。
+更新した agent definition は `scripts/maintain-agent-definition.sh` を使い、`.agents/`、`.claude/`、`.codex/` へ公開する。
 
 ```bash
 agent-resources/skills/manage-agent-skills/scripts/maintain-agent-definition.sh <agent-name>
 ```
 
-This script verifies `<agent-name>.md` (canonical) and `codex.toml`, then ensures `.agents/agents/<agent-name>.md` and `.claude/agents/<agent-name>.md` symlink to the canonical file and `.codex/agents/<agent-name>.toml` symlinks to `codex.toml`.
+このスクリプトは `<agent-name>.md`（canonical）と `codex.toml` を検証した後、`.agents/agents/<agent-name>.md` と `.claude/agents/<agent-name>.md` が canonical file を参照する symlink であり、`.codex/agents/<agent-name>.toml` が `codex.toml` を参照する symlink であることを確認する。

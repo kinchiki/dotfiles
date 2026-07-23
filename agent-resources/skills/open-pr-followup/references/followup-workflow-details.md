@@ -1,19 +1,19 @@
 # Follow-up Workflow Details
 
-Use this reference when executing Steps 0 through 5.
-It holds command recipes and lane integration details so `SKILL.md` stays focused on orchestration.
-Run every `scripts/` command below from this skill's own directory.
+Step 0 から Step 5 を実行するときに、この reference を使う。
+`SKILL.md` をオーケストレーションに集中させるため、コマンドの実行例と lane 統合の詳細をこのファイルに置く。
+以下のすべての `scripts/` コマンドは、このスキル自身のディレクトリから実行する。
 
 ## Resolve PR Metadata
 
-After `open-pr` succeeds, fetch the concrete PR identity.
-Use the helper script first; it prints `PR_URL`, `PR_NUMBER`, `HEAD_REF`, and `BASE_REF` without waiting or collecting signals.
+`open-pr` が成功した後、具体的な PR の識別情報を取得する。
+最初に helper script を使う。このスクリプトは待機や signal の収集を行わず、`PR_URL`、`PR_NUMBER`、`HEAD_REF`、`BASE_REF` を出力する。
 
 ```bash
 scripts/poll-pr-signals.sh --pr <pr-number-or-url-or-branch> --metadata-only
 ```
 
-If the script cannot run, use the fallback command.
+スクリプトを実行できない場合は、fallback command を使う。
 
 ```bash
 gh pr view --json number,url,headRefName,baseRefName,state,title
@@ -21,56 +21,56 @@ gh pr view --json number,url,headRefName,baseRefName,state,title
 
 ## Wait And Poll
 
-Use the wait policy in `SKILL.md` Step 2.
-Use the helper script first.
+`SKILL.md` の Step 2 にある待機ポリシーを使う。
+最初に helper script を使う。
 
 ```bash
 scripts/poll-pr-signals.sh --pr <pr-number-or-url-or-branch> --initial-wait-seconds 300 --poll-interval-seconds 180 --max-polls 3
 ```
 
-The script prints a compact summary including `CHECKS_STATUS`, `CHECKS_FAIL_COUNT`, `CHECKS_PENDING_COUNT`, `UNRESOLVED_THREAD_COUNT`, and `AI_REVIEW_DETECTED`.
-Use `--initial-wait-seconds` when the user specifies a custom wait interval.
+スクリプトは、`CHECKS_STATUS`、`CHECKS_FAIL_COUNT`、`CHECKS_PENDING_COUNT`、`UNRESOLVED_THREAD_COUNT`、`AI_REVIEW_DETECTED` を含む簡潔な要約を出力する。
+ユーザーが待機間隔を指定した場合は `--initial-wait-seconds` を使う。
 
-If the script cannot run, use fallback commands.
-The existing quick command example is:
+スクリプトを実行できない場合は、fallback command を使う。
+既存の短縮コマンド例は次のとおり。
 
 ```bash
 sleep 300
 ```
 
-Record whether AI review was detected within the wait budget.
-If it is not detected, continue CI inspection and report the missing review signal.
+待機時間内に AI review を検出したか記録する。
+検出しなかった場合も CI の調査を続け、review signal がなかったことを報告する。
 
 ## Inspect Checks
 
-Inspect CI before review comments.
+レビューコメントより先に CI を調査する。
 
-When available, use `poll-pr-signals.sh` output as the primary CI signal.
-Use the command below as a fallback or to drill into specific check details.
+利用できる場合は、`poll-pr-signals.sh` の出力を主要な CI signal として使う。
+fallback として、または特定の check の詳細を掘り下げるために、以下のコマンドを使う。
 
 ```bash
 gh pr checks <pr-number-or-url>
 ```
 
-- Treat pass and skipped checks as recorded non-blocking states.
-- `ci/circleci: test` is ignored and never delegated to `gh-fix-ci`; this check is excluded from all counts, pending waits, and failing check summaries.
-- Delegate GitHub Actions failures to `gh-fix-ci`.
-- Report failing external checks by URL when `gh-fix-ci` cannot inspect them.
+- pass と skipped の check は、記録済みの non-blocking state として扱う。
+- `ci/circleci: test` は無視し、`gh-fix-ci` には委譲しない。この check は、すべての件数、pending の待機、失敗した check の要約から除外する。
+- GitHub Actions の失敗は `gh-fix-ci` に委譲する。
+- `gh-fix-ci` で調査できない外部 check の失敗は、URL とともに報告する。
 
 ## Integrate Follow-Up Lanes
 
-- Split CI failure and actionable review comments into separate lanes.
-- Delegate CI to `gh-fix-ci`.
-- Delegate review comments to `address-pr-comments`, or to `gh-address-comments` when the local Skill is unavailable.
-- If the review lane did not update the PR description itself, run `update-pr-description` as a separate lane before declaring writeback complete.
-- Parallelize only with separate worktrees, separate sessions, or disjoint file sets.
-- Serialize work in one working tree when files overlap.
-- Each follow-up lane must obtain user confirmation before committing its fixes.
-- If a review lane already committed, pushed, updated the PR description, replied, and resolved threads, record that result and do not repeat those side effects.
+- CI failure と対応可能なレビューコメントを別々の lane に分ける。
+- CI は `gh-fix-ci` に委譲する。
+- レビューコメントは `address-pr-comments` に委譲する。ローカルの Skill が利用できない場合は `gh-address-comments` に委譲する。
+- review lane 自身が PR description を更新しなかった場合は、書き戻し完了を宣言する前に `update-pr-description` を別の lane として実行する。
+- 並列化は、別々の worktree、別々の session、または重複しない file set を使う場合にだけ行う。
+- 1つの working tree でファイルが重複する場合は、作業を直列化する。
+- 各 follow-up lane は、修正を commit する前にユーザーの確認を得る。
+- review lane が既に commit、push、PR description の更新、返信、thread の解決まで行っている場合は、その結果を記録し、それらの side effect を繰り返さない。
 
 ## Push Remaining Fixes
 
-Use this only for remaining non-review-lane commits after `commit-changes` has created local commits and the user has confirmed push.
+`commit-changes` がローカル commit を作成し、ユーザーが push を確認した後、review lane 以外で残っている commit にだけ使う。
 
 ```bash
 git push

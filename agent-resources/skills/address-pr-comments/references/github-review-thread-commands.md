@@ -1,14 +1,14 @@
 # GitHub Review Thread Commands
 
-Use these commands in Step 1 to fetch unresolved review feedback and in Step 8 to reply and resolve implemented inline review threads.
-Keep review summary bodies as implementation inputs only; they are not inline thread reply or resolve targets.
-Treat this file as the canonical source for fetch, reply, resolve, and writeback command rules.
+未解決のレビュー指摘を取得する Step 1 と、対応済みのインラインレビュースレッドへ返信して解決する Step 8 では、これらのコマンドを使う。
+レビュー要約の本文は実装の入力としてだけ扱い、インラインスレッドへの返信や解決の対象にはしない。
+取得、返信、解決、書き戻しのコマンド規約については、このファイルを正典として扱う。
 
 ## Fetch Review Threads
 
-Use GraphQL `reviewThreads` as the primary source.
-Keep only `isResolved == false` threads and carry the GraphQL `id` into later reply and resolve steps.
-Keep `isOutdated` and the full `comments.nodes` payload as triage input.
+GraphQL の `reviewThreads` を主要な情報源として使う。
+`isResolved == false` のスレッドだけを残し、GraphQL の `id` を後続の返信・解決ステップへ引き継ぐ。
+`isOutdated` と `comments.nodes` の完全なペイロードは、トリアージの入力として保持する。
 
 ```bash
 gh api graphql -f query='
@@ -24,7 +24,7 @@ query($owner:String!,$repo:String!,$pr:Int!){
 }' -F owner=OWNER -F repo=REPO -F pr=N --jq '.data.repository.pullRequest.reviewThreads.nodes[] | select(.isResolved == false)'
 ```
 
-Fetch review summary bodies separately.
+レビュー要約の本文は別に取得する。
 
 ```bash
 gh pr view N --json reviews --jq '.reviews[] | select(.body != "") | {author:.author.login, state:.state, body:.body}'
@@ -32,10 +32,10 @@ gh pr view N --json reviews --jq '.reviews[] | select(.body != "") | {author:.au
 
 ## Reply To Implemented Threads
 
-Reply only after the implemented fix has been pushed.
-Reply only for implemented inline review threads.
-Do not reply to review summary bodies.
-Do not reply to `recommend-skip` threads unless the user explicitly approved that writeback.
+実装した修正を push した後にだけ返信する。
+対応済みのインラインレビュースレッドにだけ返信する。
+レビュー要約の本文には返信しない。
+ユーザーが書き戻しを明示的に承認した場合を除き、`recommend-skip` のスレッドには返信しない。
 
 ```bash
 gh api graphql -f query='
@@ -48,7 +48,7 @@ mutation($thread:ID!,$body:String!){
 
 ## Resolve Replied Threads
 
-Resolve only after the reply mutation succeeds for the same inline thread.
+同じインラインスレッドへの返信 mutation が成功した後にだけ解決する。
 
 ```bash
 gh api graphql -f query='

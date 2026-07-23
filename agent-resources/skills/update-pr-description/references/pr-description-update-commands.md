@@ -1,12 +1,12 @@
 # PR Description Update Commands
 
-Use these commands to resolve the target PR, inspect the current body, and apply a confirmed update.
-Treat this file as the canonical source for `gh pr view` and `gh pr edit` usage in `update-pr-description`.
+対象 PR の特定、現在の本文の調査、確認済みの更新の適用には、これらのコマンドを使う。
+`update-pr-description` における `gh pr view` と `gh pr edit` の使用方法については、このファイルを正典として扱う。
 
 ## Resolve The PR
 
-Prefer an explicit PR identifier.
-If none is given, resolve the PR for the current branch.
+明示的に指定された PR 識別子を優先する。
+指定されていない場合は、現在の branch に対応する PR を特定する。
 
 ```bash
 gh repo view --json nameWithOwner -q .nameWithOwner
@@ -15,24 +15,24 @@ gh pr view <n-or-omit> --json number,url,title,body,headRefName,baseRefName,stat
 
 ## Inspect Current Body
 
-Fetch the current body before drafting changes.
+変更案を作成する前に、現在の本文を取得する。
 
 ```bash
 gh pr view <n-or-omit> --json body -q .body
 ```
 
-If the repository may use a template, inspect `.github/pull_request_template.md` or documented local conventions before replacing empty sections.
+リポジトリがテンプレートを使っている可能性がある場合は、空のセクションを置き換える前に `.github/pull_request_template.md` または文書化されたローカル規約を調査する。
 
 ## Apply Confirmed Update
 
-Write the new body into a temporary file, then update the PR.
-Run this only after the user or calling workflow has approved description writeback.
+新しい本文を一時ファイルに書き込んでから PR を更新する。
+ユーザーまたは呼び出し元の workflow が description の書き戻しを承認した後にだけ実行する。
 
 ```bash
 gh pr edit <n-or-omit> --body-file BODY_FILE
 ```
 
-Re-read the body after editing to confirm the persisted content matches the intended update.
+編集後に本文を再取得し、永続化された内容が意図した更新と一致することを確認する。
 
 ```bash
 gh pr view <n-or-omit> --json body -q .body

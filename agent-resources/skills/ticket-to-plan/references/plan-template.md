@@ -1,8 +1,8 @@
 # Plan Template Reference
 
-Read this file from `../SKILL.md` Step 7 before writing the approved plan file.
-Fill every section unless it is truly not applicable.
-If a section is not applicable, say why in that section.
+承認済みのプランファイルを書く前に、`../SKILL.md` の Step 7 からこのファイルを読む。
+本当に該当しない場合を除き、すべてのセクションを記入する。
+該当しないセクションには、その理由を書く。
 
 ## Path convention
 
@@ -10,20 +10,20 @@ If a section is not applicable, say why in that section.
 .ai-local/plans/<plan-id>/<YYYYMMDD>_<agent-name>_<slug>.md
 ```
 
-Ticket source example:
+チケットをソースとする場合の例:
 
 ```text
 .ai-local/plans/ENG-123/20260608_codex_oauth-token-refresh.md
 ```
 
-User request source example:
+ユーザー依頼をソースとする場合の例:
 
 ```text
 .ai-local/plans/request-change-x-to-y/20260616_codex_change-x-to-y.md
 ```
 
-Use a ticket ID such as `ENG-123` or `github-123` for ticket sources.
-Use `request-<slug>` for user request sources.
+チケットをソースとする場合は、`ENG-123` や `github-123` のようなチケット ID を使う。
+ユーザー依頼をソースとする場合は、`request-<slug>` を使う。
 
 ## Template
 
@@ -33,7 +33,7 @@ Use `request-<slug>` for user request sources.
 - **ソース:** GitHub | Linear | User request
 - **参照:** <完全な URL、ID、または元依頼の短い引用>
 - **Plan ID:** <plan-id>
-- **計画者:** <AI agent 名、モデル ID、reasoning effort 設定。例: codex / gpt-5.6-sol / reasoning effort: high>
+- **計画者:** <AI agent 名、モデル ID。例: codex / gpt-5.6-sol>
 - **日付:** <YYYY-MM-DD>
 - **ステータス:** 承認済み - 実装可能
 

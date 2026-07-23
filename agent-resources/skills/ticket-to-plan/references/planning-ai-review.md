@@ -1,67 +1,81 @@
 # Planning AI Review Reference
 
-Use this reference from `../SKILL.md` Step 5 after the user finished reviewing the draft plan and before the final approval request.
-The goal is to improve the user-reviewed plan before final approval, not to approve the plan on the user's behalf.
+ユーザーがドラフトプランのレビューを終えた後、最終承認を依頼する前に、`../SKILL.md` の Step 5 からこの reference を使う。
+目的は、ユーザーに代わってプランを承認することではなく、ユーザーレビュー済みのプランを最終承認前に改善することである。
 
 ## Contents
 
-- Select the reviewer.
-- Build the review packet.
-- Run the reviewer.
-- Handle findings.
+- レビュアーを選ぶ。
+- review packet を組み立てる。
+- レビュアーを実行する。
+- 指摘に対応する。
 
 ## Select the reviewer
 
-- If the user specified a reviewer AI, use that AI.
-- If Claude Code created the draft plan, use Codex as the reviewer.
-- If Codex created the draft plan, use Claude Code as the reviewer.
-- If another AI created the draft plan, use a cost-effective independent reviewer that is different from the planner.
-- If the requested or required reviewer is unavailable, stop before final approval and report the blocker.
+- ユーザーが reviewer AI を指定した場合は、その AI を使う。
+- Claude Code がドラフトプランを作成した場合は、Codex をレビュアーとして使う。
+- Codex がドラフトプランを作成した場合は、Claude Code をレビュアーとして使う。
+- その他の AI がドラフトプランを作成した場合は、planner とは異なる費用対効果の高い独立レビュアーを使う。
+- 依頼された、または必要なレビュアーが利用できない場合は、最終承認の前に停止して阻害要因を報告する。
 
 ## Select model and effort
 
-Use cost-effective defaults for review.
-Raise effort only when the plan involves auth, billing, permissions, data deletion, migration, security, production data, broad refactor, or unknown blast radius.
-Prefer explicit environment overrides when the user or repo provides them.
-
-- Codex reviewer default: `CODEX_REVIEW_MODEL=${CODEX_REVIEW_MODEL:-gpt-5.6-terra}` and `CODEX_REVIEW_EFFORT=${CODEX_REVIEW_EFFORT:-medium}`. plain `codex exec` によるプラン文書レビューの balanced default。高リスク計画では `CODEX_REVIEW_MODEL=gpt-5.6-sol` と `CODEX_REVIEW_EFFORT=high` を指定する。
-- Claude reviewer default: `CLAUDE_REVIEW_MODEL=${CLAUDE_REVIEW_MODEL:-sonnet}` and `CLAUDE_REVIEW_EFFORT=${CLAUDE_REVIEW_EFFORT:-medium}`.
-- High-risk plan review default: set the selected reviewer effort env var to `high`.
-- Use `xhigh` or `max` only when explicitly requested.
+- レビューには費用対効果の高いデフォルト値を使う。
+- プランが認証、請求、権限、データ削除、migration、セキュリティ、本番データ、広範な refactor、または不明な影響範囲に関わる場合は high-risk とする。
+- レビューには以下のモデルと推論を使う。
+  - Codex
+    - デフォルト
+      - `CODEX_REVIEW_MODEL=${CODEX_REVIEW_MODEL:-gpt-5.6-terra}`
+      - `CODEX_REVIEW_EFFORT=${CODEX_REVIEW_EFFORT:-high}`
+    - high-risk の差分
+      - `CODEX_REVIEW_MODEL=gpt-5.6-sol`
+      - `CODEX_REVIEW_EFFORT=high`
+  - Claude
+    - デフォルト
+      - `CLAUDE_REVIEW_MODEL=${CLAUDE_REVIEW_MODEL:-sonnet}`
+      - `CLAUDE_REVIEW_EFFORT=${CLAUDE_REVIEW_EFFORT:-high}`
+    - high-risk の差分
+      - `CLAUDE_REVIEW_MODEL=opus`
+      - `CLAUDE_REVIEW_EFFORT=high`
+    - high-risk の差分
+      - `CLAUDE_REVIEW_MODEL=opus`
+      - `CLAUDE_REVIEW_EFFORT=high`
+- 明示的に依頼された場合にだけ `xhigh` または `max` を使う。
+- 環境変数はデフォルト値より優先する。
 
 ## Build the review packet
 
-Pass only the context needed to evaluate the plan.
-Include:
+プランの評価に必要なコンテキストだけを渡す。
+次の内容を含める。
 
-- Source kind and 3 to 6 line source summary.
-- Original source reference or user request excerpt.
-- User-reviewed intent changes, accepted behaviors, and explicit non-goals when the user clarified them during draft review.
-- Draft plan, including goal, acceptance criteria, scoped approach, risks, and out-of-scope items.
-- Draft `## タスク` breakdown with `files`, `depends_on`, `parallel`, `test`, and `done_when`.
-- File paths and existing patterns the planner inspected.
-- Assumptions, open questions, and known constraints.
+- ソース種別と3〜6行のソース要約。
+- 元ソースの参照先またはユーザー依頼の抜粋。
+- ドラフトレビュー中にユーザーが明確にした、ユーザーレビュー済みの意図の変更、受け入れた振る舞い、明示的な non-goal。
+- ゴール、受入基準、スコープを限定したアプローチ、リスク、スコープ外の項目を含むドラフトプラン。
+- `files`、`depends_on`、`parallel`、`test`、`done_when` を含むドラフトの `## タスク` 分解。
+- planner が調査したファイルパスと既存パターン。
+- 仮定、未解決の質問、既知の制約。
 - `test-selection-policy.md` の内容。
 
-Ask the reviewer to check:
+レビュアーに次の点を確認させる。
 
-- Missing requirements from the source.
-- Whether the plan preserves explicit user intent and intentionally accepted behavior unless there is a concrete conflict with safety, data integrity, implementation feasibility, or repository constraints.
-- For ticket sources, check comments, labels, linked issues / PRs, and acceptance criteria.
-- For user request sources, check whether inferred assumptions and acceptance criteria are explicit enough for implementation.
-- Missed affected files, data flow, auth / permission, background job, API, migration, or compatibility concerns.
-- Task ordering, dependency, and `parallel: yes` safety.
-- Test coverage, lint / test commands, and observable `done_when` conditions.
+- ソースにある要件の漏れ。
+- 安全性、データ整合性、実装可能性、リポジトリの制約との具体的な衝突がない限り、プランがユーザーの明示的な意図と意図的に受け入れた振る舞いを維持しているか。
+- チケットをソースとする場合は、コメント、label、リンクされた issue / PR、受入基準。
+- ユーザー依頼をソースとする場合は、推測した仮定と受入基準が実装に十分なほど明示されているか。
+- 影響を受けるファイル、data flow、認証 / 権限、background job、API、migration、互換性に関する懸念の見落とし。
+- タスクの順序、依存関係、`parallel: yes` の安全性。
+- テストカバレッジ、lint / test コマンド、観測可能な `done_when` 条件。
 - テストが DB・フレームワーク・ライブラリの標準保証だけを直接再検証していないこと。
-- Scope creep or unnecessary abstraction.
-- Whether the plan is self-contained enough for a fresh implementation session.
+- scope creep または不要な抽象化。
+- 新しい実装セッションが使えるほどプランが自己完結しているか。
 
-Tell the reviewer to treat the original source and user-reviewed intent as the source of truth.
-Tell the reviewer not to suggest changing behavior that the user explicitly asked to keep unless the finding cites a concrete risk such as security, data loss, implementation infeasibility, or a hard repository constraint.
-Tell the reviewer not to request or report missing tests excluded by `test-selection-policy.md`.
-Tell the reviewer to cite the relevant source excerpt, user-reviewed intent, or inspected codebase evidence for every P1 or P2 finding.
+元ソースとユーザーレビュー済みの意図を source of truth として扱うようレビュアーへ指示する。
+セキュリティ、データ損失、実装不可能、リポジトリの強制的な制約など、具体的なリスクを指摘で示す場合を除き、ユーザーが維持を明示的に依頼した振る舞いの変更を提案しないようレビュアーへ指示する。
+`test-selection-policy.md` で除外されているテストの不足を要求または報告しないようレビュアーへ指示する。
+P1 または P2 の各指摘では、関連するソースの抜粋、ユーザーレビュー済みの意図、または調査したコードベースの根拠を引用するようレビュアーへ指示する。
 
-Ask the reviewer to return findings in this format:
+レビュアーに次の形式で指摘を返させる。
 
 ```text
 [P1] <blocking issue that would likely make implementation fail or violate requirements>
@@ -72,18 +86,18 @@ No findings
 
 ## Run the reviewer
 
-Run every reviewer script below from this skill's own directory.
-Use a read-only mode.
-Tell the reviewer not to edit production code, skill files, or the plan file.
-Write the review packet to `REVIEW_PROMPT_FILE` before running a reviewer script.
-The review packet must already exist before script execution.
-The reviewer scripts only run the selected reviewer; they do not select the reviewer, build the review packet, handle findings, or update the plan.
-The reviewer scripts create their own fresh temporary directory for reviewer output and stderr.
-If Claude Code is the selected reviewer, ask the user for explicit permission before sending the review packet.
-Set `CLAUDE_REVIEW_CONSENT=yes` only after that permission is recorded.
-If the run is blocked because consent has not been recorded yet, stop, obtain consent, set the variable, and rerun.
+- 以下のすべてのレビュアースクリプトは、このスキル自身のディレクトリから実行する。
+- read-only mode を使う。
+- production code、skill file、plan file を編集しないようレビュアーへ指示する。
+- レビュアースクリプトを実行する前に、review packet を `REVIEW_PROMPT_FILE` へ書き込む。
+- スクリプトの実行前に review packet が存在していなければならない。
+- レビュアースクリプトは選択したレビュアーの実行だけを行い、レビュアーの選択、review packet の構築、指摘への対応、プランの更新は行わない。
+- レビュアースクリプトは、レビュアーの出力と stderr のために新しい一時ディレクトリを自ら作成する。
+- Claude Code をレビュアーとして選択した場合、review packet を送信する前にユーザーへ明示的な許可を求める。
+- 許可を記録した後にだけ `CLAUDE_REVIEW_CONSENT=yes` を設定する。
+- 同意がまだ記録されていないため実行が妨げられた場合は、停止して同意を得てから変数を設定し、再実行する。
 
-If Claude Code created the draft plan, use Codex as the reviewer:
+Claude Code がドラフトプランを作成した場合は、Codex をレビュアーとして使う。
 
 ```bash
 REPO="<absolute repo path>"
@@ -94,7 +108,7 @@ scripts/run-codex-planning-review.sh \
   --prompt-file "$REVIEW_PROMPT_FILE"
 ```
 
-If Codex created the draft plan, use Claude Code as the reviewer:
+Codex がドラフトプランを作成した場合は、Claude Code をレビュアーとして使う。
 
 ```bash
 REPO="<absolute repo path>"
@@ -105,7 +119,7 @@ scripts/run-claude-planning-review.sh \
   --prompt-file "$REVIEW_PROMPT_FILE"
 ```
 
-Use the common runner directly only as the low-level API:
+共通 runner を直接使うのは、low-level API として使う場合だけにする。
 
 ```bash
 scripts/run-planning-reviewer.sh \
@@ -114,14 +128,14 @@ scripts/run-planning-reviewer.sh \
   --prompt-file "$REVIEW_PROMPT_FILE"
 ```
 
-If the current environment has a multi-agent or review tool that is more cost-effective and still uses the selected reviewer AI, use that tool instead.
+現在の環境に、選択した reviewer AI を使用しつつ費用対効果がより高い multi-agent tool または review tool がある場合は、その tool を代わりに使う。
 
 ## Handle findings
 
-- Treat P1 and P2 findings as requiring either a plan update or an explicit planner rejection with rationale.
-- Apply accepted findings to the draft plan and task breakdown before asking the user for final approval.
-- If a finding changes assumptions or affected files, re-read the relevant ticket or code context before updating the plan.
-- Address cheap P3 findings when they make the plan clearer.
-- Record skipped P2 / P3 findings and the reason in `AIレビュー` or `リスク・未解決の論点`.
-- If a P1 or P2 finding causes a material redesign, run the same reviewer once more on the updated draft.
-- Present the reviewer, key findings, and planner disposition together with the final approval request.
+- P1 と P2 の指摘には、プランの更新または理由を伴う planner の明示的な却下が必要であるものとして扱う。
+- 採用した指摘は、ユーザーに最終承認を求める前にドラフトプランとタスク分解へ反映する。
+- 指摘によって仮定や影響を受けるファイルが変わる場合は、プランを更新する前に関連するチケットまたはコードのコンテキストを読み直す。
+- 低コストで対応でき、プランが明確になる P3 の指摘には対応する。
+- 見送った P2 / P3 の指摘とその理由を `AIレビュー` または `リスク・未解決の論点` に記録する。
+- P1 または P2 の指摘によって実質的な再設計が発生した場合は、更新したドラフトに対して同じレビュアーをもう1回実行する。
+- レビュアー、主要な指摘、planner の判断を最終承認の依頼と一緒に提示する。
