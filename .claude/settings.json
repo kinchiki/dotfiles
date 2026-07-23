@@ -248,7 +248,8 @@
         "~/.docker/",
         "~/.config/gh/",
         "~/.local/share/aquaproj-aqua/",
-        "~/.cache/trivy/"
+        "~/.cache/trivy/",
+        "~/.claude/skills/"
       ],
       "denyWrite": [
         "/etc"
@@ -272,7 +273,8 @@
         "~/.colima/",
         "~/.lima/",
         "~/.config/gh/",
-        "~/.local/share/aquaproj-aqua/"
+        "~/.local/share/aquaproj-aqua/",
+        "~/.claude/skills/"
       ]
     },
     "credentials": {
