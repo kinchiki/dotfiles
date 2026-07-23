@@ -45,7 +45,6 @@ if [[ -z "$PENDING" ]]; then
 fi
 
 codex exec review \
-  --uncommitted \
   --model "$CODEX_REVIEW_MODEL" \
   -c "model_reasoning_effort=\"$CODEX_REVIEW_EFFORT\"" \
   --json \
