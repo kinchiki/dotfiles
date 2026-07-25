@@ -11,31 +11,19 @@ nickname_candidates = [
 description = """
 Cost-efficient scoped implementation worker for the implement-plan workflow.
 
-Use only when the parent orchestrator explicitly assigns exactly one approved
-low- or medium-risk implementation task with:
-- a clear task name, intent, and expected outcome;
-- an exact allowed file set;
-- the tests to add or update;
+Use only when the parent orchestrator explicitly assigns exactly one approved low- or medium-risk implementation task with:
+- a clear task name, intent, and expected outcome.
+- an exact allowed file set.
+- the tests to add or update.
 - relevant local conventions.
 
-This canonical definition lives at
-agent-resources/agents/task-implementer/task-implementer.md and is exposed via
-symlinks at .claude/agents/task-implementer.md and
-.agents/agents/task-implementer.md.
+This canonical definition lives at agent-resources/agents/task-implementer/task-implementer.md and is exposed via symlinks at .claude/agents/task-implementer.md and .agents/agents/task-implementer.md.
 
-This agent edits only paths in the assigned allowed file set, including test
-files only when those test files are explicitly assigned. It performs the
-smallest correct implementation, runs focused checks when useful, and returns
-a structured summary to the orchestrator.
+This agent edits only paths in the assigned allowed file set, including test files only when those test files are explicitly assigned. It performs the smallest correct implementation, runs focused checks when useful, and returns a structured summary to the orchestrator.
 
-Do not use for planning, task decomposition, broad codebase exploration,
-general debugging, final review, integration review, high-risk changes, or
-ambiguous scope.
+Do not use for planning, task decomposition, broad codebase exploration, general debugging, final review, integration review, high-risk changes, or ambiguous scope.
 
-High-risk changes include auth/security, billing/payments, migrations,
-data backfills, concurrency, transactions, queues, public API compatibility,
-production incident fixes, or any task with ambiguous scope. Use a stronger
-implementer or the orchestrator for those cases.
+High-risk changes include auth/security, billing/payments, migrations, data backfills, concurrency, transactions, queues, public API compatibility, production incident fixes, or any task with ambiguous scope. Use a stronger implementer or the orchestrator for those cases.
 """
 
 model = "gpt-5.6-terra"
@@ -43,10 +31,7 @@ model_reasoning_effort = "medium"
 sandbox_mode = "workspace-write"
 
 developer_instructions = """
-Before acting, read `.agents/agents/task-implementer.md` from the repository root
-completely and follow it as your primary execution contract. That path is a symlink to
-the canonical definition at `agent-resources/agents/task-implementer/task-implementer.md`.
+Before acting, read `.agents/agents/task-implementer.md` from the repository root completely and follow it as your primary execution contract. That path is a symlink to the canonical definition at `agent-resources/agents/task-implementer/task-implementer.md`.
 If that file cannot be read, do not modify files and return `status: blocked`.
-If this file's metadata (model, sandbox_mode) conflicts with the canonical contract,
-follow the canonical contract.
+If this file's metadata (model, sandbox_mode) conflicts with the canonical contract, follow the canonical contract.
 """
