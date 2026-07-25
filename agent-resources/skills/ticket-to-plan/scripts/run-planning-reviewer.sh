@@ -171,7 +171,14 @@ trap cleanup EXIT
 status=0
 case "$reviewer" in
   codex)
+    # codex exec
+      # 向いている用途: 計画書・設計・任意ファイルのレビュー
+      # 標準入力やpromptで任意タスクを実行する汎用モード
+    # --ignore-user-config でMCP接続を止める
+      # 利点: user config 由来の MCP 接続を止め、認証失敗を避けて外部状態に依存しないレビューにする。
+      # 欠点: MCP の外部コンテキストに加え、provider・hook など user config 全体も適用されない。
     codex exec \
+      --ignore-user-config \
       --cd "$repo" \
       --sandbox read-only \
       --model "$model" \
@@ -187,7 +194,10 @@ case "$reviewer" in
     fi
     (
       cd "$repo"
-      claude -p \
+      # 利点: MCP 接続を止め、認証失敗を避けて外部状態に依存しないレビューにする。
+      # 欠点: MCP 経由の issue・docs・監視情報など外部コンテキストを参照できない。
+      claude - \
+        --strict-mcp-config \
         --permission-mode plan \
         --model "$model" \
         --effort "$effort" \

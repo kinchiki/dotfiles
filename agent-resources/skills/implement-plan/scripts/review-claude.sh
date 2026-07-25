@@ -47,7 +47,12 @@ Style / line-length 指摘は repo linter で確定検証し、byte count だけ
 $TEST_SELECTION_POLICY
 
 問題がなければ、確認した差分の概要を示してから no findings と書いてください。"
+
+# strict-mcp-config でMCP接続を止める
+  # 利点: MCP 接続を止め、認証失敗を避けて外部状態に依存しないレビューにする。
+  # 欠点: MCP 経由の issue・docs・監視情報など外部コンテキストを参照できない。
 claude -p \
+  --strict-mcp-config \
   --model "$CLAUDE_REVIEW_MODEL" \
   --effort "$CLAUDE_REVIEW_EFFORT" \
   --permission-mode plan \
