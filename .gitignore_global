@@ -39,7 +39,7 @@ Temporary Items
 
 # AI
 **/.claude/settings.local.json
-.ai-local/plans/
+.ai-local/
 .claude/plans
 
 **/.claude/.cc-writes/
