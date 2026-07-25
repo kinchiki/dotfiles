@@ -147,11 +147,11 @@ case "$reviewer" in
     # GPT-5.6 Terra is the balanced default for planning review;
     # this path runs a plain `codex exec` prompt review, not the `codex exec review` subcommand.
     model="${model:-${CODEX_REVIEW_MODEL:-gpt-5.6-terra}}"
-    effort="${effort:-${CODEX_REVIEW_EFFORT:-medium}}"
+    effort="${effort:-${CODEX_REVIEW_EFFORT:-high}}"
     ;;
   claude)
     model="${model:-${CLAUDE_REVIEW_MODEL:-sonnet}}"
-    effort="${effort:-${CLAUDE_REVIEW_EFFORT:-medium}}"
+    effort="${effort:-${CLAUDE_REVIEW_EFFORT:-high}}"
     ;;
 esac
 

@@ -10,7 +10,7 @@ REVIEW_ERR="$REVIEW_DIR/review.err"
 # Terra is the balanced default for the `codex exec review` subcommand.
 # Set CODEX_REVIEW_MODEL=gpt-5.6-sol for high-risk diffs.
 CODEX_REVIEW_MODEL="${CODEX_REVIEW_MODEL:-gpt-5.6-terra}"
-CODEX_REVIEW_EFFORT="${CODEX_REVIEW_EFFORT:-medium}"
+CODEX_REVIEW_EFFORT="${CODEX_REVIEW_EFFORT:-high}"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 TEST_POLICY_FILE="$SCRIPT_DIR/../../ticket-to-plan/references/test-selection-policy.md"
 

@@ -4,7 +4,7 @@
 set -uo pipefail
 
 CLAUDE_REVIEW_MODEL="${CLAUDE_REVIEW_MODEL:-sonnet}"
-CLAUDE_REVIEW_EFFORT="${CLAUDE_REVIEW_EFFORT:-medium}"
+CLAUDE_REVIEW_EFFORT="${CLAUDE_REVIEW_EFFORT:-high}"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 TEST_POLICY_FILE="$SCRIPT_DIR/../../ticket-to-plan/references/test-selection-policy.md"
 

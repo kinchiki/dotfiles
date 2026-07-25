@@ -57,7 +57,7 @@ plan file に `## 動作確認` がある場合は、その指示も contract �
 - `parallel: yes` かつ `files` が重ならない ready な task で、かつ low・medium risk の場合に限り worker へ委譲する。それ以外は serialize する。委譲先はその環境で公開されているかで選ぶ:
   - `task-implementer` が公開されていればそれを使う（Claude では sub-agent、Codex では agent として公開されている場合）。
   - `task-implementer` が無い環境では、その環境の標準 worker（sub-agent 相当）を使う。
-  - どちらの worker 機構も使えない環境: 委譲せず **逐次実行**する。逐次実行時の既定モデルは Claude=`sonnet` / Codex=`gpt-5.6-terra`、effort=`medium`（上位設定は明示指示があるときだけ）。
+  - どちらの worker 機構も使えない環境: 委譲せず **逐次実行**する。逐次実行時の既定モデルは Claude=`sonnet` / Codex=`gpt-5.6-terra`, effort=`high`（上位設定は明示指示があるときだけ）。
   - worker brief には task 名、intent、期待する成果、許可された file set、追加・更新する test、`test-selection-policy.md`、local convention を含める。
   - worker は commit、branch 作成、plan file の編集を行わない。
   - worker が `status: blocked` または `needs-strong-implementer` を返した場合は、その task をチェックせず、serialize するかユーザーに確認する。
