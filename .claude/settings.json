@@ -255,9 +255,6 @@
       "denyWrite": [
         "/etc"
       ],
-      "denyRead": [
-        "~/"
-      ],
       "allowRead": [
         "/dev/ttys",
         "/dev/ptmx",
