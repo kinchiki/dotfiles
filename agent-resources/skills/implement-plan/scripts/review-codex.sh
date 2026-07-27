@@ -52,8 +52,10 @@ fi
 # --ignore-user-config でMCP接続を止める
   # 利点: user config 由来の MCP 接続を止め、認証失敗を避けて外部状態に依存しないレビューにする。
   # 欠点: MCP の外部コンテキストに加え、provider・hook など user config 全体も適用されない。
+# --ignore-user-config で認証設定 cli_auth_credentials_store = "keyring" が読めないため、明示する
 codex exec review \
   --ignore-user-config \
+  -c cli_auth_credentials_store="keyring" \
   --model "$CODEX_REVIEW_MODEL" \
   -c "model_reasoning_effort=\"$CODEX_REVIEW_EFFORT\"" \
   --json \

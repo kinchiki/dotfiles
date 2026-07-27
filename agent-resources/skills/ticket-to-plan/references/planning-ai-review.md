@@ -48,6 +48,7 @@
 プランの評価に必要なコンテキストだけを渡す。
 次の内容を含める。
 
+- ドラフト plan file の絶対パスと、その最新の全文。
 - ソース種別と3〜6行のソース要約。
 - 元ソースの参照先またはユーザー依頼の抜粋。
 - ドラフトレビュー中にユーザーが明確にした、ユーザーレビュー済みの意図の変更、受け入れた振る舞い、明示的な non-goal。
@@ -86,7 +87,12 @@ No findings
 
 ## Run the reviewer
 
-- 以下のすべてのレビュアースクリプトは、このスキル自身のディレクトリから実行する。
+- Claude Code から Codex をレビュアーとして起動する場合は、`~/.claude/skills/ticket-to-plan/scripts/run-codex-planning-review.sh` だけを使う。
+- Claude Code の `sandbox.excludedCommands` と `permissions.allow` には、この wrapper を登録する。
+- Claude Code から Codex CLI または共通 runner を直接実行しない。
+- Codex reviewer は plan file と review packet に記載したローカル実装を読み、両者を照合する。
+- Codex がローカルファイルを読めない場合は、レビューを blocked として報告し、remote committed code または review packet だけに基づく指摘を最終承認へ進めない。
+- Claude Code をレビュアーとして起動する場合は、このスキル自身のディレクトリから `scripts/run-claude-planning-review.sh` を実行する。
 - read-only mode を使う。
 - production code、skill file、plan file を編集しないようレビュアーへ指示する。
 - レビュアースクリプトを実行する前に、review packet を `REVIEW_PROMPT_FILE` へ書き込む。
@@ -100,12 +106,9 @@ No findings
 Claude Code がドラフトプランを作成した場合は、Codex をレビュアーとして使う。
 
 ```bash
-REPO="<absolute repo path>"
-REVIEW_PROMPT_FILE="<review packet file>"
-
-scripts/run-codex-planning-review.sh \
-  --repo "$REPO" \
-  --prompt-file "$REVIEW_PROMPT_FILE"
+~/.claude/skills/ticket-to-plan/scripts/run-codex-planning-review.sh \
+  --repo "<absolute repo path>" \
+  --prompt-file "<review packet file>"
 ```
 
 Codex がドラフトプランを作成した場合は、Claude Code をレビュアーとして使う。
@@ -118,17 +121,6 @@ scripts/run-claude-planning-review.sh \
   --repo "$REPO" \
   --prompt-file "$REVIEW_PROMPT_FILE"
 ```
-
-共通 runner を直接使うのは、low-level API として使う場合だけにする。
-
-```bash
-scripts/run-planning-reviewer.sh \
-  --repo "$REPO" \
-  --reviewer codex \
-  --prompt-file "$REVIEW_PROMPT_FILE"
-```
-
-現在の環境に、選択した reviewer AI を使用しつつ費用対効果がより高い multi-agent tool または review tool がある場合は、その tool を代わりに使う。
 
 ## Handle findings
 
