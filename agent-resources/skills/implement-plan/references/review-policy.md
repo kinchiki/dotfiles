@@ -6,10 +6,14 @@ low risk では読み込まない。
 ## Independence
 
 - レビュアーは、変更を実装した AI セッションから独立させる。
-- 別系統のレビュアーを優先する。Claude または Codex 以外による実装には `scripts/review-codex.sh` 経由で Codex CLI を使い、Codex または Claude 以外による実装には `scripts/review-claude.sh` 経由で Claude Code を使う。
+- risk と model を決める前に、実装した AI に基づいて reviewer を選ぶ。
+  - Codex が実装した場合は、`scripts/review-claude.sh` 経由で Claude Code を使う。
+  - Claude Code が実装した場合は、`scripts/review-codex.sh` 経由で Codex CLI を使う。
+  - その他の AI が実装した場合は、実装した AI とは異なる reviewer を使う。
+- 実装した AI と同じ系統の reviewer は、別 session や別 model でも独立レビューとして数えない。
+- risk 分類は、選択済み reviewer の model だけを変更する。reviewer の種類は変更しない。
 - `scripts/review-claude.sh` を実行する前に、レビュー対象の未コミット差分を Claude Code へ送信することについてユーザーの明示的な同意を得る。
 - 同意を得た後にだけ `CLAUDE_REVIEW_CONSENT=yes` を渡す。
-- 同じ agent によるセルフレビューは独立レビューとして数えない。
 - 目的、受入基準、特別なリスクだけを渡す。長い実装経緯は渡さない。
 - レビュアーは `../../ticket-to-plan/references/test-selection-policy.md` に従う。レビュースクリプトはその内容をレビュアーへ渡す。
 - 明示的な同意を得た後も必要なレビュアーを実行できない場合は停止し、`status: blocked` と報告する。
@@ -32,20 +36,45 @@ low risk では読み込まない。
       - `CLAUDE_REVIEW_MODEL=opus`
       - `CLAUDE_REVIEW_EFFORT=high`
 - 明示的に依頼された場合にだけ `xhigh` または `max` を使う。
+- reviewer を選択した後、その reviewer の設定だけを適用する。
 - `scripts/review-codex.sh` はモデルと推論を `--model` / `--effort` で渡す。フラグ → 環境変数 → デフォルト値の順で解決するため、フラグを渡せば環境変数の前置は不要である。
 - `scripts/review-claude.sh` は環境変数のみを受け付ける。`CLAUDE_REVIEW_CONSENT=yes` の前置が必要で `sandbox.excludedCommands` にも登録していないため、環境変数の前置を維持する。
 
 ## Run
 
-- `scripts/review-claude.sh` は、このスキル自身のディレクトリ（この `references/` ディレクトリの1階層上にあるスキルルート）から相対パスで実行する。
-- `scripts/review-codex.sh` は、`sandbox.excludedCommands` に登録された絶対パス `~/src/dotfiles/agent-resources/skills/implement-plan/scripts/review-codex.sh` から始める1つの単体コマンドとして実行する。環境変数の前置、パイプ、リダイレクト、`&&`、`tee` を付けない。モデルと推論は `--model` / `--effort` で渡す。この形から外れると sandbox 除外に一致せず、Codex がローカルファイルを読めないまま所見だけ返す。
+### Codex が実装した場合
+
+- Claude Code を reviewer として選び、このスキル自身のディレクトリから `scripts/review-claude.sh` を実行する。
+- レビュー対象の未コミット差分を Claude Code へ送信することについてユーザーの明示的な同意を得てから、`CLAUDE_REVIEW_CONSENT=yes` を渡す。
+
+```bash
+CLAUDE_REVIEW_CONSENT=yes \
+CLAUDE_REVIEW_MODEL=sonnet \
+CLAUDE_REVIEW_EFFORT=high \
+scripts/review-claude.sh
+```
+
+high-risk の場合は `CLAUDE_REVIEW_MODEL=opus` を使う。
+
+### Claude Code が実装した場合
+
+- Codex CLI を reviewer として選び、`scripts/review-codex.sh` を実行する。
+- `scripts/review-codex.sh` は、`sandbox.excludedCommands` に登録された絶対パス `~/src/dotfiles/agent-resources/skills/implement-plan/scripts/review-codex.sh` から始める1つの単体コマンドとして実行する。
+- 環境変数の前置、パイプ、リダイレクト、`&&`、`tee` を付けない。
+- モデルと推論は `--model` / `--effort` で渡す。
+- この形から外れると sandbox 除外に一致せず、Codex がローカルファイルを読めないまま所見だけ返す。
 
 ```bash
 ~/src/dotfiles/agent-resources/skills/implement-plan/scripts/review-codex.sh --model gpt-5.6-terra --effort high
 ```
 
+high-risk の場合は `--model gpt-5.6-sol` を使う。
+
 - `codex exec review` は sandbox 内で入れ子 `sandbox-exec` に失敗すると、`scripts/review-codex.sh` 自身が Codex を呼ぶ前に `BLOCKED: nested sandbox-exec ...` で停止する。呼び出しの形を単体コマンドへ戻して1回だけ再実行し、それでも `BLOCKED` なら停止して阻害要因を報告する。
-- sandbox 化された Claude 環境では、レビュースクリプトの呼び出しを実際の呼び出しと完全に同じ形で `sandbox.excludedCommands` に登録する。そうしないと Claude は sandbox 内に留まり、PTY ベースのコマンド実行が `UNTRUSTED` で失敗する。sandbox が設定されていない場合、この対応は不要で、上記の呼び出しをそのまま使える。
+- sandbox 化された Claude Code 環境では、レビュースクリプトの呼び出しを実際の呼び出しと完全に同じ形で `sandbox.excludedCommands` に登録する。そうしないと Claude Code は sandbox 内に留まり、PTY ベースのコマンド実行が `UNTRUSTED` で失敗する。sandbox が設定されていない場合、この対応は不要で、上記の呼び出しをそのまま使える。
+
+### Common result handling
+
 - 各スクリプトは未コミットの working tree をレビューし、レビュアーが実際に差分を調査したことを検証し、レビュー本文を出力して、対応する終了コードとともに `TRUSTED` または `UNTRUSTED` の判定を報告する。
 - スクリプトが `TRUSTED` を報告し、出力が実際の差分に言及している場合にだけ、指摘なし（"no findings"）の結果を信頼する。
 - `UNTRUSTED` の場合、同じレビュアーを新たな承認待ちなしで実行できるなら1回再実行する。
