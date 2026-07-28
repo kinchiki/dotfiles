@@ -3,14 +3,35 @@
 # Prints the review body and a trust verdict. Exit 0 only when TRUSTED.
 set -uo pipefail
 
+MODEL_FLAG=""
+EFFORT_FLAG=""
+while (($#)); do
+  case "$1" in
+    --model)
+      (($# >= 2)) || { echo "error: --model requires a value" >&2; exit 2; }
+      MODEL_FLAG="$2"
+      shift 2
+      ;;
+    --effort)
+      (($# >= 2)) || { echo "error: --effort requires a value" >&2; exit 2; }
+      EFFORT_FLAG="$2"
+      shift 2
+      ;;
+    *)
+      echo "error: unexpected argument: $1" >&2
+      exit 2
+      ;;
+  esac
+done
+
 REVIEW_DIR="$(mktemp -d "${TMPDIR:-/tmp}/codex-review.XXXXXX")"
 REVIEW_OUT="$REVIEW_DIR/review.md"
 REVIEW_JSON="$REVIEW_DIR/review.jsonl"
 REVIEW_ERR="$REVIEW_DIR/review.err"
 # Terra is the balanced default for the `codex exec review` subcommand.
-# Set CODEX_REVIEW_MODEL=gpt-5.6-sol for high-risk diffs.
-CODEX_REVIEW_MODEL="${CODEX_REVIEW_MODEL:-gpt-5.6-terra}"
-CODEX_REVIEW_EFFORT="${CODEX_REVIEW_EFFORT:-high}"
+# Pass --model gpt-5.6-sol for high-risk diffs.
+CODEX_REVIEW_MODEL="${MODEL_FLAG:-${CODEX_REVIEW_MODEL:-gpt-5.6-terra}}"
+CODEX_REVIEW_EFFORT="${EFFORT_FLAG:-${CODEX_REVIEW_EFFORT:-high}}"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 TEST_POLICY_FILE="$SCRIPT_DIR/../../ticket-to-plan/references/test-selection-policy.md"
 
@@ -53,6 +74,12 @@ fi
   # 利点: user config 由来の MCP 接続を止め、認証失敗を避けて外部状態に依存しないレビューにする。
   # 欠点: MCP の外部コンテキストに加え、provider・hook など user config 全体も適用されない。
 # --ignore-user-config で認証設定 cli_auth_credentials_store = "keyring" が読めないため、明示する
+# Codex の既定 sandbox は macOS で sandbox-exec を使うため、Claude Code の sandbox 内では入れ子適用に失敗する。
+# 失敗しても Codex はローカルファイルを読めないまま所見を返すので、呼び出す前に停止する。
+if [[ "$(uname -s)" == "Darwin" ]] && ! /usr/bin/sandbox-exec -p '(version 1)(allow default)' /usr/bin/true >/dev/null 2>&1; then
+  echo "BLOCKED: nested sandbox-exec is unavailable; invoke ~/src/dotfiles/agent-resources/skills/implement-plan/scripts/review-codex.sh as a single command with no env prefix and no pipe so it matches sandbox.excludedCommands" >&2
+  exit 6
+fi
 codex exec review \
   --ignore-user-config \
   -c cli_auth_credentials_store="keyring" \

@@ -25,23 +25,21 @@
 - レビューには以下のモデルと推論を使う。
   - Codex
     - デフォルト
-      - `CODEX_REVIEW_MODEL=${CODEX_REVIEW_MODEL:-gpt-5.6-terra}`
-      - `CODEX_REVIEW_EFFORT=${CODEX_REVIEW_EFFORT:-high}`
+      - `--model gpt-5.6-terra`
+      - `--effort high`
     - high-risk の差分
-      - `CODEX_REVIEW_MODEL=gpt-5.6-sol`
-      - `CODEX_REVIEW_EFFORT=high`
+      - `--model gpt-5.6-sol`
+      - `--effort high`
   - Claude
     - デフォルト
-      - `CLAUDE_REVIEW_MODEL=${CLAUDE_REVIEW_MODEL:-sonnet}`
-      - `CLAUDE_REVIEW_EFFORT=${CLAUDE_REVIEW_EFFORT:-high}`
+      - `--model sonnet`
+      - `--effort high`
     - high-risk の差分
-      - `CLAUDE_REVIEW_MODEL=opus`
-      - `CLAUDE_REVIEW_EFFORT=high`
-    - high-risk の差分
-      - `CLAUDE_REVIEW_MODEL=opus`
-      - `CLAUDE_REVIEW_EFFORT=high`
+      - `--model opus`
+      - `--effort high`
 - 明示的に依頼された場合にだけ `xhigh` または `max` を使う。
-- 環境変数はデフォルト値より優先する。
+- モデルと推論はレビュアースクリプトの `--model` / `--effort` で渡す。
+- レビュアースクリプトはフラグ → 環境変数 → デフォルト値の順で解決するため、フラグを渡せば環境変数の前置は不要である。
 
 ## Build the review packet
 
@@ -85,6 +83,8 @@ P1 または P2 の各指摘では、関連するソースの抜粋、ユーザ�
 No findings
 ```
 
+ローカルファイルを読めない場合は、指摘の代わりに `BLOCKED: cannot read local files` と明記するようレビュアーへ指示する。
+
 ## Run the reviewer
 
 - Claude Code から Codex をレビュアーとして起動する場合は、`~/.claude/skills/ticket-to-plan/scripts/run-codex-planning-review.sh` だけを使う。
@@ -95,20 +95,25 @@ No findings
 - Claude Code をレビュアーとして起動する場合は、このスキル自身のディレクトリから `scripts/run-claude-planning-review.sh` を実行する。
 - read-only mode を使う。
 - production code、skill file、plan file を編集しないようレビュアーへ指示する。
-- レビュアースクリプトを実行する前に、review packet を `REVIEW_PROMPT_FILE` へ書き込む。
+- レビュアースクリプトを実行する前に、review packet を先にファイルへ書き出し、その絶対パスを `--prompt-file` に渡す。
 - スクリプトの実行前に review packet が存在していなければならない。
 - レビュアースクリプトは選択したレビュアーの実行だけを行い、レビュアーの選択、review packet の構築、指摘への対応、プランの更新は行わない。
 - レビュアースクリプトは、レビュアーの出力と stderr のために新しい一時ディレクトリを自ら作成する。
+- Codex wrapper は、コマンド文字列を `~/.claude/skills/ticket-to-plan/scripts/run-codex-planning-review.sh` から始める1つの単体コマンドとして実行する。
+- 環境変数の前置、パイプ、リダイレクト、`&&`、`tee` を付けない。モデルと推論は `--model` / `--effort` で渡す。
+- 展開済み絶対パス（`/Users/...` など）や dotfiles 実体パスで呼ばない。`sandbox.excludedCommands` に登録されているのは `~/.claude/skills/...` の形だけである。
+- この形から外れると sandbox 除外に一致せず、Codex がローカルファイルを読めないまま所見だけ返す。
+- wrapper が `BLOCKED: nested sandbox-exec` を報告した場合は、呼び出しの形を単体コマンドへ戻して1回だけ再実行し、それでも `BLOCKED` なら停止して阻害要因を報告する。
+- レビュー結果を疑うときは `--keep-temp` を付けて再実行し、一時ディレクトリの `review.err` と `review.jsonl` を読む。既定では `trap cleanup EXIT` で消える。
 - Claude Code をレビュアーとして選択した場合、review packet を送信する前にユーザーへ明示的な許可を求める。
 - 許可を記録した後にだけ `CLAUDE_REVIEW_CONSENT=yes` を設定する。
 - 同意がまだ記録されていないため実行が妨げられた場合は、停止して同意を得てから変数を設定し、再実行する。
+- 環境変数前置の禁止は sandbox 除外に登録された Codex wrapper に限る。Claude reviewer は `excludedCommands` に登録しておらず、`CLAUDE_REVIEW_CONSENT=yes` の前置が必要である。
 
 Claude Code がドラフトプランを作成した場合は、Codex をレビュアーとして使う。
 
 ```bash
-~/.claude/skills/ticket-to-plan/scripts/run-codex-planning-review.sh \
-  --repo "<absolute repo path>" \
-  --prompt-file "<review packet file>"
+~/.claude/skills/ticket-to-plan/scripts/run-codex-planning-review.sh --repo "<absolute repo path>" --prompt-file "<review packet file>" --model gpt-5.6-terra --effort high
 ```
 
 Codex がドラフトプランを作成した場合は、Claude Code をレビュアーとして使う。
@@ -119,7 +124,9 @@ REVIEW_PROMPT_FILE="<review packet file>"
 
 scripts/run-claude-planning-review.sh \
   --repo "$REPO" \
-  --prompt-file "$REVIEW_PROMPT_FILE"
+  --prompt-file "$REVIEW_PROMPT_FILE" \
+  --model sonnet \
+  --effort high
 ```
 
 ## Handle findings

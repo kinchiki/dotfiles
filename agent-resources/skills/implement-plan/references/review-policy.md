@@ -19,11 +19,11 @@ low risk では読み込まない。
 - コードレビューには以下のモデルと推論を使う
   - Codex
     - デフォルト
-      - `CODEX_REVIEW_MODEL=${CODEX_REVIEW_MODEL:-gpt-5.6-terra}`
-      - `CODEX_REVIEW_EFFORT=${CODEX_REVIEW_EFFORT:-high}`
+      - `--model gpt-5.6-terra`
+      - `--effort high`
     - high-risk の差分
-      - `CODEX_REVIEW_MODEL=gpt-5.6-sol`
-      - `CODEX_REVIEW_EFFORT=high`
+      - `--model gpt-5.6-sol`
+      - `--effort high`
   - Claude
     - デフォルト
       - `CLAUDE_REVIEW_MODEL=${CLAUDE_REVIEW_MODEL:-sonnet}`
@@ -32,12 +32,20 @@ low risk では読み込まない。
       - `CLAUDE_REVIEW_MODEL=opus`
       - `CLAUDE_REVIEW_EFFORT=high`
 - 明示的に依頼された場合にだけ `xhigh` または `max` を使う。
-- 環境変数はデフォルト値より優先する。
+- `scripts/review-codex.sh` はモデルと推論を `--model` / `--effort` で渡す。フラグ → 環境変数 → デフォルト値の順で解決するため、フラグを渡せば環境変数の前置は不要である。
+- `scripts/review-claude.sh` は環境変数のみを受け付ける。`CLAUDE_REVIEW_CONSENT=yes` の前置が必要で `sandbox.excludedCommands` にも登録していないため、環境変数の前置を維持する。
 
 ## Run
 
-- レビュースクリプト `scripts/review-codex.sh` と `scripts/review-claude.sh` は、このスキル自身のディレクトリ（この `references/` ディレクトリの1階層上にあるスキルルート）から実行する。
-- sandbox 化された Claude 環境では、レビュースクリプトの呼び出しを実際の呼び出しと完全に同じ形で `sandbox.excludedCommands` に登録する。そうしないと Claude は sandbox 内に留まり、PTY ベースのコマンド実行が `UNTRUSTED` で失敗する。sandbox が設定されていない場合、この対応は不要で、上記の相対パスによる呼び出しをそのまま使える。
+- `scripts/review-claude.sh` は、このスキル自身のディレクトリ（この `references/` ディレクトリの1階層上にあるスキルルート）から相対パスで実行する。
+- `scripts/review-codex.sh` は、`sandbox.excludedCommands` に登録された絶対パス `~/src/dotfiles/agent-resources/skills/implement-plan/scripts/review-codex.sh` から始める1つの単体コマンドとして実行する。環境変数の前置、パイプ、リダイレクト、`&&`、`tee` を付けない。モデルと推論は `--model` / `--effort` で渡す。この形から外れると sandbox 除外に一致せず、Codex がローカルファイルを読めないまま所見だけ返す。
+
+```bash
+~/src/dotfiles/agent-resources/skills/implement-plan/scripts/review-codex.sh --model gpt-5.6-terra --effort high
+```
+
+- `codex exec review` は sandbox 内で入れ子 `sandbox-exec` に失敗すると、`scripts/review-codex.sh` 自身が Codex を呼ぶ前に `BLOCKED: nested sandbox-exec ...` で停止する。呼び出しの形を単体コマンドへ戻して1回だけ再実行し、それでも `BLOCKED` なら停止して阻害要因を報告する。
+- sandbox 化された Claude 環境では、レビュースクリプトの呼び出しを実際の呼び出しと完全に同じ形で `sandbox.excludedCommands` に登録する。そうしないと Claude は sandbox 内に留まり、PTY ベースのコマンド実行が `UNTRUSTED` で失敗する。sandbox が設定されていない場合、この対応は不要で、上記の呼び出しをそのまま使える。
 - 各スクリプトは未コミットの working tree をレビューし、レビュアーが実際に差分を調査したことを検証し、レビュー本文を出力して、対応する終了コードとともに `TRUSTED` または `UNTRUSTED` の判定を報告する。
 - スクリプトが `TRUSTED` を報告し、出力が実際の差分に言及している場合にだけ、指摘なし（"no findings"）の結果を信頼する。
 - `UNTRUSTED` の場合、同じレビュアーを新たな承認待ちなしで実行できるなら1回再実行する。

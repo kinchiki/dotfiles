@@ -179,6 +179,12 @@ case "$reviewer" in
       # 欠点: MCP の外部コンテキストに加え、provider・hook など user config 全体も適用されない。
     # -c cli_auth_credentials_store="keyring"
       # --ignore-user-config で認証設定 cli_auth_credentials_store = "keyring" が読めないため、明示する
+    # Codex の --sandbox は macOS で sandbox-exec を使うため、Claude Code の sandbox 内では入れ子適用に失敗する。
+    # 失敗しても Codex はローカルファイルを読めないまま所見を返すので、呼び出す前に停止する。
+    if [[ "$(uname -s)" == "Darwin" ]] && ! /usr/bin/sandbox-exec -p '(version 1)(allow default)' /usr/bin/true >/dev/null 2>&1; then
+      echo "BLOCKED: nested sandbox-exec is unavailable; invoke ~/.claude/skills/ticket-to-plan/scripts/run-codex-planning-review.sh as a single command with no env prefix and no pipe so it matches sandbox.excludedCommands" >&2
+      exit 6
+    fi
     codex exec \
       --ignore-user-config \
       -c cli_auth_credentials_store="keyring" \
