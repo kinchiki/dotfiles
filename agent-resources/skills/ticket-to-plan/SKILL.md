@@ -31,7 +31,6 @@ planning フェーズは read-only で行い、production code を編集しま�
 - `references/planning-ai-review.md`: Step 5 でユーザーレビュー後の AI 相互レビューを行う直前に読む。
 - `references/plan-template.md`: Step 7 で plan file を書く直前に読む。
 - `references/test-selection-policy.md`: Step 2 でテスト方針と task の `test` を決める直前に読む。
-- `../create-verification/SKILL.md`: Step 2 で、手動 verification を plan に組み込む条件と生成物を決める直前に読む。
 
 ## Hard constraints
 
@@ -44,9 +43,6 @@ planning フェーズは read-only で行い、production code を編集しま�
 - ユーザー承認は plan 内容の承認であり、実装開始とセッション選択は Step 8 の判断に従う。
 - plan file は、source を再取得しなくても実装者が開始できる程度に self-contained にする。
 - planning 中に実装可否や受入基準を左右する不明点が見つかった場合は、推測で埋めずにユーザーへ確認する。
-- 手動 verification が妥当かどうかを source と codebase から判断し、その判断結果を plan file に残す。
-- 手動 verification を行う場合は、少なくとも「コミット前」と「レビュー / CI 対応後」の 2 つの確認ポイントを plan に明記する。
-- どちらの確認ポイントでも、実行するかスキップするかをユーザー承認で決める前提を plan に明記する。
 - ユーザーレビュー後、`references/planning-ai-review.md` に従って、元の依頼内容とユーザー確認済みの意図を踏まえた最新の draft plan と task breakdown を別 AI でレビューする。
 - AI review 反映後に plan が変わった場合は、plan file 保存前に更新版をユーザーへ再提示して最終承認を得る。
 
@@ -124,13 +120,11 @@ read-only planning で codebase を調査してください。
 - 既存 pattern と testing idiom を確認する。
 - テストは `references/test-selection-policy.md` の対象に限り、DB・フレームワーク・ライブラリの標準保証だけを直接再検証する test を plan に含めない。
 - migration、backward compatibility、permission / auth、N+1、background-job idempotency、API surface、i18n など、該当する edge を検討する。
-- UI、API、非同期処理、データ更新のどこに手動 verification が必要かを判定する。
 - target repo が `app/interactions/`、`packs/`、`CLAUDE.md` / `AGENTS.md` の convention を持つ場合は、それを尊重する。
 
 plan は、source や codebase を読んでいない session でも正しく実装できる粒度にしてください。
 曖昧な plan は失敗です。
 調査で実装に関わる不明点が見つかった場合は、`../ask-user-questions/SKILL.md` を読んで、draft plan を固め切る前にユーザーへ確認してください。
-手動 verification を行う場合は、`../create-verification/SKILL.md` を読み、どの変更が verification 対象で、どのタイミングで verification ファイルを生成 / 追記するかを plan に落としてください。
 
 ### Step 3: Break the plan into tasks
 
