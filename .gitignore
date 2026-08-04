@@ -5,3 +5,4 @@ __pycache__/
 
 docs/plans
 .ai-local/verification/*.local.md
+.claude/skills/gh-stack/
