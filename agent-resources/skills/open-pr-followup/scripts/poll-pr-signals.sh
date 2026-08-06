@@ -139,7 +139,15 @@ ai_review_detected=false
 ai_author_pattern="${POLL_PR_SIGNALS_AI_AUTHOR_PATTERN:-(copilot|coderabbit|openai|gpt|claude|gemini|ai[-_]?review|ai[-_]?bot|\[bot\]$)}"
 
 collect_signals() {
-  last_checks_json="$(gh pr checks "$pr_ref" ${gh_args[@]+"${gh_args[@]}"} --json name,state,bucket,link,workflow,event 2>/dev/null || echo '[]')"
+  # exit 0=pass, 1=fail, 8=pending — all emit JSON; anything else is a real error
+  local _checks_out _checks_rc
+  _checks_out="$(gh pr checks "$pr_ref" ${gh_args[@]+"${gh_args[@]}"} --json name,state,bucket,link,workflow,event 2>/dev/null)"
+  _checks_rc=$?
+  if [[ "$_checks_rc" -eq 0 || "$_checks_rc" -eq 1 || "$_checks_rc" -eq 8 ]]; then
+    last_checks_json="${_checks_out:-[]}"
+  else
+    last_checks_json='[]'
+  fi
   last_checks_json="$(jq --arg ignored "$ignored_check" '[.[] | select(.name != $ignored)]' <<<"$last_checks_json")"
   last_reviews_json="$(gh pr view "$pr_ref" ${gh_args[@]+"${gh_args[@]}"} --json reviews --jq '.reviews // []')"
   last_threads_json="$(gh api graphql -f query='query($owner:String!,$repo:String!,$pr:Int!){ repository(owner:$owner,name:$repo){ pullRequest(number:$pr){ reviewThreads(first:100){ nodes{ id isResolved isOutdated } } } } }' -F owner="$owner" -F repo="$repo" -F pr="$pr_number" --jq '.data.repository.pullRequest.reviewThreads.nodes // []')"
