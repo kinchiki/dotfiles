@@ -28,9 +28,9 @@ planning フェーズは read-only で行い、production code を編集しま�
 ## Resources
 
 - `../ask-user-questions/SKILL.md`: Step 1 と Step 2 で、repo 調査では解けない open question をユーザーへ確認する直前に読む。
-- `references/planning-ai-review.md`: Step 5 でユーザーレビュー後の AI 相互レビューを行う直前に読む。
+- `../ai-review/SKILL.md`: Step 5 でユーザーレビュー後の draft plan を独立レビューへ渡す直前に読む。
 - `references/plan-template.md`: Step 7 で plan file を書く直前に読む。
-- `references/test-selection-policy.md`: Step 2 でテスト方針と task の `test` を決める直前に読む。
+- `../ai-review/references/test-selection-policy.md`: Step 2 でテスト方針と task の `test` を決める直前に読む。
 
 ## Hard constraints
 
@@ -43,7 +43,7 @@ planning フェーズは read-only で行い、production code を編集しま�
 - ユーザー承認は plan 内容の承認であり、実装開始とセッション選択は Step 8 の判断に従う。
 - plan file は、source を再取得しなくても実装者が開始できる程度に self-contained にする。
 - planning 中に実装可否や受入基準を左右する不明点が見つかった場合は、推測で埋めずにユーザーへ確認する。
-- ユーザーレビュー後、`references/planning-ai-review.md` に従って、元の依頼内容とユーザー確認済みの意図を踏まえた最新の draft plan と task breakdown を別 AI でレビューする。
+- ユーザーレビュー後、`../ai-review/SKILL.md` の plan review mode で、元の依頼内容とユーザー確認済みの意図を踏まえた最新の draft plan と task breakdown を別 AI でレビューする。
 - AI review 反映後に plan が変わった場合は、plan file 保存前に更新版をユーザーへ再提示して最終承認を得る。
 
 ## Workflow
@@ -112,13 +112,13 @@ source が薄い、矛盾している、または acceptance criteria が欠け�
 
 read-only planning で codebase を調査してください。
 
-テスト方針と task の `test` を決める前に `references/test-selection-policy.md` を読んでください。
+テスト方針と task の `test` を決める前に `../ai-review/references/test-selection-policy.md` を読んでください。
 
 - actual data flow を追う。
 - models、services / interactions、controllers、serializers、GraphQL types、jobs、tests など、影響範囲を読む。
 - exact file path を記録する。
 - 既存 pattern と testing idiom を確認する。
-- テストは `references/test-selection-policy.md` の対象に限り、DB・フレームワーク・ライブラリの標準保証だけを直接再検証する test を plan に含めない。
+- テストは `../ai-review/references/test-selection-policy.md` の対象に限り、DB・フレームワーク・ライブラリの標準保証だけを直接再検証する test を plan に含めない。
 - migration、backward compatibility、permission / auth、N+1、background-job idempotency、API surface、i18n など、該当する edge を検討する。
 - target repo が `app/interactions/`、`packs/`、`CLAUDE.md` / `AGENTS.md` の convention を持つ場合は、それを尊重する。
 
@@ -152,8 +152,9 @@ approval affordance がある環境では、それを使ってください。
 
 ### Step 5: Run cross-AI planning review
 
-ユーザーレビューが完了した draft plan に対して、`references/planning-ai-review.md` を読んで AI review を実行してください。
-review packet には、元の依頼内容とユーザー確認済みの意図や維持したい挙動も含めてください。
+ユーザーレビューが完了した draft plan に対して、`../ai-review/SKILL.md` を読み、plan review mode で AI review を実行してください。
+ai-review へ planner、元の依頼内容、ユーザー確認済みの意図、維持したい挙動、non-goal、draft plan、調査した path を渡してください。
+ai-review は plan を編集せず、reviewer、信頼性判定、finding を返します。
 Planning AI は review 内容を確認し、採用する指摘を plan と task breakdown へ反映してください。
 採用しない重要指摘は、理由を plan に残してください。
 

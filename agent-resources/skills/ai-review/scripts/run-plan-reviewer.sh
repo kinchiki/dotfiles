@@ -4,7 +4,7 @@ set -euo pipefail
 usage() {
   cat <<'USAGE'
 Usage:
-  run-planning-reviewer.sh --repo <absolute repo path> --reviewer <codex|claude> --prompt-file <review prompt file> [--model <model>] [--effort <effort>] [--keep-temp]
+  run-plan-reviewer.sh --repo <absolute repo path> --reviewer <codex|claude> --prompt-file <review prompt file> [--model <model>] [--effort <effort>] [--keep-temp]
 
 Options:
   --repo         Absolute path to the repository being reviewed.
@@ -164,6 +164,8 @@ review_events="$review_dir/review.jsonl"
 cleanup() {
   if [[ "$keep_temp" == false ]]; then
     rm -rf "$review_dir"
+  else
+    echo "review artifacts: $review_dir" >&2
   fi
 }
 trap cleanup EXIT
@@ -182,7 +184,7 @@ case "$reviewer" in
     # Codex の --sandbox は macOS で sandbox-exec を使うため、Claude Code の sandbox 内では入れ子適用に失敗する。
     # 失敗しても Codex はローカルファイルを読めないまま所見を返すので、呼び出す前に停止する。
     if [[ "$(uname -s)" == "Darwin" ]] && ! /usr/bin/sandbox-exec -p '(version 1)(allow default)' /usr/bin/true >/dev/null 2>&1; then
-      echo "BLOCKED: nested sandbox-exec is unavailable; invoke ~/.claude/skills/ticket-to-plan/scripts/run-codex-planning-review.sh as a single command with no env prefix and no pipe so it matches sandbox.excludedCommands" >&2
+      echo "BLOCKED: nested sandbox-exec is unavailable; invoke ~/.claude/skills/ai-review/scripts/run-plan-review-codex.sh as a single command with no env prefix and no pipe so it matches sandbox.excludedCommands" >&2
       exit 6
     fi
     codex exec \
@@ -210,7 +212,7 @@ case "$reviewer" in
         --permission-mode plan \
         --model "$model" \
         --effort "$effort" \
-        "標準入力の review packet を読み、ticket-to-plan の draft plan をレビューしてください。編集は禁止です。" \
+        "標準入力の review packet を読み、実装用の draft plan をレビューしてください。編集は禁止です。" \
         < "$prompt_file" > "$review_out" 2> "$review_err"
     ) || status=$?
     ;;
@@ -218,7 +220,27 @@ esac
 
 if ((status != 0)); then
   [[ -f "$review_err" ]] && cat "$review_err" >&2
+  echo "UNTRUSTED: reviewer exited with status $status" >&2
   exit "$status"
 fi
 
+case "$reviewer" in
+  codex)
+    command_count="$(grep -c '\"type\":\"command_execution\"' "$review_events" 2>/dev/null || true)"
+    command_count="${command_count:-0}"
+    if ((command_count < 1)) || [[ ! -s "$review_out" ]]; then
+      echo "UNTRUSTED: reviewer did not demonstrate local file inspection" >&2
+      exit 4
+    fi
+    ;;
+  claude)
+    if [[ ! -s "$review_out" ]]; then
+      echo "UNTRUSTED: empty review output" >&2
+      exit 4
+    fi
+    ;;
+esac
+
+echo "TRUSTED"
+echo "----- review -----"
 cat "$review_out"

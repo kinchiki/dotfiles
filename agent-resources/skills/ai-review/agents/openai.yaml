@@ -1,0 +1,4 @@
+interface:
+  display_name: "AI Review"
+  short_description: "コード差分と実装プランを別系統のAIで独立レビューする"
+  default_prompt: "Use $ai-review to independently review an uncommitted code diff or an implementation plan."

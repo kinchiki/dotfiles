@@ -2,4 +2,4 @@
 set -euo pipefail
 
 script_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
-exec "$script_dir/run-planning-reviewer.sh" --reviewer claude "$@"
+exec "$script_dir/run-plan-reviewer.sh" --reviewer claude "$@"

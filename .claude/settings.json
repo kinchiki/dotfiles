@@ -6,7 +6,8 @@
     "allow": [
       "Bash(codex review:*)",
       "Bash(codex exec review:*)",
-      "Bash(~/.claude/skills/ticket-to-plan/scripts/run-codex-planning-review.sh:*)",
+      "Bash(~/.claude/skills/ai-review/scripts/run-code-review-codex.sh:*)",
+      "Bash(~/.claude/skills/ai-review/scripts/run-plan-review-codex.sh:*)",
       "Bash(cat:*)",
       "Bash(cp:*)",
       "Bash(find:*)",
@@ -329,9 +330,8 @@
     "excludedCommands": [
       "codex exec review *",
       "codex review *",
-      "~/.claude/skills/ticket-to-plan/scripts/run-codex-planning-review.sh *",
-      "~/src/dotfiles/agent-resources/skills/implement-plan/scripts/review-codex.sh*",
-      "$(git rev-parse --show-toplevel)/agent-resources/skills/implement-plan/scripts/review-codex.sh",
+      "~/.claude/skills/ai-review/scripts/run-code-review-codex.sh *",
+      "~/.claude/skills/ai-review/scripts/run-plan-review-codex.sh *",
       "tflint *"
     ]
   },

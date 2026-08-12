@@ -6,7 +6,7 @@ set -uo pipefail
 CLAUDE_REVIEW_MODEL="${CLAUDE_REVIEW_MODEL:-sonnet}"
 CLAUDE_REVIEW_EFFORT="${CLAUDE_REVIEW_EFFORT:-high}"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-TEST_POLICY_FILE="$SCRIPT_DIR/../../ticket-to-plan/references/test-selection-policy.md"
+TEST_POLICY_FILE="$SCRIPT_DIR/../references/test-selection-policy.md"
 
 if [[ ! -f "$TEST_POLICY_FILE" ]]; then
   echo "UNTRUSTED: missing test selection policy: $TEST_POLICY_FILE"
@@ -46,7 +46,7 @@ Style / line-length 指摘は repo linter で確定検証し、byte count だけ
 
 $TEST_SELECTION_POLICY
 
-問題がなければ、確認した差分の概要を示してから no findings と書いてください。"
+問題がなければ、確認した差分の概要を示してから No findings と書いてください。"
 
 # strict-mcp-config でMCP接続を止める
   # 利点: MCP 接続を止め、認証失敗を避けて外部状態に依存しないレビューにする。

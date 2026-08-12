@@ -33,7 +33,7 @@ REVIEW_ERR="$REVIEW_DIR/review.err"
 CODEX_REVIEW_MODEL="${MODEL_FLAG:-${CODEX_REVIEW_MODEL:-gpt-5.6-terra}}"
 CODEX_REVIEW_EFFORT="${EFFORT_FLAG:-${CODEX_REVIEW_EFFORT:-high}}"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-TEST_POLICY_FILE="$SCRIPT_DIR/../../ticket-to-plan/references/test-selection-policy.md"
+TEST_POLICY_FILE="$SCRIPT_DIR/../references/test-selection-policy.md"
 
 if [[ ! -f "$TEST_POLICY_FILE" ]]; then
   echo "UNTRUSTED: missing test selection policy: $TEST_POLICY_FILE"
@@ -50,7 +50,7 @@ Style / line-length 指摘は repo linter で確定検証し、byte count だけ
 
 $TEST_SELECTION_POLICY
 
-問題がなければ、確認した差分の概要を示してから no findings と書いてください。"
+問題がなければ、確認した差分の概要を示してから No findings と書いてください。"
 
 cleanup() {
   rm -rf "$REVIEW_DIR"
@@ -69,7 +69,7 @@ fi
   # 向いている用途: コード差分レビュー
   # --uncommitted、--base、--commitなどレビュー対象を理解する専用モード
   # codex exec review では --uncommitted、--base、--commit、カスタムpromptを同時指定できません。
-  # 現在の review-codex.sh はテスト選定方針を含むカスタムpromptが必要なので、--uncommittedを追加せず、prompt内で未コミット差分の確認を指示している。
+  # 現在の wrapper はテスト選定方針を含むカスタムpromptが必要なので、--uncommittedを追加せず、prompt内で未コミット差分の確認を指示している。
 # --ignore-user-config でMCP接続を止める
   # 利点: user config 由来の MCP 接続を止め、認証失敗を避けて外部状態に依存しないレビューにする。
   # 欠点: MCP の外部コンテキストに加え、provider・hook など user config 全体も適用されない。
@@ -77,7 +77,7 @@ fi
 # Codex の既定 sandbox は macOS で sandbox-exec を使うため、Claude Code の sandbox 内では入れ子適用に失敗する。
 # 失敗しても Codex はローカルファイルを読めないまま所見を返すので、呼び出す前に停止する。
 if [[ "$(uname -s)" == "Darwin" ]] && ! /usr/bin/sandbox-exec -p '(version 1)(allow default)' /usr/bin/true >/dev/null 2>&1; then
-  echo "BLOCKED: nested sandbox-exec is unavailable; invoke ~/src/dotfiles/agent-resources/skills/implement-plan/scripts/review-codex.sh as a single command with no env prefix and no pipe so it matches sandbox.excludedCommands" >&2
+  echo "BLOCKED: nested sandbox-exec is unavailable; invoke ~/.claude/skills/ai-review/scripts/run-code-review-codex.sh as a single command with no env prefix and no pipe so it matches sandbox.excludedCommands" >&2
   exit 6
 fi
 codex exec review \

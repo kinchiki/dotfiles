@@ -3,7 +3,7 @@ name: implement-plan
 description: >-
   承認済みの実装プランファイルを、同一セッションの継続または新しいセッションで端から端まで実行する。
   feature branch を作成し、プランの `## タスク` をテスト込みで進め、lint / test を緑にする。
-  リスクに応じた AI レビューを受け、commit-changes で論理コミットを作り、open-pr-followup で PR 作成後の CI と AI レビュー初回フォローまで進める。
+  リスクに応じて ai-review で独立レビューを受け、commit-changes で論理コミットを作り、open-pr-followup で PR 作成後の CI と AI レビュー初回フォローまで進める。
   承認済みプランを渡されて実装を始めるときに使う。
   例: 「implement-plan スキルで実装して」「プランを実装して」
   ticket-to-plan がプランファイルを指す実装セッションを起動したときにも使う。
@@ -18,8 +18,8 @@ plan file に `## 動作確認` がある場合は、その指示も contract �
 
 ## Resources
 
-- `references/review-policy.md`: lint / test が緑になり、実際の diff が medium または high risk に分類された後にだけ読む。low risk では読まない。
-- `../ticket-to-plan/references/test-selection-policy.md`: Step 0 でテスト方針を抽出する直前に読む。
+- `../ai-review/SKILL.md`: lint / test が緑になり、実際の diff が medium または high risk に分類された後にコードレビューを委譲する直前に読む。low risk では読まない。
+- `../ai-review/references/test-selection-policy.md`: Step 0 でテスト方針を抽出する直前に読む。
 - `../create-verification/SKILL.md`: plan の `## 動作確認` が yes で、コミット前 verification の準備をする直前に読む。
 - `../run-verification/SKILL.md`: plan の `## 動作確認` が yes で、コミット前 verification を実行する直前に読む。
 
@@ -39,7 +39,7 @@ plan file に `## 動作確認` がある場合は、その指示も contract �
 ### Step 0: Load the plan and prepare the branch
 
 - 指定された絶対パスの plan file と repo convention file（`CLAUDE.md` / `AGENTS.md`）を読む。
-- `../ticket-to-plan/references/test-selection-policy.md` を読み、計画、実装、レビューで使うテスト選定基準として保持する。
+- `../ai-review/references/test-selection-policy.md` を読み、計画、実装、レビューで使うテスト選定基準として保持する。
 - plan 全体は要約せず、実行に必要な状態だけを抽出する。
   - goal: 1 行
   - acceptance criteria: checklist id
@@ -79,7 +79,9 @@ plan file に `## 動作確認` がある場合は、その指示も contract �
 
 ### Step 4: Run independent review for medium/high risk
 
-- medium・high risk の場合だけ `references/review-policy.md` を読み、独立 reviewer を実行する。
+- medium・high risk の場合だけ `../ai-review/SKILL.md` を読み、未コミット差分を code review mode でレビューする。
+- ai-review へ実装した AI、risk、目的、受入基準、lint / test 結果、特別なリスクを渡す。
+- ai-review は差分を編集せず、reviewer、信頼性判定、finding を返す。指摘への対応はこの workflow で行う。
 - P1 / P2 は blocking として扱う。修正し、lint / test を再実行し、必要に応じて review も再実行する。
 - 対応が安価な P3 は修正する。見送った P3 は PR body に列挙する。
 - すべての `## タスク` がチェック済みで、lint / test が緑で、blocking な review finding が残っていない場合だけ完了とする。
