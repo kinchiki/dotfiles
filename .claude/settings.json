@@ -67,6 +67,7 @@
       "Bash(sudo:*)",
       "mcp__supabase__execute_sql",
       "NotebookEdit",
+      "Read(~/**/archive/**)",
       "Read(~/src/**/.ai-local/**/archive/**)",
       "Read(~/src/**/.claude/**/archive/**)",
       "Read(~/src/**/.codex/**/archive/**)",
