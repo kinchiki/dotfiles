@@ -142,6 +142,11 @@ case "$reviewer" in
   *) die "--reviewer must be codex or claude" ;;
 esac
 
+if ! command -v "$reviewer" >/dev/null 2>&1; then
+  echo "BLOCKED: required reviewer CLI is unavailable: $reviewer" >&2
+  exit 127
+fi
+
 case "$reviewer" in
   codex)
     # GPT-5.6 Terra is the balanced default for planning review;
@@ -160,6 +165,7 @@ review_dir="$(mktemp -d "${tmp_parent%/}/planning-review-${reviewer}.XXXXXX")"
 review_out="$review_dir/review.md"
 review_err="$review_dir/review.err"
 review_events="$review_dir/review.jsonl"
+review_prompt="$review_dir/prompt.md"
 
 cleanup() {
   if [[ "$keep_temp" == false ]]; then
@@ -169,6 +175,38 @@ cleanup() {
   fi
 }
 trap cleanup EXIT
+
+command -v jq >/dev/null 2>&1 || die "jq is required"
+
+inspection_file=""
+while IFS= read -r -d '' candidate; do
+  if [[ -r "$candidate" ]] && grep -Iq . "$candidate"; then
+    inspection_file="$candidate"
+    break
+  fi
+done < <(find "$repo" -path "$repo/.git" -prune -o -type f -size +0c -print0)
+
+if [[ -z "$inspection_file" ]]; then
+  echo "UNTRUSTED: repository has no readable nonempty text file to inspect" >&2
+  exit 4
+fi
+
+inspection_command="$(printf "sed -n '1,80p' %q" "$inspection_file")"
+inspection_output="$(sed -n '1,80p' "$inspection_file")"
+
+{
+  cat "$prompt_file"
+  printf '\n\n## Required local inspection\n'
+  case "$reviewer" in
+    codex)
+      printf 'Before returning the review, run this exact command and use its output as local repository evidence:\n\n```sh\n%s\n```\n' "$inspection_command"
+      ;;
+    claude)
+      printf 'Before returning the review, use the Read tool on this exact local repository file and use its contents as evidence:\n\n`%s`\n' "$inspection_file"
+      ;;
+  esac
+  printf 'If local files cannot be read, return `BLOCKED: cannot read local files`.\n'
+} > "$review_prompt"
 
 status=0
 case "$reviewer" in
@@ -196,7 +234,7 @@ case "$reviewer" in
       -c "model_reasoning_effort=\"$effort\"" \
       --json \
       --output-last-message "$review_out" \
-      - < "$prompt_file" > "$review_events" 2> "$review_err" || status=$?
+      - < "$review_prompt" > "$review_events" 2> "$review_err" || status=$?
     ;;
   claude)
     if [[ "${CLAUDE_REVIEW_CONSENT:-}" != "yes" ]]; then
@@ -207,16 +245,24 @@ case "$reviewer" in
       cd "$repo"
       # 利点: MCP 接続を止め、認証失敗を避けて外部状態に依存しないレビューにする。
       # 欠点: MCP 経由の issue・docs・監視情報など外部コンテキストを参照できない。
-      claude - \
+      claude --print \
         --strict-mcp-config \
         --permission-mode plan \
         --model "$model" \
         --effort "$effort" \
+        --output-format stream-json \
+        --verbose \
         "標準入力の review packet を読み、実装用の draft plan をレビューしてください。編集は禁止です。" \
-        < "$prompt_file" > "$review_out" 2> "$review_err"
+        < "$review_prompt" > "$review_events" 2> "$review_err"
     ) || status=$?
     ;;
 esac
+
+if ((status == 126 || status == 127)); then
+  [[ -f "$review_err" ]] && cat "$review_err" >&2
+  echo "BLOCKED: reviewer CLI could not be executed: $reviewer (status $status)" >&2
+  exit "$status"
+fi
 
 if ((status != 0)); then
   [[ -f "$review_err" ]] && cat "$review_err" >&2
@@ -224,18 +270,65 @@ if ((status != 0)); then
   exit "$status"
 fi
 
+if [[ "$reviewer" == "claude" ]]; then
+  jq -s -r '[.[] | select(.type == "result") | .result // empty] | last // empty' "$review_events" > "$review_out" || {
+    echo "UNTRUSTED: invalid Claude event stream" >&2
+    exit 4
+  }
+fi
+
+if [[ ! -s "$review_out" ]]; then
+  echo "UNTRUSTED: empty review output" >&2
+  exit 4
+fi
+
+if grep -Eq '^[[:space:]]*(BLOCKED|UNTRUSTED):' "$review_out"; then
+  echo "UNTRUSTED: reviewer reported that the review is not trustworthy" >&2
+  exit 4
+fi
+
 case "$reviewer" in
   codex)
-    command_count="$(grep -c '\"type\":\"command_execution\"' "$review_events" 2>/dev/null || true)"
-    command_count="${command_count:-0}"
-    if ((command_count < 1)) || [[ ! -s "$review_out" ]]; then
+    if ! jq -e \
+      --arg command "$inspection_command" \
+      --arg output "$inspection_output" \
+      'select(
+        .type == "item.completed"
+        and .item.type == "command_execution"
+        and .item.exit_code == 0
+        and (.item.command | contains($command))
+        and ((.item.aggregated_output // "") | sub("[\\r\\n]+$"; "") == $output)
+      )' \
+      "$review_events" >/dev/null; then
       echo "UNTRUSTED: reviewer did not demonstrate local file inspection" >&2
       exit 4
     fi
     ;;
   claude)
-    if [[ ! -s "$review_out" ]]; then
-      echo "UNTRUSTED: empty review output" >&2
+    read_tool_use_id="$(jq -s -r \
+      --arg file "$inspection_file" \
+      '[
+        .[]
+        | select(.type == "assistant")
+        | .message.content[]?
+        | select(.type == "tool_use" and .name == "Read" and .input.file_path == $file)
+        | .id
+      ] | last // empty' \
+      "$review_events")"
+    if [[ -z "$read_tool_use_id" ]] || ! jq -e -s \
+      --arg id "$read_tool_use_id" \
+      'any(
+        .[];
+        .type == "user"
+        and any(
+          .message.content[]?;
+          .type == "tool_result"
+          and .tool_use_id == $id
+          and ((.is_error // false) | not)
+        )
+      )' \
+      "$review_events" >/dev/null; then
+      echo "UNTRUSTED: reviewer did not demonstrate successful local file inspection" >&2
       exit 4
     fi
     ;;

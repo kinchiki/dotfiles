@@ -32,6 +32,11 @@ if [[ -z "$PENDING" ]]; then
   exit 3
 fi
 
+if ! command -v claude >/dev/null 2>&1; then
+  echo "BLOCKED: required reviewer CLI is unavailable: claude" >&2
+  exit 127
+fi
+
 if [[ "${CLAUDE_REVIEW_CONSENT:-}" != "yes" ]]; then
   echo "BLOCKED: set CLAUDE_REVIEW_CONSENT=yes after explicit user consent to send the uncommitted diff to Claude Code"
   exit 5
@@ -58,6 +63,12 @@ claude -p \
   --permission-mode plan \
   "$CLAUDE_REVIEW_PROMPT" >| "$CLAUDE_REVIEW_OUT" 2>| "$CLAUDE_REVIEW_ERR"
 CLAUDE_RC=$?
+
+if [[ "$CLAUDE_RC" -eq 126 || "$CLAUDE_RC" -eq 127 ]]; then
+  [[ -s "$CLAUDE_REVIEW_ERR" ]] && cat "$CLAUDE_REVIEW_ERR" >&2
+  echo "BLOCKED: reviewer CLI could not be executed: claude (status $CLAUDE_RC)" >&2
+  exit "$CLAUDE_RC"
+fi
 
 echo "Claude Code exit=$CLAUDE_RC"
 

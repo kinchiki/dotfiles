@@ -65,6 +65,11 @@ if [[ -z "$PENDING" ]]; then
   exit 3
 fi
 
+if ! command -v codex >/dev/null 2>&1; then
+  echo "BLOCKED: required reviewer CLI is unavailable: codex" >&2
+  exit 127
+fi
+
 # codex exec review
   # 向いている用途: コード差分レビュー
   # --uncommitted、--base、--commitなどレビュー対象を理解する専用モード
@@ -89,6 +94,12 @@ codex exec review \
   -o "$REVIEW_OUT" \
   "$REVIEW_PROMPT" >| "$REVIEW_JSON" 2>| "$REVIEW_ERR"
 CODEX_RC=$?
+
+if [[ "$CODEX_RC" -eq 126 || "$CODEX_RC" -eq 127 ]]; then
+  [[ -s "$REVIEW_ERR" ]] && cat "$REVIEW_ERR" >&2
+  echo "BLOCKED: reviewer CLI could not be executed: codex (status $CODEX_RC)" >&2
+  exit "$CODEX_RC"
+fi
 
 CMD_EXEC="$(grep -c '"type":"command_execution"' "$REVIEW_JSON" 2>/dev/null || true)"
 CMD_EXEC="${CMD_EXEC:-0}"
