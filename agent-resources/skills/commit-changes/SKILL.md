@@ -73,6 +73,10 @@ git commit
 - 何が変わったかだけでなく、なぜその変更が必要かが伝わる message を書く。
 - commit message はすべて日本語で書き、該当する場合は Conventional Commit 形式を使う（例: `feat: 新機能説明`、`fix: バグ修正説明`、`refactor: リファクタリング説明`、`docs: ドキュメント更新`、`test: テスト追加`）。
 - 現実的な範囲で、各 commit を build / test 可能な状態に保つ。
+- Codex では `git add` と `git commit` を初回から sandbox 外実行として要求し、tool call の `sandbox_permissions` に `require_escalated` と承認理由を指定する。
+- `.codex/rules/default.rules` の許可 prefix と一致させるため、対象の Git command を単独の command segment で実行し、shell wrapper や環境変数 prefix を付けない。
+- Codex 以外の実行環境で `.git/index.lock` の作成が `Operation not permitted` または `Permission denied` になった場合は、利用可能な権限承認機構を使って失敗した同じ Git command を再実行する。
+- 権限承認機構が利用できない場合、またはユーザーが承認を拒否した場合だけ、失敗した command と必要な権限を報告して停止する。
 
 ### Step 4: Report
 

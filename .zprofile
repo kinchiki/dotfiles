@@ -104,3 +104,6 @@ export DOCKER_BUILDKIT=1
 export USE_GKE_GCLOUD_AUTH_PLUGIN=True
 
 [[ -x /opt/homebrew/bin/brew ]] && eval "$(/opt/homebrew/bin/brew shellenv)"
+
+# mise shims for non-interactive login shells (e.g. Codex)
+(( ${+commands[mise]} )) && eval "$(mise activate zsh --shims)"
