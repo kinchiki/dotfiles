@@ -93,6 +93,13 @@ export LESS='-i -g -s -F -M -R -X -W -N'
 ## dev
 export DOCKER_BUILDKIT=1
 
+# AI エージェントの sandbox では ~/.docker/config.json が読めず
+# docker context を解決できないため colima の socket を直指定する
+if [[ -n "$CLAUDECODE" || -n "$CODEX_SANDBOX" ]] \
+  && [[ -S "$HOME/.colima/default/docker.sock" ]]; then
+  export DOCKER_HOST="unix://$HOME/.colima/default/docker.sock"
+fi
+
 # podman
 # export DOCKER_HOST=unix://$(podman machine inspect --format '{{.ConnectionInfo.PodmanSocket.Path}}')
 

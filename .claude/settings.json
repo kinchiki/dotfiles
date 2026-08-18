@@ -228,6 +228,9 @@
       "allowUnixSockets": [
         "~/.colima/default/docker.sock",
         "~/.colima/docker.sock",
+        "~/.colima/default/containerd.sock",
+        "~/.colima/_lima/colima/ha.sock",
+        "~/.colima/_lima/colima/ssh.sock",
         "/var/run/docker.sock"
       ],
       "allowLocalBinding": true,
