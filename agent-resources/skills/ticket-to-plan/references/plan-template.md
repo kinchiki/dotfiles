@@ -1,10 +1,11 @@
 # Plan Template Reference
 
-承認済みのプランファイルを書く前に、`../SKILL.md` の Step 7 からこのファイルを読む。
-本当に該当しない場合を除き、すべてのセクションを記入する。
-該当しないセクションには、その理由を書く。
+承認済みの実装プランとユーザー向け情報ファイルを書く前に、`../SKILL.md` の Step 7 からこのファイルを読む。
+実装プランはAI実装者が実行に必要とする情報だけを持つ。
+ユーザー向け情報ファイルはAIレビュー、リスク・未解決の論点、スコープ外を持つ。
+本当に該当しないセクションには、その理由を書く。
 
-## Path convention
+## 実装プランの Path convention
 
 ```text
 .ai-local/plans/<plan-id>/<YYYYMMDD>_<agent-name>_<slug>.md
@@ -25,7 +26,17 @@
 チケットをソースとする場合は、`ENG-123` や `github-123` のようなチケット ID を使う。
 ユーザー依頼をソースとする場合は、`request-<slug>` を使う。
 
-## Template
+## ユーザー向け情報の Path convention
+
+```text
+.ai-local/plans/<plan-id>/<YYYYMMDD>_<slug>_info_for_user.md
+```
+
+`<YYYYMMDD>` と `<slug>` は同じ実装プランの値を使う。
+Project が別 convention を持つ場合も、実装プランと同じディレクトリに保存する。
+`最終承認` の情報は保存しない。
+
+## 実装プランの Template
 
 ```markdown
 # <プランのタイトル>
@@ -46,17 +57,6 @@
 ## 背景・影響するコード
 <主要なファイル/モジュールをパス付きで、各1行メモを添える。>
 <実装者がコードベースに合わせられるよう、踏襲すべき既存パターンも含める。>
-
-## AIレビュー
-- reviewer: <AI agent 名、model、review 実行方法>
-- findings: <P1/P2/P3 の要約、または no findings>
-- planner disposition: <採用 / 一部採用 / 不採用と理由>
-- plan updates: <review 後に反映した変更>
-
-## 最終承認
-- reviewer sequence: <ユーザーレビュー完了後に AI review を実施したこと>
-- approved by: <ユーザー>
-- approval note: <最終承認時の短いメモ、または承認メッセージの要約>
 
 ## タスク
 <順序付きタスク。実装セッションが進捗に応じてこのチェックボックスを更新する。>
@@ -81,11 +81,23 @@
 <追加/更新する spec と実行方法を書く。>
 <カバーすべき edge case を書く。>
 <実装 gate が何を走らせるか分かるよう lint command も明記する。>
+```
+
+## ユーザー向け情報の Template
+
+```markdown
+# <プランのタイトル> のユーザー向け情報
+
+## AIレビュー
+- reviewer: <AI agent 名、model、review 実行方法、未実施ならその理由>
+- findings: <P1/P2/P3 の要約、または no findings>
+- planner disposition: <採用 / 一部採用 / 不採用と理由>
+- plan updates: <review 後に反映した変更>
 
 ## リスク・未解決の論点
-<注意点、先送りした判断、実装者が確認すべきことを書く。>
+<注意点、先送りした判断、ユーザーが把握すべきことを書く。>
 <想定 risk を low / medium / high で書き、その理由も書く。>
 
 ## スコープ外
-<やらないことを明示し、実装セッションでの scope creep を防ぐ。>
+<やらないことを明示する。>
 ```

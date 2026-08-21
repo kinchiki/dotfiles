@@ -1,7 +1,7 @@
 ---
 name: ticket-to-plan
 description: >-
-  GitHub や Linear のチケット、またはユーザーの自然言語の変更依頼を十分に調査し、承認済みの実装プランファイルに変換する。
+  GitHub や Linear のチケット、またはユーザーの自然言語の変更依頼を十分に調査し、承認済みの実装プランとユーザー向け情報ファイルに変換する。
   コンテキストに余裕があれば同一セッションで implement-plan による実装まで続け、コンテキスト不足が予想されるときだけ別セッションへ引き継ぐ。
   ユーザーがチケットを指しただけのとき、チケットを import したとき、またはチケットなしでコーディング前に plan / 計画を求めたときに使う。
   例: 「https://github.com/foo/bar/issues/42」「plan ENG-1234」「このissueの実装計画」「github.com/foo/bar/issues/42 のプラン」「ticket-to-plan で X を Y にしたい」「X に変えるプラン」
@@ -10,9 +10,9 @@ description: >-
 
 # ticket-to-plan
 
-GitHub や Linear のタスク管理ツールのチケット、またはユーザーの自然言語の変更依頼から、fresh session がそのまま実装できる durable plan file を作るスキルです。
+GitHub や Linear のタスク管理ツールのチケット、またはユーザーの自然言語の変更依頼から、fresh session がそのまま実装できる durable な実装プランとユーザー向け情報ファイルを作るスキルです。
 planning フェーズは read-only で行い、production code を編集しません。
-承認と plan file 保存の後は、コンテキスト状況に応じて同一セッションで `implement-plan` による実装まで続けるか、別セッションへ引き継ぎます。
+承認と実装プラン・ユーザー向け情報ファイルの保存後は、コンテキスト状況に応じて同一セッションで `implement-plan` による実装まで続けるか、別セッションへ引き継ぎます。
 
 ## Scope
 
@@ -21,7 +21,7 @@ planning フェーズは read-only で行い、production code を編集しま�
 - User request source の場合は依頼文と会話 context から目的、対象、制約、受入基準を抽出する。
 - codebase を調査して設計と task breakdown を作る。
 - ユーザー承認を得る。
-- plan file を現在の AI agent に対応する plan directory の `<plan-id>/` 配下に保存する。
+- 実装プランとユーザー向け情報ファイルを現在の AI agent に対応する plan directory の `<plan-id>/` 配下に保存する。
 - 承認後、同一セッション継続か別セッション引き継ぎかを判断する。
 - planning フェーズでは production code を編集しない。
 
@@ -29,7 +29,7 @@ planning フェーズは read-only で行い、production code を編集しま�
 
 - `../ask-user-questions/SKILL.md`: Step 1 と Step 2 で、repo 調査では解けない open question をユーザーへ確認する直前に読む。
 - `../ai-review/SKILL.md`: Step 5 でユーザーレビュー後の draft plan を独立レビューへ渡す直前に読む。
-- `references/plan-template.md`: Step 7 で plan file を書く直前に読む。
+- `references/plan-template.md`: Step 7 で実装プランとユーザー向け情報ファイルを書く直前に読む。
 - `../ai-review/references/test-selection-policy.md`: Step 2 でテスト方針と task の `test` を決める直前に読む。
 
 ## Hard constraints
@@ -37,14 +37,16 @@ planning フェーズは read-only で行い、production code を編集しま�
 - orchestrator は現在の AI agent で利用できる上位推論モデルを使う。満たせない、または確認できない場合は一度警告し、ユーザーが明示的にその trade-off を受け入れた場合だけ、その設定のまま続行する。
 - Ticket source では ticket title と body と body 記載の各URL先をもとにplanを作る。
 - Ticket source では comments、labels、linked issues / PRs、acceptance criteria を確認する。
-- User request source では依頼文と会話 context を source of truth とし、抽出した前提、受入基準、open questions を plan に明記する。
+- User request source では依頼文と会話 context を source of truth とし、実装に必要な前提と受入基準を実装プランに明記する。
 - repo 調査では解けない open question の確認は `../ask-user-questions/SKILL.md` に従う。
 - read-only planning が使える場合は、調査中に code を編集しない。
 - ユーザー承認は plan 内容の承認であり、実装開始とセッション選択は Step 8 の判断に従う。
-- plan file は、source を再取得しなくても実装者が開始できる程度に self-contained にする。
+- 実装プランは、source やユーザー向け情報ファイルを再取得しなくても実装者が開始できる程度に self-contained にする。
+- AIレビュー、リスク・未解決の論点、スコープ外はユーザー向け情報ファイルに記録する。
+- 最終承認の履歴は保存ファイルに記録しない。
 - planning 中に実装可否や受入基準を左右する不明点が見つかった場合は、推測で埋めずにユーザーへ確認する。
 - ユーザーレビュー後、`../ai-review/SKILL.md` の plan review mode で、元の依頼内容とユーザー確認済みの意図を踏まえた最新の draft plan と task breakdown を別 AI でレビューする。
-- AI review 反映後に plan が変わった場合は、plan file 保存前に更新版をユーザーへ再提示して最終承認を得る。
+- AI review 反映後に実装プランが変わった場合は、保存前に更新版をユーザーへ再提示して最終承認を得る。
 
 ## Workflow
 
@@ -53,7 +55,7 @@ planning フェーズは read-only で行い、production code を編集しま�
 - 自分の model を確認する。
 - 上位推論モデルなら続行する。
 - 満たせない、または確認できない場合は、planning quality への影響を伝えて一度警告する。ユーザーが明示的にその trade-off を受け入れた場合だけ、その設定のまま続行する。
-- 使用 model を plan file の header に記録する（弱い設定で続行した場合はその旨も記録する）。
+- 使用 model を実装プランの header に記録する（弱い設定で続行した場合はその旨も記録する）。
 
 ### Step 1: Resolve the source
 
@@ -105,7 +107,7 @@ User request source では次を抽出してください。
 - assumptions and open questions
 
 取得または抽出後、3 から 6 行の source summary をユーザーに返してください。
-source が薄い、矛盾している、または acceptance criteria が欠けている場合は、その gap を plan の open question として扱ってください。
+source が薄い、矛盾している、または acceptance criteria が欠けている場合は、その gap をユーザー向け情報ファイルの `リスク・未解決の論点` に記録する予定として扱ってください。
 その gap が plan の成否や実装範囲に影響する場合は、`../ask-user-questions/SKILL.md` を読んで、Step 2 の調査中または調査後すぐにユーザーへ確認してください。
 
 ### Step 2: Research and plan
@@ -140,9 +142,10 @@ plan は、source や codebase を読んでいない session でも正しく実�
 `parallel: yes` は、同時に ready になる task と `files` が重ならない場合だけ使ってください。
 overlap がある task は sequential にしてください。
 
-### Step 4: Present the draft plan for user review
+### Step 4: Present the draft plan and user information for review
 
-draft plan と task breakdown をユーザーに提示してレビューを求めてください。
+独立AIレビューの前に、実装プランの要約、task breakdown、ユーザー向け情報の draft を画面に表示してレビューを求めてください。
+この時点の `AIレビュー` は未実施であることを明記してください。
 approval affordance がある環境では、それを使ってください。
 
 - ユーザーが reject または feedback を返した場合は、feedback を spec として扱う。
@@ -156,14 +159,14 @@ approval affordance がある環境では、それを使ってください。
 ai-review へ planner、元の依頼内容、ユーザー確認済みの意図、維持したい挙動、non-goal、draft plan、調査した path を渡してください。
 ai-review は plan を編集せず、reviewer、信頼性判定、finding を返します。
 Planning AI は review 内容を確認し、採用する指摘を plan と task breakdown へ反映してください。
-採用しない重要指摘は、理由を plan に残してください。
+採用しない重要指摘は、理由をユーザー向け情報ファイルの `AIレビュー` に残してください。
 
-- P1 または P2 で plan が実質的に変わる場合は、反映後の plan をユーザーへ再提示して最終承認を得る。
+- P1 または P2 で実装プランが実質的に変わる場合は、反映後の実装プランをユーザーへ再提示して最終承認を得る。
 
 ### Step 6: Get final approval after AI review
 
-AI review 後の最終版 plan と task breakdown をユーザーへ再提示して承認を得てください。
-AI review の reviewer、主要 findings、planning AI の採否判断も短く添えてください。
+AI review 後の最終版の実装プラン要約、task breakdown、ユーザー向け情報を画面に表示して承認を得てください。
+AI review の reviewer、主要 findings、planning AI の採否判断はユーザー向け情報の `AIレビュー` に記録してください。
 
 - ユーザーが追加 feedback を返した場合は、feedback を spec として扱う。
 - feedback が前提を変える場合は code を再調査する。
@@ -171,13 +174,14 @@ AI review の reviewer、主要 findings、planning AI の採否判断も短く�
 - 最終承認されるまで plan を更新する。
 - 承認後も実装は始めない。
 
-### Step 7: Write the plan file
+### Step 7: Write the implementation plan and user information files
 
-最終承認後、`references/plan-template.md` を読んで plan file を保存してください。
+最終承認後、`references/plan-template.md` を読んで実装プランとユーザー向け情報ファイルを保存してください。
 
-保存先とファイル名は `references/plan-template.md` の Path convention に従ってください。
+保存先とファイル名は `references/plan-template.md` の各 Path convention に従ってください。
 `<YYYYMMDD>` は `TZ=Asia/Tokyo date +%Y%m%d` で取得してください。
 Project が明確に別 convention を持つ場合は従い、保存先を報告してください。
+保存後、ユーザー向け情報ファイルの全内容を画面に表示してください。
 
 ```bash
 TZ=Asia/Tokyo date +%Y%m%d
@@ -185,7 +189,7 @@ TZ=Asia/Tokyo date +%Y%m%d
 
 ### Step 8: Continue or hand off implementation
 
-plan file 保存後、同一セッションで実装を続けるか、別セッションへ引き継ぐかを判断してください。
+実装プランの保存後、同一セッションで実装を続けるか、別セッションへ引き継ぐかを判断してください。
 デフォルトは同一セッションでの継続です。
 別セッションを選ぶのは、そのほうがトークン効率と出力品質が上がると見込めるときだけです。
 
@@ -194,7 +198,7 @@ plan file 保存後、同一セッションで実装を続けるか、別セッ�
 - planning でコンテキストを大きく消費した、または compaction / 要約が既に発生していて、残りコンテキストで実装まで通す余裕が乏しい。
 - plan が大規模または high risk（タスク数が多い、touch するファイルが広い、risk 分類が high など）で、実装とレビューで残りコンテキストを超えると見込まれる。
 
-同一セッションで続ける場合は、`implement-plan` skill をこのセッションで起動し、保存した plan file を contract として実装へ進んでください。
+同一セッションで続ける場合は、`implement-plan` skill をこのセッションで起動し、保存した実装プランだけを contract として実装へ進んでください。
 
 別セッションへ引き継ぐ場合は、このセッションでは実装せず、新しいセッションに貼り付ける self-contained な引き継ぎテキストを 1 つの fenced code block で提示してください。
 特定 agent の CLI コマンドや起動ツールは使わないでください。
@@ -203,20 +207,20 @@ plan file 保存後、同一セッションで実装を続けるか、別セッ�
 
 - `implement-plan` スキルで実装する指示
 - working directory
-- absolute plan-file path
+- absolute implementation-plan path
 - source reference が ticket ではない場合は、source summary と plan-id
 
 例:
 
 ```text
 working directory: <repo>
-plan file: <absolute-plan-file-path>
+implementation plan: <absolute-plan-file-path>
 Implement this plan with the `implement-plan` skill.
 ```
 
 選んだ経路とその理由を報告してください。
 同一セッション継続を選んだ場合は、その旨と理由を報告してから `implement-plan` を起動してください。
-別セッション引き継ぎを選んだ場合は、plan の保存先と引き継ぎテキストを提示したことを報告して停止してください。
+別セッション引き継ぎを選んだ場合は、実装プランの保存先と引き継ぎテキストを提示したことを報告して停止してください。
 
 ## Report
 
@@ -226,6 +230,7 @@ Implement this plan with the `implement-plan` skill.
 - plan の主要方針
 - task breakdown の概要
 - AI review の reviewer と planning AI の採否判断
-- 保存した plan file の path
+- 保存した実装プランとユーザー向け情報ファイルの path
+- 画面に表示したユーザー向け情報
 - 選んだ経路（同一セッション継続 / 別セッション引き継ぎ）とその理由
 - 同一セッション継続なら実装を続ける旨、別セッション引き継ぎなら引き継ぎテキストを提示して停止した旨

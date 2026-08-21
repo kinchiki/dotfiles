@@ -13,7 +13,7 @@ description: >-
 # implement-plan
 
 承認済みプランを端から端まで実行する: feature branch を作成し、`## タスク` をテスト込みで実装し、lint / test を緑にし、risk に応じた独立レビューを受け、commit-changes と open-pr-followup へ引き継ぐ。
-承認済みプランは contract である。`## スコープ外` に出る必要がない限り re-plan しない。
+承認済みプランは contract である。ゴール、受入基準、タスク、対象 files、done_when から外れる必要がない限り re-plan しない。
 plan file に `## 動作確認` がある場合は、その指示も contract として扱う。
 
 ## Resources
@@ -28,7 +28,7 @@ plan file に `## 動作確認` がある場合は、その指示も contract �
 - planning / approval mode が有効な場合は、1〜2行の実行 outline だけを示して終了し、plan を再提示・再議論しない。
 - default branch では作業しない。
 - `## タスク` のチェックボックスは orchestrator だけが編集し、進捗の唯一の source として使う。
-- `## スコープ外` に出ない。scope change が必要な場合は停止して理由を説明する。
+- ゴール、受入基準、タスク、対象 files、done_when から外れる scope change が必要な場合は停止して理由を説明する。
 - test を弱める・削除する・skip / pending にしない。
 - orchestration には現在の AI agent で利用できる上位推論モデルを使う。満たせない、または確認できない場合は一度警告し、ユーザーが明示的にその trade-off を受け入れた場合だけ、弱い設定のまま続行する。
 - lint / test の修正ループは最大 3 round。
@@ -45,10 +45,9 @@ plan file に `## 動作確認` がある場合は、その指示も contract �
   - acceptance criteria: checklist id
   - 未チェック task: id、depends_on、files、test、done_when、parallel
   - `## 動作確認`: 要否、対象、各確認ポイント、skip 承認ルール
-  - `## スコープ外`: 具体的な制約
   - lint / test コマンド（plan が repo convention file より優先）
-  - 未解決の blocking risk
-- plan file の変更を除き、working tree が clean であることを要求する。そうでなければ停止する。
+- 同じディレクトリにある `_info_for_user.md` は読み込まず、実装 contract として扱わない。
+- plan file と同じディレクトリの今回の実装プランに対応する `_info_for_user.md` を除き、working tree が clean であることを要求する。そうでなければ停止する。
 - clean な tree から feature branch を作る: `git switch -c <type>/<plan-id>-<slug>`。`<type>` は repo convention に従い、既存の ticket branch があれば再利用する。
 
 ### Step 1: Implement tasks in order
