@@ -44,9 +44,6 @@ Project が別 convention を持つ場合も、実装プランと同じディレ
 - **ソース:** GitHub | Linear | User request
 - **参照:** <完全な URL、ID、または元依頼の短い引用>
 - **Plan ID:** <plan-id>
-- **計画者:** <AI agent 名、モデル ID。例: codex / gpt-5.6-sol>
-- **日付:** <YYYY-MM-DD>
-- **ステータス:** 承認済み - 実装可能
 
 ## ゴール
 <1〜3文: 完了状態を平易な言葉で。>
@@ -87,6 +84,10 @@ Project が別 convention を持つ場合も、実装プランと同じディレ
 
 ```markdown
 # <プランのタイトル> のユーザー向け情報
+
+- **計画者:** <AI agent 名、モデル ID。例: codex / gpt-5.6-sol>
+- **日付:** <YYYY-MM-DD>
+- **ステータス:** 承認済み - 実装可能
 
 ## AIレビュー
 - reviewer: <AI agent 名、model、review 実行方法、未実施ならその理由>
