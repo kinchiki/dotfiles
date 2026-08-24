@@ -92,7 +92,8 @@ Project が別 convention を持つ場合も、実装プランと同じディレ
 ## AIレビュー
 - reviewer: <AI agent 名、model、review 実行方法、未実施ならその理由>
 - findings: <P1/P2/P3 の要約、または no findings>
-- planner disposition: <採用 / 一部採用 / 不採用と理由>
+- planning AI proposal: <各 finding の対応案>
+- user disposition: <各 finding の採用 / 見送りと理由。未承認なら実装プランを確定しない>
 - plan updates: <review 後に反映した変更>
 
 ## リスク・未解決の論点

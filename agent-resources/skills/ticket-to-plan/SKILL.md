@@ -44,6 +44,8 @@ planning フェーズは read-only で行い、production code を編集しま�
 - 実装プランは、source やユーザー向け情報ファイルを再取得しなくても実装者が開始できる程度に self-contained にする。
 - 発生可能性と影響に見合う事象だけを専用実装として計画する。低確率で単純なエラー処理で足りる事象は、専用実装の対象外とし、単純なエラー処理で対処する。
 - AIレビュー、リスク・未解決の論点、スコープ外はユーザー向け情報ファイルに記録する。
+- AIレビューの全 finding はユーザーへ提示し、項目ごとの採用または見送りの明示承認を得てから実装プランと task breakdown に反映する。
+- planning AI は AIレビューの指摘に対する採否を単独で確定せず、ユーザーの判断が揃うまで実装プランを確定しない。
 - 最終承認の履歴は保存ファイルに記録しない。
 - planning 中に実装可否や受入基準を左右する不明点が見つかった場合は、推測で埋めずにユーザーへ確認する。
 - ユーザーレビュー後、`../ai-review/SKILL.md` の plan review mode で、元の依頼内容とユーザー確認済みの意図を踏まえた最新の draft plan と task breakdown を別 AI でレビューする。
@@ -159,15 +161,17 @@ approval affordance がある環境では、それを使ってください。
 ユーザーレビューが完了した draft plan に対して、`../ai-review/SKILL.md` を読み、plan review mode で AI review を実行してください。
 ai-review へ planner、元の依頼内容、ユーザー確認済みの意図、維持したい挙動、non-goal、draft plan、調査した path を渡してください。
 ai-review は plan を編集せず、reviewer、信頼性判定、finding を返します。
-Planning AI は review 内容を確認し、採用する指摘を plan と task breakdown へ反映してください。
-採用しない重要指摘は、理由をユーザー向け情報ファイルの `AIレビュー` に残してください。
+planning AI は review 内容を確認し、各 finding の影響と対応案を整理してください。
+各 finding の採用または見送りはユーザーへ提示して項目ごとに承認を得てください。
+ユーザーが採用を承認した finding だけを plan と task breakdown へ反映し、見送りを承認した finding は理由とともにユーザー向け情報ファイルの `AIレビュー` に残してください。
 
 - P1 または P2 で実装プランが実質的に変わる場合は、反映後の実装プランをユーザーへ再提示して最終承認を得る。
 
 ### Step 6: Get final approval after AI review
 
-AI review 後の最終版の実装プラン要約、task breakdown、ユーザー向け情報を画面に表示して承認を得てください。
-AI review の reviewer、主要 findings、planning AI の採否判断はユーザー向け情報の `AIレビュー` に記録してください。
+AI review 後の finding 一覧と各 finding の対応案を画面に表示し、項目ごとに採用または見送りの明示承認を得てください。
+すべての finding の判断が揃ったら、採用承認済みの finding だけを反映した最終版の実装プラン要約、task breakdown、ユーザー向け情報を画面に表示して最終承認を得てください。
+AI review の reviewer、主要 findings、planning AI の対応案、ユーザーの採否判断はユーザー向け情報の `AIレビュー` に記録してください。
 
 - ユーザーが追加 feedback を返した場合は、feedback を spec として扱う。
 - feedback が前提を変える場合は code を再調査する。
@@ -230,7 +234,7 @@ Implement this plan with the `implement-plan` skill.
 - source summary
 - plan の主要方針
 - task breakdown の概要
-- AI review の reviewer と planning AI の採否判断
+- AI review の reviewer、planning AI の対応案、ユーザーの採否判断
 - 保存した実装プランとユーザー向け情報ファイルの path
 - 画面に表示したユーザー向け情報
 - 選んだ経路（同一セッション継続 / 別セッション引き継ぎ）とその理由

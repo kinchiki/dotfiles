@@ -1,12 +1,11 @@
 ---
 name: address-pr-comments
 description: >-
-  GitHub PR の未解決レビューコメントとレビュー本文を取得し、実コードを読んで must-fix / recommend-fix / recommend-skip にトリアージして修正する。
+  GitHub PR の未解決レビューコメントとレビュー本文を取得し、実コードを読んで must-fix / recommend-fix / recommend-skip にトリアージしてユーザーへ提示する。
   bot コメントも対象にし、解決済みスレッドは除外する。
-  must-fix は自動で進め、任意対応はユーザー確認後に実装する。
   PR のレビュー指摘を処理したいときに使う。
   例: 「PRのコメントに対応して」「レビュー対応」「PRの指摘を直して」「レビューを反映」。
-  対応実装後に commit / push、`update-pr-description` による PR description 更新、対象レビューコメントへの対応済み reply、thread resolve まで行う。
+  ユーザー承認済みの対応を実装した後に commit / push、`update-pr-description` による PR description 更新、対象レビューコメントへの対応済み reply、thread resolve まで行う。
 ---
 
 # address-pr-comments
@@ -20,7 +19,7 @@ GitHub PR のレビュー指摘を、実コードに照らして直すスキル�
 - `coderabbitai`、`copilot` などの bot コメントも扱う。
 - 通常の PR conversation コメントは対象外にする。
 - 通常コメントに実質的な指摘がある場合は、範囲を広げるかユーザーに確認する。
-- 承認済み review 対応の実装、quality gate、local commit、push、`update-pr-description` による PR description 更新、対象 thread への reply、thread resolve まで扱う。
+- ユーザー承認済み review 対応の実装、quality gate、local commit、push、`update-pr-description` による PR description 更新、対象 thread への reply、thread resolve まで扱う。
 - Review summary body は実装対象に含めるが、inline thread ではないため reply / resolve の対象外にする。
 
 ## Resources
@@ -36,8 +35,9 @@ GitHub PR のレビュー指摘を、実コードに照らして直すスキル�
 - dirty tree で別ブランチに切り替える必要がある場合は、stash や破棄をせずに確認する。
 - test を弱める、削除する、skip / pending にする行為は禁止する。
 - 3 回修正しても lint / test が通らない場合は停止して失敗内容を報告する。
-- PR description は `update-pr-description` で実装後の状態に合わせて確認または更新し、実装と矛盾しない既存内容は保持する。
-- `recommend-skip` の thread は、ユーザーが明示的に承認した場合だけ reply / resolve する。
+- すべての review finding はユーザーへ提示し、項目ごとの修正または見送りの明示承認を得るまで、実装、commit、push、PR description 更新、reply、resolve を実行しない。
+- PR description は、ユーザー承認済みの実装後に `update-pr-description` で状態に合わせて確認または更新し、実装と矛盾しない既存内容は保持する。
+- inline thread の reply / resolve は、対象 finding の対応方針と writeback の明示承認後だけ実行する。
 - コマンド出力は全文を貼らず、判定根拠、失敗要点、commit URL、thread status だけを報告する。
 
 ## Workflow
@@ -87,16 +87,16 @@ gh pr view <n-or-omit> --json number,headRefName,baseRefName,url,state,title
 
 ### Step 3: Present and confirm
 
-- `must-fix`、`recommend-fix`、`recommend-skip` の表をユーザーに出す。
-- `must-fix` は同じ turn で着手する。
-- `files_to_touch` が重ならない `must-fix` は、可能なら `task-implementer` sub-agent で並列に進める。
-- `recommend-fix` と `recommend-skip` はユーザーに確認する。
+- `must-fix`、`recommend-fix`、`recommend-skip` の表をユーザーに出し、各項目について修正または見送りの明示承認を得る。
+- `files_to_touch` が重ならない承認済み項目は、可能なら `task-implementer` sub-agent で並列に進める。
+- ユーザーが見送りを承認した項目は理由とともに記録する。
 - 確認用の質問ツールがある場合は使い、ない場合は番号付きの短い質問で確認する。
 
 ### Step 4: Implement approved work
 
-- background の `must-fix` があれば完了を待つ。
-- 承認された項目を実装する。
+- background の承認済み項目があれば完了を待つ。
+- ユーザーが修正を承認した項目だけを実装する。
+- ユーザーが見送りを承認した項目は理由とともに報告へ記録する。
 - `files_to_touch` が重ならない項目だけ並列化する。
 - overlap がある項目は順番に実装する。
 - 各 worker は割り当てられた files だけを編集し、必要な test を追加または更新する。
@@ -136,7 +136,7 @@ Commit URL は PR URL に対する commit URL にしてください。
 
 ### Step 8: Reply and resolve review threads
 
-- 実装した inline review thread ごとに writeback する。
+- ユーザーが writeback を明示承認した実装済みまたは見送りの inline review thread ごとに writeback する。
 - reply / resolve の command、body format、実行順序、writeback 条件は `references/github-review-thread-commands.md` に従う。
 - Review summary body 由来の項目は、reply / resolve 対象なしとして report に含める。
 
