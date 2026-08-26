@@ -33,6 +33,7 @@ plan file に `## 動作確認` がある場合は、その指示も contract �
 - test を弱める・削除する・skip / pending にしない。
 - AI review の全 finding は severity にかかわらずユーザーへ提示し、項目ごとの修正または見送りの明示承認を得てから対応する。
 - ユーザーの承認前に AI review finding の修正、見送りの確定、PR body への記録を進めず、未承認の finding が残る場合は停止する。
+- 同一実装に対する2回目以降の AI review が必要なときは、再レビューの理由と対象を提示してユーザーの明示的な確認を得る。
 - orchestration には現在の AI agent で利用できる上位推論モデルを使う。満たせない、または確認できない場合は一度警告し、ユーザーが明示的にその trade-off を受け入れた場合だけ、弱い設定のまま続行する。
 - lint / test の修正ループは最大 3 round。
 - 次のいずれかに該当する場合は停止して報告する: plan が欠落・曖昧で次の未チェック task を特定できない / working tree に無関係な変更がある / 既存 branch や ticket の衝突を安全に解決できない / scope change が必要 / 3 round 経ても lint / test が失敗する / 明示的な同意後も必須の独立 reviewer が実行できない / AI review finding のユーザー判断が未完了 / blocking な P1 / P2 が残っている。
@@ -77,7 +78,7 @@ plan file に `## 動作確認` がある場合は、その指示も contract �
 - lint / test が緑になったら、実際の diff を分類する。
   - low: docs・comment・copy・軽微な type / test / UI 文言・style の変更 → self-review のみ。
   - medium: 通常の feature・bugfix・UI 挙動・API 隣接の変更 → 独立 review を 1 回。
-  - high: auth・billing・permission・data 削除・migration・security・production data・広範な refactor・影響範囲不明 → 独立 review。P1 / P2 修正後にもう 1 回 re-review。
+  - high: auth・billing・permission・data 削除・migration・security・production data・広範な refactor・影響範囲不明 → 独立 review。P1 / P2 修正後にもう一度 review をするかユーザーに確認する。
 
 ### Step 4: Run independent review for medium/high risk
 
@@ -87,6 +88,7 @@ plan file に `## 動作確認` がある場合は、その指示も contract �
 - reviewer の全 finding を severity、対象、根拠、対応案とともにユーザーへ提示し、各 finding について修正または見送りの明示承認を得る。
 - ユーザーが修正を承認した finding だけを実装し、lint / test を再実行する。
 - ユーザーが見送りを承認した finding は理由とともに報告へ記録する。P1 / P2 の見送りは blocking finding として扱い、commit と PR 作成へ進まない。
+- 修正後に再レビューが必要な場合は、再レビューの理由、前回からの変更点、レビュー対象をユーザーへ提示して明示的な確認を得てから AI review を再実行する。確認が得られない場合は再レビューを実行せず停止する。
 - 修正後に必要な再レビューで新しい finding が返った場合も、同じ承認フローを繰り返す。
 - すべての `## タスク` がチェック済みで、lint / test が緑で、全 review finding の判断が完了し、blocking な review finding が残っていない場合だけ完了とする。
 

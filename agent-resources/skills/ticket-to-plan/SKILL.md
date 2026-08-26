@@ -49,6 +49,7 @@ planning フェーズは read-only で行い、production code を編集しま�
 - 最終承認の履歴は保存ファイルに記録しない。
 - planning 中に実装可否や受入基準を左右する不明点が見つかった場合は、推測で埋めずにユーザーへ確認する。
 - ユーザーレビュー後、`../ai-review/SKILL.md` の plan review mode で、元の依頼内容とユーザー確認済みの意図を踏まえた最新の draft plan と task breakdown を別 AI でレビューする。
+- 同一計画に対する2回目以降の AI review が必要なときは、再レビューの理由と対象を提示してユーザーの明示的な確認を得る。
 - AI review 反映後に実装プランが変わった場合は、保存前に更新版をユーザーへ再提示して最終承認を得る。
 
 ## Workflow
@@ -154,11 +155,12 @@ approval affordance がある環境では、それを使ってください。
 - ユーザーが reject または feedback を返した場合は、feedback を spec として扱う。
 - feedback が前提を変える場合は code を再調査する。
 - feedback で plan または task breakdown が変わる場合は、更新版をもう一度ユーザーへ提示する。
-- ユーザーレビュー完了前に AI review へ進まない。
+- ユーザーレビュー完了後に AI review へ進む。
 
 ### Step 5: Run cross-AI planning review
 
 ユーザーレビューが完了した draft plan に対して、`../ai-review/SKILL.md` を読み、plan review mode で AI review を実行してください。
+同一計画に対する2回目以降の AI review では、再レビューの理由と対象、前回からの変更点を画面に表示してユーザーの明示的な確認を得てください。確認が得られない場合は再レビューを実行せず停止してください。
 ai-review へ planner、元の依頼内容、ユーザー確認済みの意図、維持したい挙動、non-goal、draft plan、調査した path を渡してください。
 ai-review は plan を編集せず、reviewer、信頼性判定、finding を返します。
 planning AI は review 内容を確認し、各 finding の影響と対応案を整理してください。
@@ -203,7 +205,8 @@ TZ=Asia/Tokyo date +%Y%m%d
 - planning でコンテキストを大きく消費した、または compaction / 要約が既に発生していて、残りコンテキストで実装まで通す余裕が乏しい。
 - plan が大規模または high risk（タスク数が多い、touch するファイルが広い、risk 分類が high など）で、実装とレビューで残りコンテキストを超えると見込まれる。
 
-同一セッションで続ける場合は、`implement-plan` skill をこのセッションで起動し、保存した実装プランだけを contract として実装へ進んでください。
+同一セッションで続ける場合は、ユーザーに承認を得てください。
+承認を得られた場合のみ `implement-plan` skill をこのセッションで起動し、保存した実装プランだけを contract として実装へ進んでください。
 
 別セッションへ引き継ぐ場合は、このセッションでは実装せず、新しいセッションに貼り付ける self-contained な引き継ぎテキストを 1 つの fenced code block で提示してください。
 特定 agent の CLI コマンドや起動ツールは使わないでください。
