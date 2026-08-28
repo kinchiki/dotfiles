@@ -1,74 +1,92 @@
 # AGENTS.md
 
-**あなたはユーザーに日本語で応答すること。**
+**ユーザーには日本語で応答すること。**
 
-Behavioral guardrails against common LLM coding mistakes, applied by default in every repository. If a repository's own instructions conflict with these, follow the repository's instructions.
+Repository-local instructions and established repository conventions override these defaults when they are more specific.
 
-**Scope:** apply the extra steps below (naming assumptions, stating a plan, listing verification checks) for anything beyond read-only work or a fix with exactly one correct implementation (e.g., a typo, an off-by-one, a version bump). For those, just do it - then still verify per Section 4.
+## 1. Inspect Before Acting
 
-## 1. Think Before Coding
+Before making a non-trivial change, inspect the relevant code, tests, configuration, instructions, and existing usage as needed.
 
-**Don't guess silently. Surface ambiguity and better options before writing code.**
+Prefer existing repository patterns over introducing new ones.
 
-Before implementing:
-- If multiple reasonable interpretations exist, name them, then state which one you're using and why - don't pick silently.
-- If the request is missing information you can't reasonably default (e.g., no acceptance criteria, no target file/function), stop and ask instead of guessing.
-- If a simpler approach exists than the one requested, say so before implementing it - push back when warranted.
+Resolve information from the repository whenever it can reasonably be discovered there before asking the user.
 
-The test: someone reading only your first message, before seeing any diff, could state exactly what you assumed and why.
+If ambiguity remains:
 
-## 2. Simplicity First
+* choose a conservative, reversible interpretation when the risk is low, and state any material assumption;
+* ask the user when a wrong choice could affect behavior, compatibility, data, scope, security, or architecture.
 
-**Minimum code that solves the problem. Nothing speculative.**
+If the requested approach has a materially simpler or safer alternative, mention it before implementing.
 
-- No features beyond what was asked.
-- No abstractions for single-use code.
-- No "flexibility" or "configurability" that wasn't requested.
-- No error handling for impossible scenarios.
-- If you write 200 lines and it could be 50, rewrite it.
+## 2. Plan Proportionally
 
-Ask yourself: "Would a senior engineer say this is overcomplicated?" If yes, simplify.
+For read-only work or a mechanical, local, low-risk change, proceed directly.
 
-## 3. Surgical Changes
+For non-trivial changes, briefly state:
 
-**Touch only what you must. Clean up only your own mess.**
+1. what you intend to change;
+2. any material assumption or design decision;
+3. how you will verify it.
 
-When editing existing code:
-- Don't "improve" adjacent code, comments, or formatting.
-- Don't refactor things that aren't broken.
-- Match existing style, even if you'd do it differently.
-- If you notice unrelated dead code, mention it - don't delete it.
+Focus the plan on material decisions, assumptions, and verification.
 
-When your changes create orphans:
-- Remove imports/variables/functions that YOUR changes made unused.
-- Don't remove pre-existing dead code unless asked.
+## 3. Optimize for Correctness and Readability
 
-The test: Every changed line should trace directly to the user's request.
+Default priority:
 
-## 4. Goal-Driven Execution
+correctness and required behavior
+→ compatibility and safety
+→ readability
+→ repository consistency
+→ simplicity
+→ meaningful performance
+→ brevity
 
-**Define success criteria. Loop until verified.**
+Prefer explicit, readable code over clever or compressed code.
 
-Transform tasks into verifiable goals:
-- "Add validation" → "Write tests for invalid inputs, then make them pass"
-- "Fix the bug" → "Write a test that reproduces it, then make it pass"
-- "Refactor X" → "Ensure tests pass before and after"
+Introduce abstractions and flexibility only when they serve the current requirement or an established repository pattern. Keep cleanup scoped to the requested change.
 
-For multi-step tasks, state a brief plan:
-```
-1. [Step] → verify: [check]
-2. [Step] → verify: [check]
-3. [Step] → verify: [check]
-```
+## 4. Make the Smallest Coherent Change
 
-Strong success criteria let you loop independently. Weak criteria ("make it work") require constant clarification.
+Touch only what is necessary to implement and verify the requested behavior.
 
-## 5. Runtime / package manager
+Match the existing repository style.
 
-明示的な指示がない限り、node, python, ruby, etc. は mise を使ってコマンドを実行する。
+Necessary supporting changes such as tests, imports, fixtures, schemas, migrations, generated files, documentation, or lockfiles are allowed when directly caused by the requested change.
 
-コマンド例
+Remove code that your own change makes unused.
 
-- `mise x -- node`
-- `mise x -- npm`
-- `mise x -- python`
+## 5. Verify the Result
+
+Define success in observable terms and verify the affected behavior.
+
+Run the narrowest relevant checks first, then broader checks when warranted by the scope or repository conventions.
+
+For bug fixes, add or update a regression test when feasible and valuable.
+
+Report a check as passed only when you actually ran it and observed a successful result.
+
+Preserve valid test expectations. Update tests when the requested behavior intentionally changes what they should assert.
+
+If verification is incomplete or fails, state:
+
+* what you ran;
+* what passed or failed;
+* what remains unverified;
+* whether the problem appears related to your change.
+
+Retry a failing action only after forming a new hypothesis or making a meaningful change.
+
+## 6. Runtime and Package Managers
+
+Use `mise` for runtime- and package-manager-dependent commands when repository-specific instructions do not specify another environment.
+
+Examples:
+
+* `mise x -- node`
+* `mise x -- npm test`
+* `mise x -- python -m pytest`
+* `mise x -- ruby`
+
+Prefer repository-defined scripts and task runners.
