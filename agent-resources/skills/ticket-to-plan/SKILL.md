@@ -27,7 +27,7 @@ planning フェーズは read-only で行い、production code を編集しま�
 
 ## Resources
 
-- `../ask-user-questions/SKILL.md`: Step 1 と Step 2 で、repo 調査では解けない open question をユーザーへ確認する直前に読む。
+- `../ask-user-questions/SKILL.md`: Step 1 と Step 2 で、repo 調査では解けない open question または設計方針をユーザーへ確認する直前に読む。
 - `../ai-review/SKILL.md`: Step 5 でユーザーレビュー後の draft plan を独立レビューへ渡す直前に読む。
 - `references/plan-template.md`: Step 7 で実装プランとユーザー向け情報ファイルを書く直前に読む。
 - `../ai-review/references/test-selection-policy.md`: Step 2 でテスト方針と task の `test` を決める直前に読む。
@@ -41,6 +41,7 @@ planning フェーズは read-only で行い、production code を編集しま�
 - repo 調査では解けない open question の確認は `../ask-user-questions/SKILL.md` に従う。
 - read-only planning が使える場合は、調査中に code を編集しない。
 - ユーザー承認は plan 内容の承認であり、実装開始とセッション選択は Step 8 の判断に従う。
+- non-simple task では、ユーザーが実装方針を選択するまで詳細な task breakdown を作らない。
 - 実装プランは、source やユーザー向け情報ファイルを再取得しなくても実装者が開始できる程度に self-contained にする。
 - 発生可能性と影響に見合う事象だけを専用実装として計画する。低確率で単純なエラー処理で足りる事象は、専用実装の対象外とし、単純なエラー処理で対処する。
 - AIレビュー、リスク・未解決の論点、スコープ外はユーザー向け情報ファイルに記録する。
@@ -114,7 +115,7 @@ User request source では次を抽出してください。
 source が薄い、矛盾している、または acceptance criteria が欠けている場合は、その gap をユーザー向け情報ファイルの `リスク・未解決の論点` に記録する予定として扱ってください。
 その gap が plan の成否や実装範囲に影響する場合は、`../ask-user-questions/SKILL.md` を読んで、Step 2 の調査中または調査後すぐにユーザーへ確認してください。
 
-### Step 2: Research and plan
+### Step 2: Research and select an approach
 
 read-only planning で codebase を調査してください。
 
@@ -128,12 +129,50 @@ read-only planning で codebase を調査してください。
 - migration、backward compatibility、permission / auth、N+1、background-job idempotency、API surface、i18n など、該当する edge を検討する。
 - target repo が `app/interactions/`、`packs/`、`CLAUDE.md` / `AGENTS.md` の convention を持つ場合は、それを尊重する。
 
+調査で実装に関わる不明点が見つかった場合は、`../ask-user-questions/SKILL.md` を読んで、draft plan を固め切る前にユーザーへ確認してください。
+
+調査後、task を `simple` または `non-simple` に分類してください。
+次の条件をすべて満たす場合だけ `simple` としてください。
+
+- 変更が局所的かつ low risk である。
+- 既存 pattern から実装方針が一意に決まる。
+- interface、責務配置、data flow、状態管理、互換性、migration、運用特性、重要な制約の優先順位に material な設計選択がない。
+
+いずれかを満たさない、または判定に迷う場合は `non-simple` としてください。
+`simple` の場合は判定理由と代替案比較を省略した理由を記録し、Step 3 へ進んでください。
+
+`non-simple` の場合は、実装方針を確定する前に materially distinct な viable alternatives を探索してください。
+要件と既知の制約を満たし、target repo で実装可能で、既知の致命的な欠点がない案を viable としてください。
+interface、責務配置、data flow、状態管理、互換性、migration、運用特性、または重要な制約の優先順位が異なる案を materially distinct としてください。
+同じ設計 family の微修正版は1案にまとめてください。
+
+意味のある viable alternatives だけを最大3案提示してください。
+2案だけが viable なら2案を提示してください。
+1案だけが viable なら、その案と検討した主要な代替案の具体的な棄却理由を提示してください。
+数合わせの strawman、微修正版、既知の制約に反する案、明らかな劣化案を候補に含めないでください。
+
+各案は次の観点を同じ粒度で比較してください。
+
+- 設計上の違い
+- メリット
+- trade-off
+- リスク
+- 選択基準
+
+推奨案がある場合は理由とともに示してください。
+推奨案を自動選択せず、`../ask-user-questions/SKILL.md` に従ってユーザーに方針選択を求めてください。
+ユーザーが提示案の選択、要素を指定した hybrid、または観点を指定した再検討を回答できるようにしてください。
+hybrid は整合性と viability を確認し、materially new な方針になる場合は選択案として再提示して確認を得てください。
+再検討を求められた場合は、指定された観点を調査して比較を更新し、改めて選択を求めてください。
+viable な案が1つだけの場合も、その案の受諾または再検討をユーザーへ確認してください。
+
+選択後、task classification、selected approach、selection basis、accepted trade-offs、主要な rejected alternatives と棄却理由を draft plan に残してください。
 plan は、source や codebase を読んでいない session でも正しく実装できる粒度にしてください。
 曖昧な plan は失敗です。
-調査で実装に関わる不明点が見つかった場合は、`../ask-user-questions/SKILL.md` を読んで、draft plan を固め切る前にユーザーへ確認してください。
 
 ### Step 3: Break the plan into tasks
 
+Step 2 で実装方針が確定していることを確認してください。
 `## タスク` に書く task breakdown を作ってください。
 各 task には次を含めます。
 
@@ -161,11 +200,15 @@ approval affordance がある環境では、それを使ってください。
 
 ユーザーレビューが完了した draft plan に対して、`../ai-review/SKILL.md` を読み、plan review mode で AI review を実行してください。
 同一計画に対する2回目以降の AI review では、再レビューの理由と対象、前回からの変更点を画面に表示してユーザーの明示的な確認を得てください。確認が得られない場合は再レビューを実行せず停止してください。
-ai-review へ planner、元の依頼内容、ユーザー確認済みの意図、維持したい挙動、non-goal、draft plan、調査した path を渡してください。
+ai-review へ planner、元の依頼内容、ユーザー確認済みの意図、維持したい挙動、non-goal、draft plan、selected approach、selection basis、accepted trade-offs、主要な rejected alternatives と棄却理由、調査した path を渡してください。
 ai-review は plan を編集せず、reviewer、信頼性判定、finding を返します。
 planning AI は review 内容を確認し、各 finding の影響と対応案を整理してください。
 各 finding の採用または見送りはユーザーへ提示して項目ごとに承認を得てください。
 ユーザーが採用を承認した finding だけを plan と task breakdown へ反映し、見送りを承認した finding は理由とともにユーザー向け情報ファイルの `AIレビュー` に残してください。
+
+selected approach の実現可能性、受入基準、重要なリスク、または比較の前提を material に崩す finding は、その影響を明示してユーザーの採否判断を得てください。
+ユーザーがその finding の採用を承認した場合は、planning AI が別方針へ変更せず Step 2 の方針選択へ戻ってください。
+再選択後は task breakdown と draft plan を更新し、2回目以降の AI review には既存の明示確認ルールを適用してください。
 
 - P1 または P2 で実装プランが実質的に変わる場合は、反映後の実装プランをユーザーへ再提示して最終承認を得る。
 

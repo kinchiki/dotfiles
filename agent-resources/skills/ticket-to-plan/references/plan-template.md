@@ -51,6 +51,15 @@ Project が別 convention を持つ場合も、実装プランと同じディレ
 ## 受入基準
 - [ ] <source から導いた観測可能でテスト可能な成果>
 
+## 設計判断
+- **Task classification:** `simple` | `non-simple` — <判定理由>
+- **Selected approach:** <採用する実装方針>
+- **Selection basis:** <この方針を選んだ基準>
+- **Accepted trade-offs:** <受け入れた不利益や制約>
+- **Rejected alternatives:**
+  - <主要な代替案>: <棄却理由>
+<simple の場合は、Rejected alternatives に代替案比較を省略した理由を書く。>
+
 ## 背景・影響するコード
 <主要なファイル/モジュールをパス付きで、各1行メモを添える。>
 <実装者がコードベースに合わせられるよう、踏襲すべき既存パターンも含める。>
