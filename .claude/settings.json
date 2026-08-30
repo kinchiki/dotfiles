@@ -260,13 +260,20 @@
         "~/.local/state/mise/",
         "~/.config/mise/",
         "~/Library/Caches/mise/",
-        "~/.docker/",
         "~/.colima/",
         "~/.lima/",
-        "~/.config/gh/",
         "~/.local/share/aquaproj-aqua/",
-        "~/.claude/skills/",
-        "~/Library/Keychains/"
+        "~/.claude/skills/"
+      ],
+      "denyRead": [
+        "~/.ssh",
+        "~/.aws",
+        "~/.gnupg",
+        "~/.config/gcloud",
+        "~/.kube",
+        "~/.docker/config.json",
+        "~/.npmrc",
+        "~/.netrc"
       ]
     },
     "credentials": {
