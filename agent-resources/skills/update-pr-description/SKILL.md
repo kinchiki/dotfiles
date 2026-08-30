@@ -8,8 +8,8 @@ description: >-
 
 # update-pr-description
 
-GitHub PR の description/body を、現在の実装内容に合わせて更新するスキルです。
-既存の構成をできるだけ保持し、矛盾した section だけを直してください。
+GitHub PR の description/body を、現在の実装内容に合わせて更新するスキル。
+既存の構成をできるだけ保持し、矛盾した section だけを直す。
 
 ## Scope
 
@@ -66,7 +66,7 @@ GitHub PR の description/body を、現在の実装内容に合わせて更新�
 
 ### Step 4: Report
 
-日本語で次を報告してください。
+日本語で次を報告する。
 
 - 対象 PR
 - PR description を更新したか、変更なしで終えたか

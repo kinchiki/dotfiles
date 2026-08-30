@@ -9,8 +9,8 @@ description: >-
 
 # create-verification
 
-変更差分を読み、手動確認に使う verification ドキュメントを作るスキルです。
-初回は新規作成し、レビュー / CI 対応後は同じ verification ファイルへ必要分だけ追記します。
+変更差分を読み、手動確認に使う verification ドキュメントを作るスキル。
+初回は新規作成し、レビュー / CI 対応後は同じ verification ファイルへ必要分だけ追記する。
 
 ## Scope
 
@@ -61,7 +61,7 @@ description: >-
 
 ## Report
 
-日本語で次を報告してください。
+日本語で次を報告する。
 
 - 対象 diff（現在ブランチ or PR 番号）
 - 採用した verification ファイルの path

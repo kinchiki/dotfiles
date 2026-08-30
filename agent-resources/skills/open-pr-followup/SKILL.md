@@ -9,7 +9,7 @@ description: >-
 
 # open-pr-followup
 
-PR を作成し、初回の CI と AI レビューを確認して、必要な follow-up を専門スキルに委譲する orchestrator です。
+PR を作成し、初回の CI と AI レビューを確認して、必要な follow-up を専門スキルに委譲する orchestrator 。
 
 ## Scope
 

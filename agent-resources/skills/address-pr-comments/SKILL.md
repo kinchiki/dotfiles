@@ -10,8 +10,8 @@ description: >-
 
 # address-pr-comments
 
-GitHub PR のレビュー指摘を、実コードに照らして直すスキルです。
-コメント本文だけで判断せず、対象行と周辺コードを読んでから対応可否を決めてください。
+GitHub PR のレビュー指摘を、実コードに照らして直すスキル。
+コメント本文だけで判断せず、対象行と周辺コードを読んでから対応可否を決める。
 
 ## Scope
 
@@ -59,7 +59,7 @@ gh pr view <n-or-omit> --json number,headRefName,baseRefName,url,state,title
 
 ### Step 1: Fetch unresolved feedback
 
-`references/github-review-thread-commands.md` を読み、unresolved inline thread と review summary body を取得してください。
+`references/github-review-thread-commands.md` を読み、unresolved inline thread と review summary body を取得する。
 
 - 1 つの unresolved thread を 1 つの論理コメントとして扱う。
 - inline thread は GraphQL `id` と comment metadata を保持し、reply / resolve の対象 thread として後続 step に渡す。
@@ -80,7 +80,7 @@ gh pr view <n-or-omit> --json number,headRefName,baseRefName,url,state,title
 | `recommend-fix` | 妥当だが裁量のある改善。 |
 | `recommend-skip` | outdated、誤指摘、範囲外、要件との衝突、主観的 preference、bot noise、対応済み。 |
 
-各判定は次の形にしてください。
+各判定は次の形にする。
 
 ```text
 { id, source, author, summary, verdict, approach_or_reason, files_to_touch }
@@ -129,7 +129,7 @@ gh pr view <n-or-omit> --json number,headRefName,baseRefName,url,state,title
 git push
 ```
 
-Commit URL は PR URL に対する commit URL にしてください。
+Commit URL は PR URL に対する commit URL にする。
 
 ```text
 <pr-url>/commits/<commit-sha>
@@ -151,7 +151,7 @@ Commit URL は PR URL に対する commit URL にしてください。
 
 ### Step 10: Report
 
-日本語で次を報告してください。
+日本語で次を報告する。
 
 - コメントごとの source / author、verdict、実施内容または見送り理由、変更ファイル。
 - lint / test の最終状態。

@@ -9,8 +9,8 @@ description: >-
 
 # commit-changes
 
-検証済みの working tree を、レビューしやすい 1 つ以上の local commit に変えるスキルです。
-このスキルが担当するのは commit planning、staging、commit message の作成だけです。
+検証済みの working tree を、レビューしやすい 1 つ以上の local commit に変えるスキル。
+このスキルが担当するのは commit planning、staging、commit message の作成だけ。
 
 ## Scope
 
@@ -58,7 +58,7 @@ git diff --staged
 
 ### Step 3: Stage and commit intentionally
 
-各 commit ごとに staged diff を確認してください。
+各 commit ごとに staged diff を確認する。
 
 ```bash
 git add -p
@@ -80,7 +80,7 @@ git commit
 
 ### Step 4: Report
 
-日本語で次を報告してください。
+日本語で次を報告する。
 
 - 作成した commit hash と subject。
 - working tree が clean か dirty か。

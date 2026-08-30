@@ -41,16 +41,15 @@ if [[ ! -f "$TEST_POLICY_FILE" ]]; then
 fi
 
 TEST_SELECTION_POLICY="$(<"$TEST_POLICY_FILE")"
-REVIEW_PROMPT="このリポジトリの未コミット差分をコードレビューしてください。
-編集は禁止です。
-まず git status --short, git diff --stat HEAD, git diff --cached, git diff を確認してください。
-指摘は [P1]/[P2]/[P3] の重大度、file:line、根拠、修正案を含めて日本語で返してください。
-Style / line-length 指摘は repo linter で確定検証し、byte count だけで日本語など multibyte text を違反判定しないでください。
-次のテスト選定方針に従い、除外対象の直接保証チェックを追加するよう求めたり、不足テストとして指摘したりしないでください。
+REVIEW_PROMPT="read only でこのリポジトリの未コミット差分をコードレビューする。
+まず git status --short, git diff --stat HEAD, git diff --cached, git diff を確認する。
+指摘は [P1]/[P2]/[P3] の重大度、file:line、根拠、修正案を含めて日本語で返す。
+Style / line-length 指摘は repo linter で確定検証する。
+次のテスト選定方針に従い、除外対象の直接保証チェックを追加するよう求めたり、不足テストとして指摘しない。
 
 $TEST_SELECTION_POLICY
 
-問題がなければ、確認した差分の概要を示してから No findings と書いてください。"
+問題がなければ、確認した差分の概要を示してから No findings と書く。"
 
 cleanup() {
   rm -rf "$REVIEW_DIR"

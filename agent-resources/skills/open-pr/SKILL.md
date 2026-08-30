@@ -10,8 +10,8 @@ description: >-
 
 # open-pr
 
-既に commit 済みの branch を push し、チームの期待に沿った pull request を作るスキルです。
-`ticket-to-plan` → `implement-plan` → `commit-changes` → `open-pr` の最後の段階として使えます。
+既に commit 済みの branch を push し、チームの期待に沿った pull request を作るスキル。
+`ticket-to-plan` → `implement-plan` → `commit-changes` → `open-pr` の最後の段階として使える。
 
 ## Scope
 
@@ -56,7 +56,7 @@ git status --short
 
 ### Step 2: Push and open the PR
 
-ユーザー確認後に実行してください。
+ユーザー確認後に実行する。
 
 ```bash
 git push -u origin HEAD
@@ -73,7 +73,7 @@ gh pr create --base <default-branch> --title "<title>" --body "<body>" --assigne
 
 ### Step 3: Report
 
-日本語で次を報告してください。
+日本語で次を報告する。
 
 - PR URL
 - PR title

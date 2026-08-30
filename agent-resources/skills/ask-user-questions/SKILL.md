@@ -8,7 +8,7 @@ description: >-
 
 # ask-user-questions
 
-repo や source を調べても解けない判断だけを、短く、決定しやすい形でユーザーへ確認するスキルです。
+repo や source を調べても解けない判断だけを、短く、決定しやすい形でユーザーへ確認するスキル。
 調査で埋められる事実確認や、単なる進捗報告には使いません。
 
 ## Hard constraints
@@ -44,7 +44,7 @@ repo や source を調べても解けない判断だけを、短く、決定し�
 - 回答がない場合の default があるなら明記する。
 - 選択肢を出す場合は 2 から 4 個に絞る。
 
-使う形は次のどちらかにしてください。
+使う形は次のどちらかにする。
 
 - choice question: 複数案に明確な tradeoff があるとき。
 - short direct question: 選択肢化すると意味が落ちるとき。
@@ -59,7 +59,7 @@ repo や source を調べても解けない判断だけを、短く、決定し�
 
 ## Report
 
-質問後または回答反映後は次を短く残してください。
+質問後または回答反映後は次を短く残す。
 
 - open question
 - user answer or chosen assumption
