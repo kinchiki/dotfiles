@@ -213,14 +213,6 @@
         "mcp.notion.com",
         "mcp.sentry.dev"
       ],
-      "allowUnixSockets": [
-        "~/.colima/default/docker.sock",
-        "~/.colima/docker.sock",
-        "~/.colima/default/containerd.sock",
-        "~/.colima/_lima/colima/ha.sock",
-        "~/.colima/_lima/colima/ssh.sock",
-        "/var/run/docker.sock"
-      ],
       "allowLocalBinding": true,
       "allowMachLookup": [
         "com.apple.trustd.agent"
@@ -260,8 +252,6 @@
         "~/.local/state/mise/",
         "~/.config/mise/",
         "~/Library/Caches/mise/",
-        "~/.colima/",
-        "~/.lima/",
         "~/.local/share/aquaproj-aqua/",
         "~/.claude/skills/"
       ],
@@ -331,7 +321,12 @@
       "codex review *",
       "~/.claude/skills/ai-review/scripts/run-code-review-codex.sh *",
       "~/.claude/skills/ai-review/scripts/run-plan-review-codex.sh *",
-      "tflint *"
+      "terraform plan *",
+      "tflint *",
+      "docker *",
+      "colima *",
+      "dip *",
+      "gh *"
     ]
   },
   "effortLevel": "high",
