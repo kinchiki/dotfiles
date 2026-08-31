@@ -1,41 +1,27 @@
 ---
 name: commit-changes
 description: >-
-  未コミット差分を確認し、レビューしやすい粒度の論理コミットに分割して作成する。
-  コミットしてほしいとき、PR 作成前に差分をコミットする必要があるとき、または implement-plan 完了後に open-pr / open-pr-followup へ渡す前に使う。
-  例: 「コミットして」「変更をコミット」「commit」「PR 前にコミット」。
-  push / PR 作成 / GitHub への書き戻しは行わない。
----
+  未コミット差分を確認し、レビューしやすく独立して理解・revert できる論理コミットに分割して作成する。
+  複数の独立した関心事がある場合は原則として複数 commit に分け、全差分が同じ変更理由・検証単位・revert 単位を共有する場合だけ 1 commit にまとめる。
+  「コミットして」「変更をコミット」「commit」、または implement-plan 完了後に open-pr / open-pr-followup へ渡す前に使う。
+----------------------------------
 
 # commit-changes
 
-検証済みの working tree を、レビューしやすい 1 つ以上の local commit に変えるスキル。
-このスキルが担当するのは commit planning、staging、commit message の作成だけ。
+working tree を、独立して理解・レビュー・revert できる local commit に変える。
+commit 数の少なさより、各 commit の論理的な独立性を優先する。
 
-## Scope
+## Rules
 
-- local commit を作る。
-- レビューしやすくなる場合は複数 commit に分割する。
-- push、PR 作成、GitHub への書き戻しは行わない。
-- PR が必要な場合は、このスキルの後に `open-pr` または `open-pr-followup` を使う。
-
-## Hard constraints
-
-- default branch では commit しない。
-- staging 前に `git status --short`、`git diff`、`git diff --staged` を確認する。
-- 無関係なユーザー変更が混在していて安全に分離できない場合は、停止して確認する。
-- secrets、debug print、生成物の noise、無関係な file を commit に含めない。
-- repository の commit message 言語、prefix、Conventional Commit ルールに従う。
-- ユーザーがこの turn で commit を明示的に許可していない場合は、実行前に commit plan を提示する。
+* default branch では commit しない。
+* staging 前に branch、status、unstaged diff、staged diff を確認する。
+* 無関係なユーザー変更、secrets、debug print、生成物の noise を含めない。安全に分離できない場合は停止する。
+* ユーザーがこの turn で commit を明示的に許可していない場合は、実行前に commit plan を提示する。
+* commit message は日本語で書き、repository の prefix / Conventional Commit ルールに従う。
 
 ## Workflow
 
-### Step 1: Inspect pending state
-
-- 現在の branch を確認する。
-- pending diff の全体を読む。
-- staged diff がある場合はそれも読む。
-- pending diff がなければ、commit するものがない旨を報告して停止する。
+### 1. Inspect
 
 ```bash
 git branch --show-current
@@ -44,21 +30,38 @@ git diff
 git diff --staged
 ```
 
-### Step 2: Plan logical commits
+pending diff がなければ停止する。
 
-- レビューの流れが明確に保てる範囲で、最小の commit 数にする。
-- 各 commit を、目的・影響・検証ポイントを含めて単独で理解できるようにする。
-- reviewer が diff を自然に追える順序にする。
-- 実装と docs、production code と test 専用の cleanup、意味のある生成物など、関心事が別なら分割する。
-- semantic な変更と、機械的な移動・formatting・生成物更新は、分けたほうが review noise が減る場合に分割する。
-- 密結合な code と test は同じ commit にまとめる。
-- 1 つの挙動変更を理解するために reviewer が複数 commit をまたぐ必要が出る分割は避ける。
-- file 単位、task checkbox 単位、小さな edit 単位での機械的な分割はしない。
-- 1 つの commit は 1 つの一貫した関心事にする。
+### 2. Plan logical commits
 
-### Step 3: Stage and commit intentionally
+まず diff を変更理由ごとの candidate concern に分け、その後で必要なものだけ結合する。
 
-各 commit ごとに staged diff を確認する。
+別 commit にする強いシグナル:
+
+* 変更理由が異なる。
+* semantic change と rename / move / formatting などの mechanical change が分離できる。
+* behavior を変えない prerequisite refactor と behavior change が分離できる。
+* 独立した component / module の変更で、片方だけ revert しても意味が通る。
+* feature と無関係な docs / test cleanup / tooling / configuration が混在する。
+
+同じ commit に保つ:
+
+* 同じ挙動変更の production code と、その挙動を直接検証する test。
+* 分割すると中間 commit が壊れる schema / migration / call site などの一体変更。
+* source と、それから直接再生成される artifact で、別々に扱う意味が薄い場合。
+
+1 commit にするのは、meaningful な全 hunk が同じ「なぜ」に答え、同じ検証単位・revert 単位を共有する場合だけにする。
+2 つ目の自然な commit subject を書ける、または一部だけ revert する合理的なケースがあるなら再分割する。
+「同じ依頼」「同じ branch」「変更量が小さい」は結合理由にしない。
+
+staging 前に ordered plan を作る。
+
+```text
+1. <subject> — <intent> — <scope>
+2. <subject> — <intent> — <scope>
+```
+
+### 3. Stage and commit one concern at a time
 
 ```bash
 git add -p
@@ -66,22 +69,14 @@ git diff --staged
 git commit
 ```
 
-- `git add -p`、pathspec、またはその両方で意図的に stage する。
-- `git add -A` は、残り diff 全体が明らかに次の commit に属する場合だけ使う。
-- staged diff を空でない状態にし、それ単独で理解できるようにする。
-- reviewer の視点で staged diff を読み直し、他の commit の context なしにレビューできることを確認する。
-- 何が変わったかだけでなく、なぜその変更が必要かが伝わる message を書く。
-- commit message はすべて日本語で書き、該当する場合は Conventional Commit 形式を使う（例: `feat: 新機能説明`、`fix: バグ修正説明`、`refactor: リファクタリング説明`、`docs: ドキュメント更新`、`test: テスト追加`）。
-- 現実的な範囲で、各 commit を build / test 可能な状態に保つ。
-- Codex では `git add` と `git commit` を初回から sandbox 外実行として要求し、tool call の `sandbox_permissions` に `require_escalated` と承認理由を指定する。
-- `.codex/rules/default.rules` の許可 prefix と一致させるため、対象の Git command を単独の command segment で実行し、shell wrapper や環境変数 prefix を付けない。
-- Codex 以外の実行環境で `.git/index.lock` の作成が `Operation not permitted` または `Permission denied` になった場合は、利用可能な権限承認機構を使って失敗した同じ Git command を再実行する。
-- 権限承認機構が利用できない場合、またはユーザーが承認を拒否した場合だけ、失敗した command と必要な権限を報告して停止する。
+* pre-staged diff が複数 commit にまたがる場合は unstage して plan に従って restage する。
+* `git add -A` は、remaining diff 全体が明らかに次の 1 commit に属する場合だけ使う。
+* staged diff がその commit の intent だけを含むことを確認する。
+* 各 commit を現実的な範囲で build / test 可能に保つ。
+* commit 後に `git status --short` と remaining diff を確認し、残りを最後にまとめない。
+* staging 中に新しい分割点を見つけたら plan を更新する。
 
-### Step 4: Report
+### 4. Report
 
-日本語で次を報告する。
-
-- 作成した commit hash と subject。
-- working tree が clean か dirty か。
-- PR に進む場合は、次の step が `open-pr` または `open-pr-followup` であること。
+日本語で、作成した commit hash と subject、各 commit の intent、working tree の clean / dirty を報告する。
+1 commit の場合は、全差分を分割しなかった理由を 1 行で示す。
