@@ -50,5 +50,6 @@ wrapper が `BLOCKED: nested sandbox-exec` を返した場合は、コマンド�
 
 - script が `TRUSTED` を返し、出力が実際の差分に言及した場合だけ結果を採用する。
 - `UNTRUSTED` は1回だけ再実行し、再度失敗した場合は阻害要因を返す。
+- wrapper が exit 7 を返した場合は `reviewer-policy.md` の trust 判定に従う。
 - working tree 以外の commit range または PR review はこの workflow の対象外とする。
 - finding の修正、lint / test、再レビューは呼び出し元へ返す。

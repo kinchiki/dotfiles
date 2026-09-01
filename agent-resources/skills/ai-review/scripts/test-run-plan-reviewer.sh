@@ -97,6 +97,8 @@ export FAKE_REVIEWER_STATUS=126
 run_case 'Plan review blocks when reviewer CLI is not executable' 126 codex 'BLOCKED:'
 export FAKE_REVIEWER_STATUS=42
 run_case 'Plan review keeps ordinary reviewer failures untrusted' 42 codex 'UNTRUSTED:'
+export FAKE_REVIEWER_STATUS=7
+run_case 'Plan review keeps a reviewer CLI status 7 out of the self-block code' 4 codex 'reviewer exited with status 7'
 unset FAKE_REVIEWER_STATUS
 
 export FAKE_REVIEW_OUTPUT='No findings'
@@ -104,14 +106,26 @@ export FAKE_REVIEW_EVENTS='{"type":"item.completed","item":{"type":"command_exec
 run_case 'Codex rejects an arbitrary command' 4 codex
 
 export FAKE_REVIEW_OUTPUT='BLOCKED: cannot read local files'
+export FAKE_REVIEW_EVENTS='{"type":"item.completed","item":{"type":"command_execution","command":"pwd","aggregated_output":"'"$repo"'\n","exit_code":0}}'
+run_case 'Codex rejects a blocked final response without inspection' 4 codex 'reviewer reported that the review is not trustworthy'
+
 export FAKE_REVIEW_EVENTS="$(jq -nc \
   --arg command "$inspection_command" \
   --arg output "$inspection_output" \
   '{type:"item.completed",item:{type:"command_execution",command:$command,aggregated_output:($output + "\n"),exit_code:0}}')"
-run_case 'Codex rejects a blocked final response' 4 codex
+run_case 'Codex separates a self-blocked response from unreadable files' 7 codex 'self-blocked despite successful local inspection'
+
+export FAKE_REVIEW_OUTPUT='UNTRUSTED: empty review range'
+run_case 'Codex keeps a self-reported untrusted response at status 4' 4 codex 'reviewer reported that the review is not trustworthy'
 
 export FAKE_REVIEW_OUTPUT='No findings'
 run_case 'Codex trusts successful file inspection' 0 codex
+
+export FAKE_REVIEW_EVENTS="$(jq -nc \
+  --arg command "$inspection_command" \
+  --arg output "$inspection_output" \
+  '{type:"item.completed",item:{type:"command_execution",command:$command,aggregated_output:("/Users/example/.zlogin:9: nice(5) failed: operation not permitted\n" + $output + "\n"),exit_code:0}}')"
+run_case 'Codex trusts inspection output carrying login shell noise' 0 codex
 
 export FAKE_REVIEW_EVENTS='{"type":"result","result":"No findings"}'
 run_case 'Claude rejects a nonempty response without inspection' 4 claude
@@ -132,4 +146,16 @@ export FAKE_REVIEW_EVENTS="$(jq -nc \
     {type:"user",message:{content:[{type:"tool_result",tool_use_id:"read-1",is_error:false,content:"local repository evidence"}]}},
     {type:"result",result:"BLOCKED: cannot read local files"}
   ] | .[]')"
-run_case 'Claude rejects a blocked final response' 4 claude
+run_case 'Claude separates a self-blocked response from unreadable files' 7 claude 'self-blocked despite successful local inspection'
+
+export FAKE_REVIEW_EVENTS='{"type":"result","result":"BLOCKED: cannot read local files"}'
+run_case 'Claude rejects a blocked final response without inspection' 4 claude 'reviewer reported that the review is not trustworthy'
+
+export FAKE_REVIEW_EVENTS="$(jq -nc \
+  --arg file "$repo/target.txt" \
+  '[
+    {type:"assistant",message:{content:[{type:"tool_use",name:"Read",id:"read-1",input:{file_path:$file}}]}},
+    {type:"user",message:{content:[{type:"tool_result",tool_use_id:"read-1",is_error:false,content:"local repository evidence"}]}},
+    {type:"result",result:"UNTRUSTED: empty review range"}
+  ] | .[]')"
+run_case 'Claude keeps a self-reported untrusted response at status 4' 4 claude 'reviewer reported that the review is not trustworthy'

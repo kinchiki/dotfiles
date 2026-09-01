@@ -31,7 +31,7 @@
 - `test-selection-policy.md` が除外する標準保証の直接テスト要求
 
 P1 / P2 には、元ソース、ユーザー確認済み意図、または調査したコードの根拠を含めるよう reviewer へ指示する。
-ローカルファイルを読めない場合は `BLOCKED: cannot read local files` と返すよう指示する。
+必須のローカル inspection 指示と `BLOCKED` を返してよい条件は wrapper が review packet へ追記するため、packet 本文では省略する。
 
 ## Run the reviewer
 
@@ -65,6 +65,7 @@ Claude Code が plan を作成した場合は、Claude Code の `sandbox.exclude
 
 high risk の場合は `--model gpt-5.6-sol` を使う。
 wrapper が `BLOCKED: nested sandbox-exec` を返した場合は、コマンド形を戻して1回だけ再実行し、再度 `BLOCKED` なら停止する。
+wrapper が exit 7 を返した場合は `reviewer-policy.md` の trust 判定に従う。
 結果を調査するときは `--keep-temp` を付け、一時ディレクトリの `review.err` と `review.jsonl` を読む。
 
 ## Result

@@ -14,6 +14,15 @@ Options:
   --effort      Override the reviewer reasoning effort.
   --keep-temp   Keep the temporary output directory.
   -h, --help    Show this help.
+
+Exit status:
+  0         Trusted review.
+  2         Invalid arguments.
+  4         Untrusted review.
+  5         Missing Claude review consent.
+  6         Nested sandbox-exec is unavailable.
+  7         Reviewer self-blocked although the required local inspection succeeded.
+  126, 127  Reviewer CLI could not be executed.
 USAGE
 }
 
@@ -200,12 +209,15 @@ inspection_output="$(sed -n '1,80p' "$inspection_file")"
   case "$reviewer" in
     codex)
       printf 'Before returning the review, run this exact command and use its output as local repository evidence:\n\n```sh\n%s\n```\n' "$inspection_command"
+      printf '\nJudge every command by its exit status. A command that exits 0 succeeded, including when its stderr carries a harmless login shell warning such as `nice(5) failed: operation not permitted`.\n'
+      printf 'Return `BLOCKED: cannot read local files` only when the required command above exits nonzero.\n'
       ;;
     claude)
       printf 'Before returning the review, use the Read tool on this exact local repository file and use its contents as evidence:\n\n`%s`\n' "$inspection_file"
+      printf '\nReturn `BLOCKED: cannot read local files` only when the required Read above fails with an error.\n'
       ;;
   esac
-  printf 'If local files cannot be read, return `BLOCKED: cannot read local files`.\n'
+  printf '\nWrite all findings directly in the final message. This review is read-only, so creating a temporary file or a temporary directory is prohibited.\n'
 } > "$review_prompt"
 
 status=0
@@ -267,6 +279,10 @@ fi
 if ((status != 0)); then
   [[ -f "$review_err" ]] && cat "$review_err" >&2
   echo "UNTRUSTED: reviewer exited with status $status" >&2
+  # exit 7 は検証済みの self-block だけを表すため、reviewer CLI 由来の 7 は通常の UNTRUSTED へ移す。
+  if ((status == 7)); then
+    exit 4
+  fi
   exit "$status"
 fi
 
@@ -282,13 +298,12 @@ if [[ ! -s "$review_out" ]]; then
   exit 4
 fi
 
-if grep -Eq '^[[:space:]]*(BLOCKED|UNTRUSTED):' "$review_out"; then
-  echo "UNTRUSTED: reviewer reported that the review is not trustworthy" >&2
-  exit 4
-fi
-
+inspection_verified=true
 case "$reviewer" in
   codex)
+    # Codex の aggregated_output は stdout と stderr を統合するため、login shell 由来の
+    # `nice(5) failed: operation not permitted` などの警告が混入する。
+    # 完全一致ではなく包含で照合し、捏造された所見だけを排除する。
     if ! jq -e \
       --arg command "$inspection_command" \
       --arg output "$inspection_output" \
@@ -297,11 +312,10 @@ case "$reviewer" in
         and .item.type == "command_execution"
         and .item.exit_code == 0
         and (.item.command | contains($command))
-        and ((.item.aggregated_output // "") | sub("[\\r\\n]+$"; "") == $output)
+        and ((.item.aggregated_output // "") | contains($output))
       )' \
       "$review_events" >/dev/null; then
-      echo "UNTRUSTED: reviewer did not demonstrate local file inspection" >&2
-      exit 4
+      inspection_verified=false
     fi
     ;;
   claude)
@@ -328,11 +342,27 @@ case "$reviewer" in
         )
       )' \
       "$review_events" >/dev/null; then
-      echo "UNTRUSTED: reviewer did not demonstrate successful local file inspection" >&2
-      exit 4
+      inspection_verified=false
     fi
     ;;
 esac
+
+# 必須 inspection が成功したのに reviewer が自己申告で停止した場合は、実際に読めなかった
+# ケースと区別する。呼び出し元はこの status だけ1回の再実行を意味のある回復手段として扱える。
+if [[ "$inspection_verified" == true ]] && grep -Eq '^[[:space:]]*BLOCKED:' "$review_out"; then
+  echo "UNTRUSTED: reviewer self-blocked despite successful local inspection" >&2
+  exit 7
+fi
+
+if grep -Eq '^[[:space:]]*(BLOCKED|UNTRUSTED):' "$review_out"; then
+  echo "UNTRUSTED: reviewer reported that the review is not trustworthy" >&2
+  exit 4
+fi
+
+if [[ "$inspection_verified" == false ]]; then
+  echo "UNTRUSTED: reviewer did not demonstrate local file inspection" >&2
+  exit 4
+fi
 
 echo "TRUSTED"
 echo "----- review -----"

@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 # Independent review via Codex CLI on the uncommitted working tree.
 # Prints the review body and a trust verdict. Exit 0 only when TRUSTED.
+# Exit 7 marks a reviewer that self-blocked although its local inspection succeeded.
+# Requires jq to verify that the reviewer actually read the patch.
 set -uo pipefail
 
 MODEL_FLAG=""
@@ -49,6 +51,9 @@ Style / line-length 指摘は repo linter で確定検証する。
 
 $TEST_SELECTION_POLICY
 
+コマンドの成否は exit status で判定する。stderr に \`nice(5) failed: operation not permitted\` のような login shell 由来の警告が出ても、exit 0 なら成功として扱う。
+所見は最終メッセージへ直接書く。read only のレビューのため、一時ファイルと一時ディレクトリの作成は禁止する。
+
 問題がなければ、確認した差分の概要を示してから No findings と書く。"
 
 cleanup() {
@@ -64,9 +69,18 @@ if [[ -z "$PENDING" ]]; then
   exit 3
 fi
 
+# exit 7 は「調査に成功したのに自己申告で停止した」場合だけを指すため、patch 本文を読んだ証拠を要求する。
+INSPECTION_PATH="$(git diff --name-only HEAD | head -n 1)"
+
 if ! command -v codex >/dev/null 2>&1; then
   echo "BLOCKED: required reviewer CLI is unavailable: codex" >&2
   exit 127
+fi
+
+# inspection の検証に jq を使うため、実行前に存在を確認して原因の分かる形で停止する。
+if ! command -v jq >/dev/null 2>&1; then
+  echo "BLOCKED: jq is required to verify the reviewer's local inspection" >&2
+  exit 2
 fi
 
 # codex exec review
@@ -105,7 +119,53 @@ CMD_EXEC="${CMD_EXEC:-0}"
 
 echo "Codex exit=$CODEX_RC ; command_execution=$CMD_EXEC"
 
-if [[ "$CODEX_RC" -eq 0 && "$CMD_EXEC" -ge 1 ]]; then
+# 差分を exit 0 で読んだ command_execution があるかを確認する。
+# jq が無い場合や証拠が無い場合は未検証のままにし、自己申告停止を通常の UNTRUSTED へ倒す。
+# `git diff --name-only` や `--stat` だけでは patch を読んだ証拠にならないため、
+# 要求した `git diff` コマンドであること、出力に `diff --git` と対象 path が含まれることを要求する。
+# 未追跡ファイルだけの差分は `git diff` に現れず patch 証拠を取得できないため、
+# その場合だけコマンド実行の有無で判定する。
+DIFF_INSPECTED=false
+if [[ -z "$INSPECTION_PATH" ]]; then
+  if [[ "$CMD_EXEC" -ge 1 ]]; then
+    DIFF_INSPECTED=true
+  fi
+else
+  if jq -e \
+    --arg path "$INSPECTION_PATH" \
+    'select(
+      .type == "item.completed"
+      and .item.type == "command_execution"
+      and .item.exit_code == 0
+      and (.item.command | contains("git diff"))
+      and ((.item.aggregated_output // "") | contains("diff --git"))
+      and ((.item.aggregated_output // "") | contains($path))
+    )' \
+    "$REVIEW_JSON" >/dev/null 2>&1; then
+    DIFF_INSPECTED=true
+  fi
+fi
+
+# reviewer が調査に成功しながら最終メッセージで自己申告停止した場合は、実際に調査できなかった
+# ケースと区別する。plan review の trust 判定と同じ分類にそろえる。
+if [[ "$CODEX_RC" -eq 0 && "$DIFF_INSPECTED" == true ]] \
+  && [[ -s "$REVIEW_OUT" ]] \
+  && grep -Eq '^[[:space:]]*BLOCKED:' "$REVIEW_OUT"; then
+  echo "UNTRUSTED: reviewer self-blocked despite successful local inspection"
+  echo "----- review -----"
+  cat "$REVIEW_OUT"
+  exit 7
+fi
+
+if [[ -s "$REVIEW_OUT" ]] && grep -Eq '^[[:space:]]*(BLOCKED|UNTRUSTED):' "$REVIEW_OUT"; then
+  echo "UNTRUSTED: reviewer reported that the review is not trustworthy"
+  echo "----- review -----"
+  cat "$REVIEW_OUT"
+  exit 4
+fi
+
+# 差分を読んだ証拠が無い結果は信頼しない。SKILL.md の hard constraint と plan review の判定にそろえる。
+if [[ "$CODEX_RC" -eq 0 && "$DIFF_INSPECTED" == true ]]; then
   echo "TRUSTED"
   echo "----- review -----"
   cat "$REVIEW_OUT"

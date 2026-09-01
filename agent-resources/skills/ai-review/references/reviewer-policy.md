@@ -39,5 +39,9 @@ code review と plan review で reviewer を選び、結果を扱うときに使
 - reviewer がローカル対象を実際に調査したことを確認できた場合だけ `TRUSTED` とする。
 - reviewer が成功してもローカル対象を調査できたと確認できない場合は `UNTRUSTED` とする。
 - `UNTRUSTED` の場合は同じ reviewer を1回だけ再実行し、再度 `UNTRUSTED` なら停止する。
+- reviewer が必須のローカル inspection に成功しながら最終メッセージで `BLOCKED` を返した場合、wrapper は exit 7 と `self-blocked despite successful local inspection` を返す。
+- exit 7 は reviewer の自己申告の誤りとして扱い、同じ reviewer を1回だけ再実行し、再度 exit 7 なら停止する。
+- plan review で exit 7 が続く場合は `--keep-temp` を付けて再実行し、`review.jsonl` の `command_execution` の exit code を報告する。code review の wrapper は artifacts を保持しないため、報告は wrapper の出力だけを使う。
+- Claude によるコードレビューは tool 実行の記録を残さないため inspection の成否を判定できず、自己申告停止も `UNTRUSTED` として扱う。
 - sandbox または同意 gate が reviewer 実行前に停止した場合は `BLOCKED` とする。
 - P1 / P2 の採否、修正、lint / test、再レビューは呼び出し元へ返す。

@@ -71,6 +71,15 @@ fi
 
 echo "Claude Code exit=$CLAUDE_RC"
 
+# この経路は stream-json を使わず tool 実行の記録を残さないため、inspection の成否を判定できない。
+# 自己申告停止は exit 7 と区別せず、通常の trust failure として扱う。
+if [[ -s "$CLAUDE_REVIEW_OUT" ]] && grep -Eq '^[[:space:]]*(BLOCKED|UNTRUSTED):' "$CLAUDE_REVIEW_OUT"; then
+  echo "UNTRUSTED: reviewer reported that the review is not trustworthy"
+  echo "----- review -----"
+  cat "$CLAUDE_REVIEW_OUT"
+  exit 4
+fi
+
 if [[ "$CLAUDE_RC" -eq 0 && -s "$CLAUDE_REVIEW_OUT" ]]; then
   echo "TRUSTED"
   echo "----- review -----"
