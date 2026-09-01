@@ -90,3 +90,33 @@ Examples:
 * `mise x -- ruby`
 
 Prefer repository-defined scripts and task runners.
+
+## 7. Delegate Investigation and Implementation
+
+Delegate read-only investigation and low/medium-risk implementation when workers are available.
+
+| Work           | Claude   | Codex          | Effort   |
+| -------------- | -------- | -------------- | -------- |
+| Investigation  | `sonnet` | `gpt-5.6-luna` | `medium` |
+| Implementation | `sonnet` | `gpt-5.6-luna` | `high`   |
+
+Use `codebase-investigator` for investigation and `task-implementer` for implementation when available; otherwise use the standard worker.
+
+Each worker must receive exactly one scoped assignment with:
+
+* objective and expected outcome;
+* allowed files or target area;
+* required tests;
+* relevant repository conventions.
+
+Lower-tier models (e.g. `gpt-5.6-luna`) must not delegate, spawn subagents, or invoke other workers.
+
+Review repository instructions and the worker result before proceeding. If required facts are missing, delegate another investigation rather than investigating directly.
+
+Implement directly only when:
+
+* the task is high risk: auth, security, billing, payments, migrations, backfills, concurrency, transactions, queues, public API compatibility, or production incidents;
+* a worker reports `blocked` because it requires a stronger implementer or orchestrator decision;
+* the change is a trivial one- or two-line edit in one file requiring no investigation.
+
+If workers are unavailable, state that once and proceed only with explicit user approval.

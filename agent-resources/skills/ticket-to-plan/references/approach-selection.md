@@ -4,12 +4,26 @@ Step 2 の codebase 調査と実装方針の選択、および Step 3 のタス�
 
 ## コードベース調査
 
-read-only planning で実際の data flow を追う。
-models、services / interactions、controllers、serializers、GraphQL types、jobs、tests などの影響範囲を読み、exact file path を記録する。
-既存のパターン、テストの慣習、repository の `CLAUDE.md` / `AGENTS.md` を確認する。
-target repo が `app/interactions/` または `packs/` の構成規約を持つ場合は、その構造を尊重する。
+コードベースの read-only 調査は `codebase-investigator` へ委譲する。
+orchestrator は調査結果の解釈、方針の選択、タスク分解だけを行う。
 
-migration、後方互換性、permission / auth、N+1、バックグラウンドジョブの冪等性、API の公開範囲、i18n など、該当する edge を検討する。
+調査で確認する内容は次のとおりとし、worker の brief に明記する。
+
+- 実際の data flow を追うこと。
+- models、services / interactions、controllers、serializers、GraphQL types、jobs、tests などの影響範囲を読み、exact file path を記録すること。
+- 既存のパターン、テストの慣習、repository の `CLAUDE.md` / `AGENTS.md` を確認すること。
+- target repo が `app/interactions/` または `packs/` の構成規約を持つ場合は、その構造を尊重すること。
+- migration、後方互換性、permission / auth、N+1、バックグラウンドジョブの冪等性、API の公開範囲、i18n など、該当する edge を検討すること。
+
+### 調査の委譲
+
+worker の brief には、調査すべき質問、対象領域、必要な事実、関連する local convention を含める。
+調査範囲が広い場合は、対象領域が重ならない単位へ分割し、複数 worker へ同時に委譲する。
+worker が `reason: missing-input` とともに `status: blocked` を返した場合は、不足した入力を補って再委譲する。
+worker が `reason: needs-orchestrator-decision` とともに `status: blocked` を返した場合は、その判断を orchestrator が行い、判断に必要な事実だけを改めて委譲する。
+
+worker の返却は事実の情報源として扱い、推論として報告された内容は推論のまま扱う。
+返却が不足している場合、orchestrator は自分でコードベースを追加調査せず、worker へ再委譲する。
 調査で実装可否または受入基準を左右する不明点が見つかった場合は、`../../ask-user-questions/SKILL.md` に従ってユーザーへ確認する。
 
 ## Simple / non-simple の判定

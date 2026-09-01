@@ -1,0 +1,1 @@
+../../agent-resources/agents/codebase-investigator/codebase-investigator.md

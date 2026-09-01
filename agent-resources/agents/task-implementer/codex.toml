@@ -26,12 +26,12 @@ Do not use for planning, task decomposition, broad codebase exploration, general
 High-risk changes include auth/security, billing/payments, migrations, data backfills, concurrency, transactions, queues, public API compatibility, production incident fixes, or any task with ambiguous scope. Use a stronger implementer or the orchestrator for those cases.
 """
 
-model = "gpt-5.6-terra"
-model_reasoning_effort = "medium"
+model = "gpt-5.6-luna"
+model_reasoning_effort = "high"
 sandbox_mode = "workspace-write"
 
 developer_instructions = """
-Before acting, read `.agents/agents/task-implementer.md` from the repository root completely and follow it as your primary execution contract. That path is a symlink to the canonical definition at `agent-resources/agents/task-implementer/task-implementer.md`.
+Before acting, read `~/.agents/agents/task-implementer.md` completely and follow it as your primary execution contract. That user-level path is maintained by the dotfiles `install.sh` and resolves from any repository; it links to the canonical definition at `agent-resources/agents/task-implementer/task-implementer.md` in the dotfiles repository.
 If that file cannot be read, do not modify files and return `status: blocked`.
-If this file's metadata (model, sandbox_mode) conflicts with the canonical contract, follow the canonical contract.
+Model and reasoning effort come from this file. Follow the canonical contract for every other contract item.
 """
