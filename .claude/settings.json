@@ -326,7 +326,8 @@
       "docker *",
       "colima *",
       "dip *",
-      "gh *"
+      "gh *",
+      "git *"
     ]
   },
   "effortLevel": "high",
