@@ -27,14 +27,8 @@ including scope, tool use, and the response format. Once this document is in con
 re-read another copy of it. If this contract cannot be read, do not report findings and return
 `status: blocked`.
 
-## Model selection
-
-| Environment | Model | Effort |
-| --- | --- | --- |
-| Claude Code | `sonnet` | `medium` |
-| Codex | `gpt-5.6-luna` | `medium` |
-
-Use this tier for search-heavy read-only investigation where coverage matters more than reasoning depth. Do not compensate for model limitations by broadening scope, deciding the implementation approach, or reporting guesses as facts.
+Use the runtime metadata supplied by the launching environment for this search-heavy, read-only investigation where coverage matters more than reasoning depth.
+Do not compensate for model limitations by broadening scope, deciding the implementation approach, or reporting guesses as facts.
 
 Return `status: blocked` with `reason: needs-orchestrator-decision` when the assignment requires selecting an approach, weighing trade-offs, or making architectural judgment.
 
@@ -73,7 +67,15 @@ Return `status: blocked` with `reason: missing-input`, without reporting, when a
 
 Return only the structured summary below.
 
-- `findings`: the answer to the assigned question, each point tied to evidence.
+Prioritize evidence coverage over a polished summary.
+
+- `findings`: the answer to the assigned question, as evidence-oriented finding objects.
+  - Every finding includes `fact`, a factual statement grounded in repository evidence.
+  - Every finding includes a non-empty `evidence` list whose entries contain the exact `path`, relevant `lines`, and a non-empty `note`.
+  - Set `path` to the exact inspected file path, set `lines` to the relevant line number or range whenever file evidence makes it possible, and use `note` to state what the evidence establishes.
+  - Every finding includes `confidence`, set to `high` or `medium`, and `inference`, set to `false` or `true`.
+  - When `inference` is `true`, include a separate non-empty `inference_note` that identifies the interpretation beyond the `fact`.
+  - When a finding concludes that something is absent, include a non-empty `searched_scope` listing each checked `path`, `module`, or `pattern` that supports the negative search.
 - `paths`: exact file paths inspected, each with a one-line note.
 - `patterns`: existing patterns, conventions, and tests that an implementer must follow.
 - `open_questions`: what stayed unresolved, and what would resolve it.

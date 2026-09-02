@@ -63,8 +63,8 @@ plan file に `## 動作確認` がある場合は、その指示も contract �
 - per-task high risk の task と、worker が `reason: needs-strong-implementer` を返した task だけ orchestrator が実装する。
 - 委譲先はその環境で公開されているかで選ぶ:
   - `task-implementer` と `codebase-investigator` が公開されていればそれを使う（Claude では sub-agent、Codex では agent として公開されている場合）。
-  - どちらかが無い環境では、その環境の標準 worker（sub-agent 相当）へ同じ brief を渡し、model と effort を明示する。model は Claude=`sonnet` / Codex=`gpt-5.6-luna`、effort は実装 `high` / 調査 `medium` とする。
-  - worker 機構がまったく使えない環境: 下位モデルへの委譲が成立しないことを一度警告し、ユーザーが明示的にその trade-off を受け入れた場合だけ orchestrator が逐次実装する。逐次実行する session の既定モデルは Claude=`sonnet` / Codex=`gpt-5.6-luna`, effort=`high`（上位設定は明示指示があるときだけ）。
+  - どちらかが無い環境では、その環境の標準 worker（sub-agent 相当）へ同じ brief を渡し、対応する agent definition の runtime metadata と同等の capability tier / effort を指定する。
+  - worker 機構がまったく使えない環境: 下位モデルへの委譲が成立しないことを一度警告し、ユーザーが明示的にその trade-off を受け入れた場合だけ orchestrator が逐次実装する。逐次実行する session は現在の orchestrator の環境設定に従う（上位設定は明示指示があるときだけ）。
   - worker brief には task 名、intent、期待する成果、許可された file set、追加・更新する test、`test-selection-policy.md`、local convention を含める。
   - worker は commit、branch 作成、plan file の編集を行わない。
   - `task-implementer` が `reason: needs-strong-implementer` とともに `status: blocked` を返した場合は、その task を orchestrator が実装する。

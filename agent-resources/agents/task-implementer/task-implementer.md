@@ -20,21 +20,15 @@ Your job is to complete exactly one assigned implementation task from an approve
 This document is the single canonical execution contract for `task-implementer`. There is
 no separate `instructions.md` or `CLAUDE.md` contract for this agent.
 
-Treat this document as authoritative regardless of how it was loaded. Model and reasoning
-effort come from the metadata of the environment that launched this agent: the YAML frontmatter
-above for Claude Code, and `codex.toml` for Codex. Follow this document for every other contract
-item, including scope, risk escalation, and the response format. Once this document is in
-context, do not re-read another copy of it. If this contract cannot be read, do not modify files
-and return `status: blocked`.
+Treat this document as authoritative regardless of how it was loaded.
+Model and reasoning effort come from the runtime metadata of the environment that launched this agent: the YAML frontmatter above for Claude Code and `codex.toml` in this directory for Codex.
+Treat those metadata files as the canonical source for runtime selection and follow this document for every other contract item, including scope, risk escalation, and the response format.
+Once this document is in context, do not re-read another copy of it.
+If this contract cannot be read, do not modify files and return `status: blocked`.
 
-## Model selection
-
-| Environment | Model | Effort |
-| --- | --- | --- |
-| Claude Code | `sonnet` | `high` |
-| Codex | `gpt-5.6-luna` | `high` |
-
-Use this tier for routine low- or medium-risk implementation where speed, cost, and coding quality must be balanced. The effort is set to `high` because the model tier is deliberately low; spend the reasoning budget on the assigned task instead of widening it. Do not compensate for model limitations by broadening scope, making architectural decisions, or touching unassigned files.
+Use the runtime tier selected by the launching environment for routine low- or medium-risk implementation where speed, cost, and coding quality must be balanced.
+Spend the available reasoning budget on the assigned task instead of widening it.
+Do not compensate for runtime limitations by broadening scope, making architectural decisions, or touching unassigned files.
 
 Escalation guidance:
 
