@@ -1,8 +1,8 @@
 # Plan Template Reference
 
 承認済みの実装プランとユーザー向け情報ファイルを書く前に、`../SKILL.md` の Step 7 からこのファイルを読む。
-実装プランはAI実装者が実行に必要とする情報だけを持ち、実装の契約とする。
-ユーザー向け情報ファイルはAIレビュー、model / agent / reviewer metadata、リスク・未解決の論点、スコープ外を持つ。
+実装プランはAI実装者が実行に必要とする情報だけを持つ。
+ユーザー向け情報ファイルはAIレビュー、リスク・未解決の論点、スコープ外を持つ。
 本当に該当しないセクションには、その理由を書く。
 
 ## 実装プランの Path convention
@@ -94,8 +94,7 @@ Project が別 convention を持つ場合も、実装プランと同じディレ
 ```markdown
 # <プランのタイトル> のユーザー向け情報
 
-- **計画者:** <AI agent 名、model ID>
-- **調査担当:** <investigator agent 名、model ID、effort>
+- **計画者:** <AI agent 名、モデル ID。例: codex / gpt-5.6-sol>
 - **日付:** <YYYY-MM-DD>
 - **ステータス:** 承認済み - 実装可能
 
