@@ -3,7 +3,7 @@ name: ai-review
 description: >-
   未コミットのコード差分またはユーザーレビュー済みの実装プランを、作成した AI とは別系統の AI で読み取り専用レビューする。
   risk に応じた reviewer model を選び、Claude Code への送信同意、Codex sandbox、review packet、TRUSTED / UNTRUSTED / BLOCKED の判定を扱う。
-  単独で「AIレビューして」「未コミット差分を別AIでレビュー」「このプランをAIレビュー」と依頼されたときに使う。
+  単独で「AIレビューして」「未コミット差分を別AIでレビュー」「このプランをAIレビュー」と依頼されたとき、または implement-plan / ticket-to-plan から独立レビューを委譲されたときに使う。
 ---
 
 # ai-review

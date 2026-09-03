@@ -27,7 +27,6 @@ plan file に `## 動作確認` がある場合は、その指示も contract �
 
 - planning / approval mode が有効な場合は、1〜2行の実行 outline だけを示して終了し、plan を再提示・再議論しない。
 - default branch では作業しない。
-- orchestrator は low・medium risk の実装コードを自分で書かず、worker へ委譲する。例外は per-task high risk の task、worker が `reason: needs-strong-implementer` を返した task、および1ファイル1〜2行程度で調査を伴わない単発の trivial な変更に限る。
 - `## タスク` のチェックボックスは orchestrator だけが編集し、進捗の唯一の source として使う。
 - ゴール、受入基準、タスク、対象 files、done_when から外れる scope change が必要な場合は停止して理由を説明する。
 - 発生可能性と影響に見合う事象だけを専用実装として実装する。低確率で単純なエラー処理で足りる事象は、専用実装の対象外とし、単純なエラー処理で対処する。
@@ -57,19 +56,14 @@ plan file に `## 動作確認` がある場合は、その指示も contract �
 
 ### Step 1: Implement tasks in order
 
-- 未チェック task を依存順に実装する。
-- low・medium risk の task は `parallel` の有無にかかわらず原則すべて worker へ委譲する。`parallel: yes` かつ `files` が重ならない ready な task は同時に委譲し、それ以外は1件ずつ順に委譲する。
-- 実装前に既存 pattern、影響範囲、data flow の調査が必要な場合は、`codebase-investigator` へ調査を委譲する。
-- per-task high risk の task と、worker が `reason: needs-strong-implementer` を返した task だけ orchestrator が実装する。
-- 委譲先はその環境で公開されているかで選ぶ:
-  - `task-implementer` と `codebase-investigator` が公開されていればそれを使う（Claude では sub-agent、Codex では agent として公開されている場合）。
-  - どちらかが無い環境では、その環境の標準 worker（sub-agent 相当）へ同じ brief を渡し、対応する agent definition の runtime metadata と同等の capability tier / effort を指定する。
-  - worker 機構がまったく使えない環境: 下位モデルへの委譲が成立しないことを一度警告し、ユーザーが明示的にその trade-off を受け入れた場合だけ orchestrator が逐次実装する。逐次実行する session は現在の orchestrator の環境設定に従う（上位設定は明示指示があるときだけ）。
+- 未チェック task を依存順に実装する。基本は sequential に進める。
+- `parallel: yes` かつ `files` が重ならない ready な task で、かつ low・medium risk の場合に限り worker へ委譲する。それ以外は serialize する。委譲先はその環境で公開されているかで選ぶ:
+  - `task-implementer` が公開されていればそれを使う（Claude では sub-agent、Codex では agent として公開されている場合）。
+  - `task-implementer` が無い環境では、その環境の標準 worker（sub-agent 相当）を使う。
+  - どちらの worker 機構も使えない環境: 委譲せず **逐次実行**する。逐次実行時の既定モデルは Claude=`sonnet` / Codex=`gpt-5.6-terra`, effort=`high`（上位設定は明示指示があるときだけ）。
   - worker brief には task 名、intent、期待する成果、許可された file set、追加・更新する test、`test-selection-policy.md`、local convention を含める。
   - worker は commit、branch 作成、plan file の編集を行わない。
-  - `task-implementer` が `reason: needs-strong-implementer` とともに `status: blocked` を返した場合は、その task を orchestrator が実装する。
-  - `codebase-investigator` が `reason: needs-orchestrator-decision` とともに `status: blocked` を返した場合は、orchestrator がその判断を行い、判断後に必要な実装を worker へ改めて委譲する。
-  - worker がそれ以外の `reason` で `status: blocked` を返した場合は、その task をチェックせず、不足した入力を補って再委譲するか、ユーザーに確認する。
+  - worker が `status: blocked` または `needs-strong-implementer` を返した場合は、その task をチェックせず、serialize するかユーザーに確認する。
 
 ### Step 2: Run targeted checks and mark tasks done
 

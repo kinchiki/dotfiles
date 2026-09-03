@@ -24,7 +24,7 @@ description: >-
 
 - `references/source-resolution.md`: Step 1 で入力種別を判定して内容を取得する前に読む。
 - `../ask-user-questions/SKILL.md`: Step 1 または Step 2 で、調査では解けない質問や設計方針の選択をユーザーへ求める直前に読む。
-- `references/approach-selection.md`: Step 2 の codebase 調査と方針選択を始める前に読み、調査委譲契約、証拠の完全性確認、Step 3 のタスク分解まで従う。
+- `references/approach-selection.md`: Step 2 の codebase 調査と方針選択を始める前に読み、Step 3 のタスク分解まで従う。
 - `../ai-review/references/test-selection-policy.md`: Step 3 でテスト方針と各タスクの `test` を決める直前に読む。
 - `references/approval-flow.md`: Step 4 で草案を提示する前に読み、Step 6 の最終承認まで従う。
 - `../ai-review/SKILL.md`: Step 5 でユーザーレビュー済みの草案を独立レビューへ渡す直前に読む。
@@ -33,11 +33,7 @@ description: >-
 
 ## 必須制約
 
-- orchestrator と worker は、それぞれに期待される capability tier を満たす実行環境で動かす。満たせない、または確認できない場合は一度警告し、ユーザーが明示的に品質上の不利益を受け入れた場合だけ続行する。
-- Step 2 の codebase 調査は `codebase-investigator` へ委譲する。
-- 広範な探索、grep、path 発見、data-flow tracing は worker に委譲し、orchestrator は独自に開始しない。
-- orchestrator が worker 提示済みの範囲を直接確認する場合は、exact path と line または symbol の範囲に限る。対象カテゴリと検証規約は `references/approach-selection.md` に従う。
-- worker の証拠が不足、不一致、または新しい領域を示す場合、orchestrator は自分でコードベースを探索せず、対象を限定した質問として再委譲する。
+- orchestrator は現在の AI agent で利用できる上位推論モデルを使う。満たせない、または確認できない場合は一度警告し、ユーザーが明示的に品質上の不利益を受け入れた場合だけ続行する。
 - 計画中は production code を編集しない。
 - repo 調査で解けない、実装可否または受入基準を左右する不明点は推測で埋めず、ユーザーへ確認する。
 - non-simple task では、ユーザーが実装方針を選択するまで詳細なタスク分解を作らない。
@@ -49,9 +45,9 @@ description: >-
 
 ## オーケストレーション
 
-- **Step 0: capability tier を確認する。** orchestrator と調査 worker が期待 capability tier を満たすことを確認し、実際の model、agent、reviewer metadata と品質 trade-off は `_info_for_user.md` に集約する。
+- **Step 0: モデルを確認する。** 上位推論モデルであることを確認し、使用モデルと品質上の不利益を実装プランのヘッダーに残す。
 - **Step 1: 入力を解決する。** 入力の全内容を取得または抽出し、3〜6行の入力要約をユーザーへ返して、計画を左右する不足を確認する。
-- **Step 2: 調査して方針を選ぶ。** コードベースの read-only 調査を `codebase-investigator` へ委譲し、その返却をもとに simple / non-simple を判定して、必要な代替案比較とユーザー選択を完了する。
+- **Step 2: 調査して方針を選ぶ。** コードベースを read-only で調査し、simple / non-simple を判定して、必要な代替案比較とユーザー選択を完了する。
 - **Step 3: タスクへ分解する。** 選択済みの方針を、対象ファイル、依存関係、テスト、観測可能な完了条件を持つタスクへ分解する。
 - **Step 4: 草案レビューを受ける。** 実装プラン要約、タスク分解、ユーザー向け情報の草案を提示し、ユーザーの修正を反映する。
 - **Step 5: 独立AIレビューを実行する。** ユーザーレビュー済みの最新草案を別系統の AI へ渡し、信頼性判定と指摘を受け取る。
