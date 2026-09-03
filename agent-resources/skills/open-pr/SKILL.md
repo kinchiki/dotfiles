@@ -19,7 +19,7 @@ description: >-
 - GitHub PR を作成する。
 - PR URL を報告する。
 - stage、commit、amend、rebase、commit grouping は行わない。
-- 未コミット差分がある場合は `commit-changes` に引き渡す。
+- 未コミット差分がある場合は `commit-changes` を使い、local commit 作成後にこの skill を再開する。
 
 ## Resources
 
@@ -29,7 +29,7 @@ description: >-
 
 - repo 固有の PR skill や PR template がある場合は、それを優先する。
 - default branch から PR を作らない。
-- working tree が dirty の場合は停止する。
+- working tree が dirty の場合は `commit-changes` を使って local commit を作成し、clean になったことを確認してから再開する。
 - push と `gh pr create` の前にユーザー確認を取る。
 - PR assignee ログイン中のユーザー `"@me"` を指定する。
 - コマンド出力は、PR URL、title、失敗要点だけを報告する。
@@ -45,7 +45,9 @@ description: >-
 ### Step 1: Sanity-check the branch
 
 - 現在 branch が feature branch であることを確認する。
-- working tree が clean であることを確認する。
+- `git status --short` で working tree を確認する。
+- 未コミット差分がある場合は `../commit-changes/SKILL.md` を読み、その workflow に従って commit を作成する。
+- `commit-changes` 完了後に `git status --short` を再実行し、clean なら次へ進む。dirty が残る場合は停止して理由を報告する。
 - target base branch に対して ship する commit があることを確認する。
 - standalone invocation で lint / test が未確認なら、publish 前に実行するかユーザーに確認する。
 
