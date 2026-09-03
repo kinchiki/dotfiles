@@ -90,3 +90,37 @@ Examples:
 * `mise x -- ruby`
 
 Prefer repository-defined scripts and task runners.
+
+## 7. Delegate Investigation and Implementation
+
+This global delegation policy applies only to the main/orchestrator agent.
+Specialized workers follow their own agent contract first; this section defines shared boundaries and does not broaden a worker's scope.
+
+Delegate read-only investigation and low/medium-risk implementation when workers are available.
+
+| Agent | Capability / risk routing |
+| --- | --- |
+| `codebase-investigator` | Read-only, search-heavy investigation for low/medium-risk fact-finding; return repository facts to the orchestrator. |
+| `task-implementer` | Scoped implementation for approved low/medium-risk tasks with explicit file ownership and focused checks. |
+| Main/orchestrator or stronger implementer | High-risk changes and decisions requiring stronger reasoning. |
+
+Use `codebase-investigator` for investigation and `task-implementer` for implementation when available; otherwise use the standard worker.
+
+Each worker must receive exactly one scoped assignment with:
+
+* objective and expected outcome;
+* allowed files or target area;
+* required tests;
+* relevant repository conventions.
+
+Specialized workers must not delegate, spawn subagents, or invoke other workers.
+
+Review repository instructions and the worker result before proceeding. If required facts are missing, delegate another investigation rather than investigating directly.
+
+Implement directly only when:
+
+* the task is high risk: auth, security, billing, payments, migrations, backfills, concurrency, transactions, queues, public API compatibility, or production incidents;
+* a worker reports `blocked` because it requires a stronger implementer or orchestrator decision;
+* the change is a trivial one- or two-line edit in one file requiring no investigation.
+
+If workers are unavailable, state that once and proceed only with explicit user approval.
