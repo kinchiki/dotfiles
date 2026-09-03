@@ -30,9 +30,7 @@ REVIEW_DIR="$(mktemp -d "${TMPDIR:-/tmp}/codex-review.XXXXXX")"
 REVIEW_OUT="$REVIEW_DIR/review.md"
 REVIEW_JSON="$REVIEW_DIR/review.jsonl"
 REVIEW_ERR="$REVIEW_DIR/review.err"
-# Terra is the balanced default for the `codex exec review` subcommand.
-# Pass --model gpt-5.6-sol for high-risk diffs.
-CODEX_REVIEW_MODEL="${MODEL_FLAG:-${CODEX_REVIEW_MODEL:-gpt-5.6-terra}}"
+CODEX_REVIEW_MODEL="${MODEL_FLAG:-${CODEX_REVIEW_MODEL:-gpt-5.6-luna}}"
 CODEX_REVIEW_EFFORT="${EFFORT_FLAG:-${CODEX_REVIEW_EFFORT:-high}}"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 TEST_POLICY_FILE="$SCRIPT_DIR/../references/test-selection-policy.md"

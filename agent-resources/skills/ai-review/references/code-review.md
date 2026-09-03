@@ -40,7 +40,7 @@ Claude Code が実装した場合は、Claude Code の `sandbox.excludedCommands
 環境変数の前置、パイプ、リダイレクト、`&&`、`tee` を付けず、model と effort は flag で渡す。
 
 ```bash
-~/.claude/skills/ai-review/scripts/run-code-review-codex.sh --model gpt-5.6-terra --effort high
+~/.claude/skills/ai-review/scripts/run-code-review-codex.sh --model gpt-5.6-luna --effort high
 ```
 
 high risk の場合は `--model gpt-5.6-sol` を使う。

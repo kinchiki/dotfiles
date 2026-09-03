@@ -18,7 +18,7 @@ code review と plan review で reviewer を選び、結果を扱うときに使
 - 通常の feature、bugfix、UI 挙動、API 隣接の変更は medium risk とする。
 - auth、billing、permission、データ削除、migration、security、本番データ、広範な refactor、影響範囲不明は high risk とする。
 - low risk を明示的にレビューする場合も、medium risk と同じ reviewer model を使う。
-- Codex reviewer のデフォルトは `gpt-5.6-terra` / `high`、high risk は `gpt-5.6-sol` / `high` とする。
+- Codex reviewer のデフォルトは `gpt-5.6-luna` / `high`、high risk は `gpt-5.6-terra` / `high` とする。
 - Claude reviewer のデフォルトは `sonnet` / `high`、high risk は `opus` / `high` とする。
 - `xhigh` または `max` はユーザーが明示的に依頼した場合だけ使う。
 - risk は選択済み reviewer の model だけを変更し、reviewer の種類を変更しない。

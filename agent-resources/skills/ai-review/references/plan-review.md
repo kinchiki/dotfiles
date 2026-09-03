@@ -60,7 +60,7 @@ Claude Code が plan を作成した場合は、Claude Code の `sandbox.exclude
 環境変数の前置、パイプ、リダイレクト、`&&`、`tee` を付けず、展開済み絶対パスまたはdotfiles実体パスを使わない。
 
 ```bash
-~/.claude/skills/ai-review/scripts/run-plan-review-codex.sh --repo "<absolute repo path>" --prompt-file "<review packet file>" --model gpt-5.6-terra --effort high
+~/.claude/skills/ai-review/scripts/run-plan-review-codex.sh --repo "<absolute repo path>" --prompt-file "<review packet file>" --model gpt-5.6-luna --effort high
 ```
 
 high risk の場合は `--model gpt-5.6-sol` を使う。
