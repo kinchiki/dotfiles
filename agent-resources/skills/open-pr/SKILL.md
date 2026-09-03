@@ -2,7 +2,7 @@
 name: open-pr
 description: >-
   コミット済みの現在ブランチを push して GitHub PR を作成する。
-  PR を開きたいとき、または implement-plan / commit-changes 完了後の PR 作成引き継ぎで使う。
+  PR を開きたいとき、または commit-changes 完了後の PR 作成引き継ぎで使う。
   例: 「PR作成」「PR作って」「プルリク」。
   未コミット差分がある場合は commit-changes に引き渡す。
   push / gh pr create は外向きの操作なので、実行前にユーザー確認を取る。
@@ -11,7 +11,6 @@ description: >-
 # open-pr
 
 既に commit 済みの branch を push し、チームの期待に沿った pull request を作るスキル。
-`ticket-to-plan` → `implement-plan` → `commit-changes` → `open-pr` の最後の段階として使える。
 
 ## Scope
 
