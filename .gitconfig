@@ -38,6 +38,7 @@
 	stalp = stash list -p
 	pl = pull
 	rc = rebase --continue
+	push-f = push --force-with-lease
 [grep]
 	lineNumber = true
 [push]
