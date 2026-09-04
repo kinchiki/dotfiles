@@ -44,9 +44,7 @@
       "mcp__notion__notion-fetch",
       "mcp__linear__get_issue",
       "mcp__Sentry__get_issue_details",
-      "mcp__context7__resolve-library-id",
       "mcp__context7__get-library-docs",
-      "mcp__plugin_context7_context7__resolve-library-id",
       "mcp__plugin_context7_context7__get-library-docs",
       "mcp__github__list_pull_requests",
       "mcp__github__get_me",
@@ -65,6 +63,8 @@
       "Bash(psql:*)",
       "Bash(rm -rf:*)",
       "Bash(sudo:*)",
+      "Bash(terraform apply:*)",
+      "Bash(terraform destroy:*)",
       "mcp__supabase__execute_sql",
       "NotebookEdit",
       "Read(~/**/archive/**)",
@@ -138,9 +138,12 @@
       "Edit(~/.docker/config.json)"
     ],
     "ask": [
+      "Bash(aws:*)",
       "Bash(curl:*)",
       "Bash(wget:*)",
       "Bash(rm:*)",
+      "Bash(git clone:*)",
+      "Bash(git fetch:*)",
       "Bash(git merge:*)",
       "Bash(git pull:*)",
       "Bash(git push:*)",
@@ -148,6 +151,7 @@
       "Bash(git reset:*)",
       "Bash(git restore:*)",
       "Bash(git revert:*)",
+      "Bash(git tag:*)",
       "Bash(git tag:*)",
       "Bash(git publish:*)",
       "Bash(gh pr create:*)",
@@ -240,6 +244,17 @@
       "denyWrite": [
         "/etc"
       ],
+      "denyRead": [
+        "~/.ssh",
+        "~/.aws",
+        "~/.gnupg",
+        "~/.config/gcloud",
+        "~/.config/gh",
+        "~/.kube",
+        "~/.docker",
+        "~/.npmrc",
+        "~/.netrc"
+      ],
       "allowRead": [
         "/dev/ttys",
         "/dev/ptmx",
@@ -254,16 +269,6 @@
         "~/Library/Caches/mise/",
         "~/.local/share/aquaproj-aqua/",
         "~/.claude/skills/"
-      ],
-      "denyRead": [
-        "~/.ssh",
-        "~/.aws",
-        "~/.gnupg",
-        "~/.config/gcloud",
-        "~/.kube",
-        "~/.docker/config.json",
-        "~/.npmrc",
-        "~/.netrc"
       ]
     },
     "credentials": {
