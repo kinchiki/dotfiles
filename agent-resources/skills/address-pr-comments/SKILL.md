@@ -5,7 +5,7 @@ description: >-
   bot コメントも対象にし、解決済みスレッドは除外する。
   PR のレビュー指摘を処理したいときに使う。
   例: 「PRのコメントに対応して」「レビュー対応」「PRの指摘を直して」「レビューを反映」。
-  ユーザー承認済みの対応を実装し、quality gate を通した後、commit、push、`update-pr-description` による PR description 更新、対象レビューコメントへの対応済み reply、thread resolve の実行範囲をユーザーに確認し、承認された操作だけを行う。
+  ユーザー承認済みの対応を実装し、quality gate を通した後、commit、`update-pr-description` による PR description 更新、push、対象レビューコメントへの対応済み reply、thread resolve の実行範囲をユーザーに確認し、承認された操作だけを行う。
 ---
 
 # address-pr-comments
@@ -19,7 +19,7 @@ GitHub PR のレビュー指摘を、実コードに照らして直すスキル�
 - `coderabbitai`、`copilot` などの bot コメントも扱う。
 - 通常の PR conversation コメントは対象外にする。
 - 通常コメントに実質的な指摘がある場合は、範囲を広げるかユーザーに確認する。
-- ユーザー承認済み review 対応の実装、quality gate、実装後の作業範囲確認、承認された local commit、push、`update-pr-description` による PR description 更新、対象 thread への reply、thread resolve を扱う。
+- ユーザー承認済み review 対応の実装、quality gate、実装後の作業範囲確認、承認された local commit、`update-pr-description` による PR description 更新、push、対象 thread への reply、thread resolve を扱う。
 - Review summary body は実装対象に含めるが、inline thread ではないため reply / resolve の対象外にする。
 
 ## Resources
@@ -36,7 +36,7 @@ GitHub PR のレビュー指摘を、実コードに照らして直すスキル�
 - test を弱める、削除する、skip / pending にする行為は禁止する。
 - 3 回修正しても lint / test が通らない場合は停止して失敗内容を報告する。
 - すべての review finding はユーザーへ提示し、項目ごとの修正または見送りの明示承認を得てから実装する。
-- quality gate 完了後に commit、push、PR description 更新、reply、resolve のどこまでを実行するかユーザーへ確認し、承認された操作までのみを実行する。
+- quality gate 完了後に commit、PR description 更新、push、reply、resolve のどこまでを実行するかユーザーへ確認し、承認された操作までのみを実行する。
 - PR description は、実装後の作業範囲としてユーザーが承認した場合に `update-pr-description` で状態に合わせて確認または更新し、実装と矛盾しない既存内容は保持する。
 - inline thread の reply と resolve は個別に承認範囲を確認し、対象 finding の対応方針と writeback 条件を満たす操作だけを実行する。
 - コマンド出力は全文を貼らず、判定根拠、失敗要点、commit URL、thread status だけを報告する。
@@ -113,16 +113,26 @@ gh pr view <n-or-omit> --json number,headRefName,baseRefName,url,state,title
 ### Step 6: Confirm post-implementation actions
 
 - quality gate の完了後、外部状態を書き換える前に、変更ファイル、テスト結果、作成予定の commit、対象 thread を要約して提示する。
-- 次の各操作をどこまで実行するかユーザーへ確認する: `commit`、`push`、PR description 更新、reply、resolve。
+- 次の各操作をどこまで実行するかユーザーへ確認する: `commit`、PR description 更新、`push`、reply、resolve。
 - file change がない操作は `not applicable` として報告し、確認対象から除外する。
 
-### Step 7: Commit and push
+### Step 7: Commit
 
 - Step 6 で `commit` が承認された場合、file change がある場合は `commit-changes` を使って local commit を作る。
 - comment と commit の対応関係を記録する。
 - 1 つの commit が複数コメントを直した場合は、各コメントに同じ commit URL を使う。
 - 1 つのコメントに複数 commit が必要な場合は、そのコメントの修正を最も直接含む commit URL を使う。
-- Step 6 で `push` が承認された場合、commit 後に current PR branch に push する。
+
+### Step 8: Update PR description
+
+- Step 6 で PR description 更新が承認された場合、`update-pr-description` を実行し、対象 PR の description/body が実装後の状態と矛盾しないことを確認する。
+- 本文更新が不要なら、変更なしの確認結果を受け取ってそのまま進める。
+- 本文更新が必要なら、reply / resolve の前に完了させる。
+- PR description 更新が承認されなかった場合は、本文を変更せず、その旨を report に記録する。
+
+### Step 9: Push
+
+- Step 6 で `push` が承認された場合、PR description 更新の実行または変更不要の確認後に current PR branch に push する。
 - push 後に commit が PR 上で参照できることを確認する。
 
 ```bash
@@ -135,27 +145,20 @@ Commit URL は PR URL に対する commit URL にする。
 <pr-url>/commits/<commit-sha>
 ```
 
-### Step 8: Update PR description
-
-- Step 6 で PR description 更新が承認された場合、`update-pr-description` を実行し、対象 PR の description/body が実装後の状態と矛盾しないことを確認する。
-- 本文更新が不要なら、変更なしの確認結果を受け取ってそのまま進める。
-- 本文更新が必要なら、reply / resolve の前に完了させる。
-- PR description 更新が承認されなかった場合は、本文を変更せず、その旨を report に記録する。
-
-### Step 9: Reply and resolve review threads
+### Step 10: Reply and resolve review threads
 
 - Step 6 で reply が承認された実装済みまたは見送りの inline review thread ごとに reply する。
 - Step 6 で resolve が承認された inline review thread を、reply 成功後に resolve する。
 - reply / resolve の command、body format、実行順序、writeback 条件は `references/github-review-thread-commands.md` に従う。
 - Review summary body 由来の項目は、reply / resolve 対象なしとして report に含める。
 
-### Step 10: Report
+### Step 11: Report
 
 日本語で次を報告する。
 
 - コメントごとの source / author、verdict、実施内容または見送り理由、変更ファイル。
 - lint / test の最終状態。
-- Step 6 で確認した commit、push、PR description 更新、reply、resolve の実行範囲。
+- Step 6 で確認した commit、PR description 更新、push、reply、resolve の実行範囲。
 - 作成した commit hash と push 結果。
 - PR description 更新結果。
 - reply / resolve した inline thread。
