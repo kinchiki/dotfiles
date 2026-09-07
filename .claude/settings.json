@@ -55,6 +55,7 @@
     "deny": [
       "Bash(env:*)",
       "Bash(mongod:*)",
+      "Bash(make tfapply:*)",
       "Bash(mysql:*)",
       "Bash(nc:*)",
       "Bash(npm remove:*)",
@@ -169,7 +170,7 @@
       "~/src/"
     ]
   },
-  "model": "opus[1m]",
+  "model": "haiku",
   "hooks": {},
   "statusLine": {
     "type": "command",
