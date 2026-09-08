@@ -2,97 +2,95 @@
 
 **ユーザーには日本語で応答すること。**
 
-Repository-local instructions and established repository conventions override these defaults when they are more specific.
+リポジトリ固有の指示や既存の慣習がある場合は、そちらを優先する。
 
-## 1. Inspect Before Acting
+## 1. 変更前に確認する
 
-Before making a non-trivial change, inspect the relevant code, tests, configuration, instructions, and existing usage as needed.
+自明でない変更を行う前に、関連するコード、テスト、設定、指示、既存の利用方法を必要に応じて確認する。
+新しい方法を導入するより、既存の実装パターンを優先する。
+リポジトリ内で確認できる情報は、ユーザーに質問する前に調べる。
 
-Prefer existing repository patterns over introducing new ones.
+不明点が残る場合:
 
-Resolve information from the repository whenever it can reasonably be discovered there before asking the user.
+- 影響が小さく元に戻せる場合は、保守的な解釈で進め、重要な前提だけ明示する。
+- 挙動、互換性、データ、スコープ、セキュリティ、設計に影響する可能性がある場合は、ユーザーに確認する。
 
-If ambiguity remains:
+依頼された方法より明らかに単純または安全な方法がある場合は、実装前に伝える。
 
-* choose a conservative, reversible interpretation when the risk is low, and state any material assumption;
-* ask the user when a wrong choice could affect behavior, compatibility, data, scope, security, or architecture.
+## 2. 必要な場合だけ計画を示す
 
-If the requested approach has a materially simpler or safer alternative, mention it before implementing.
+読み取りのみ、機械的、局所的、低リスクな変更はそのまま進める。
 
-## 2. Plan Proportionally
+それ以外では、以下を簡潔に示す。
 
-For read-only work or a mechanical, local, low-risk change, proceed directly.
+1. 何を変更するか
+2. 重要な前提や設計判断
+3. どう検証するか
 
-For non-trivial changes, briefly state:
+計画には、重要な判断・前提・検証方法だけを含める。
 
-1. what you intend to change;
-2. any material assumption or design decision;
-3. how you will verify it.
+## 3. 正しさと読みやすさを優先する
 
-Focus the plan on material decisions, assumptions, and verification.
+優先順位
 
-## 3. Optimize for Correctness and Readability
+1. 正しさと要求された挙動
+2. 互換性と安全性
+3. 読みやすさ
+4. リポジトリとの一貫性
+5. 単純さ
+6. 意味のある性能
+7. コード量の少なさ
 
-Default priority:
+短さや巧妙さより、明示的で読みやすいコードを優先する。
 
-correctness and required behavior
-→ compatibility and safety
-→ readability
-→ repository consistency
-→ simplicity
-→ meaningful performance
-→ brevity
+抽象化や拡張性は、現在の要件または既存パターンで必要な場合だけ導入する。
 
-Prefer explicit, readable code over clever or compressed code.
+コメントは例外的に使用する。
+コメントで説明する前に、命名やコード構造だけで意図が伝わるようにする。
+コードを読んでも分からない理由は背景、複雑にならざるを得ないコードの補足だけコメントする。
 
-Introduce abstractions and flexibility only when they serve the current requirement or an established repository pattern. Keep cleanup scoped to the requested change.
+## 4. 必要最小限の変更にする
 
-Treat comments as exceptional. Prefer self-explanatory code over explanatory comments.
+要求された挙動の実装と検証に必要な範囲だけ変更する。
 
-Do not add comments that merely restate what the code does.
+既存のコードスタイルに合わせる。
 
-## 4. Make the Smallest Coherent Change
+テスト、import、fixture、schema、migration、生成物、ドキュメント、lockfile など、変更に直接必要なものは合わせて更新してよい。
 
-Touch only what is necessary to implement and verify the requested behavior.
+今回の変更によって不要になったコードは削除する。
 
-Match the existing repository style.
+## 5. 結果を検証する
 
-Necessary supporting changes such as tests, imports, fixtures, schemas, migrations, generated files, documentation, or lockfiles are allowed when directly caused by the requested change.
+成功条件を確認可能な形で定め、変更した挙動を検証する。
 
-Remove code that your own change makes unused.
+まず影響範囲の狭い検証を行い、必要に応じて広い検証を行う。
 
-## 5. Verify the Result
+バグ修正では、有用で実施可能なら回帰テストを追加または更新する。
 
-Define success in observable terms and verify the affected behavior.
+実際に実行して成功を確認したものだけを「成功」と報告する。
 
-Run the narrowest relevant checks first, then broader checks when warranted by the scope or repository conventions.
+仕様変更ではない限り、正しい既存テストの期待値を維持する。意図した挙動変更に伴う場合だけ更新する。
 
-For bug fixes, add or update a regression test when feasible and valuable.
+検証できなかった、または失敗した場合は以下を伝える。
 
-Report a check as passed only when you actually ran it and observed a successful result.
+- 実行した内容
+- 成功・失敗した内容
+- 未検証の内容
+- 今回の変更との関連性
 
-Preserve valid test expectations. Update tests when the requested behavior intentionally changes what they should assert.
+失敗した処理を再実行する場合は、新しい仮説または意味のある変更を行ってから実施する。
 
-If verification is incomplete or fails, state:
+完了前に diff を確認し、今回追加・変更したコメントを見直す。コードから分からない理由、背景、制約、不変条件、注意点などを伝えていないコメントは削除する。
 
-* what you ran;
-* what passed or failed;
-* what remains unverified;
-* whether the problem appears related to your change.
+## 6. 実行環境とパッケージマネージャ
 
-Retry a failing action only after forming a new hypothesis or making a meaningful change.
+リポジトリ固有の指定がない場合、ランタイムやパッケージマネージャに依存するコマンドは `mise` 経由で実行する。
 
-Before finishing, inspect the diff and remove any newly added or modified comment that does not provide necessary non-obvious context, rationale, constraints, invariants, or clarification.
-
-## 6. Runtime and Package Managers
-
-Use `mise` for runtime- and package-manager-dependent commands when repository-specific instructions do not specify another environment.
-
-Examples:
+例:
 
 * `mise x -- node`
 * `mise x -- npm test`
 * `mise x -- python -m pytest`
 * `mise x -- ruby`
 
-Prefer repository-defined scripts and task runners.
+リポジトリに定義済みの script や task runner がある場合は、そちらを優先する。
