@@ -7,6 +7,8 @@ CLAUDE_REVIEW_MODEL="${CLAUDE_REVIEW_MODEL:-sonnet}"
 CLAUDE_REVIEW_EFFORT="${CLAUDE_REVIEW_EFFORT:-high}"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 TEST_POLICY_FILE="$SCRIPT_DIR/../references/test-selection-policy.md"
+# shellcheck source=review-trust.sh
+source "$SCRIPT_DIR/review-trust.sh"
 
 if [[ ! -f "$TEST_POLICY_FILE" ]]; then
   echo "UNTRUSTED: missing test selection policy: $TEST_POLICY_FILE"
@@ -50,6 +52,7 @@ Style / line-length 指摘は repo linter で確定検証する。
 
 $TEST_SELECTION_POLICY
 
+最終メッセージの最初に \`REVIEW_TRUST: TRUSTED\` または \`REVIEW_TRUST: UNTRUSTED\` を1行で置く。ローカル対象を読めない、またはレビュー結果を信頼できない場合は UNTRUSTED を選ぶ。finding や行番号付き引用があっても、この判定を変更しない。
 問題がなければ、確認した差分の概要を示してから No findings と書く。"
 
 # strict-mcp-config でMCP接続を止める
@@ -73,8 +76,17 @@ echo "Claude Code exit=$CLAUDE_RC"
 
 # この経路は stream-json を使わず tool 実行の記録を残さないため、inspection の成否を判定できない。
 # 自己申告停止は exit 7 と区別せず、通常の trust failure として扱う。
-if [[ -s "$CLAUDE_REVIEW_OUT" ]] && grep -Eq '^[[:space:]]*(BLOCKED|UNTRUSTED):' "$CLAUDE_REVIEW_OUT"; then
+REVIEW_STATUS="$(review_declared_status "$CLAUDE_REVIEW_OUT")"
+if [[ -s "$CLAUDE_REVIEW_OUT" ]] \
+  && [[ "$REVIEW_STATUS" == BLOCKED || "$REVIEW_STATUS" == UNTRUSTED ]]; then
   echo "UNTRUSTED: reviewer reported that the review is not trustworthy"
+  echo "----- review -----"
+  cat "$CLAUDE_REVIEW_OUT"
+  exit 4
+fi
+
+if [[ -s "$CLAUDE_REVIEW_OUT" && "$REVIEW_STATUS" == MISSING ]]; then
+  echo "UNTRUSTED: reviewer did not provide a REVIEW_TRUST declaration"
   echo "----- review -----"
   cat "$CLAUDE_REVIEW_OUT"
   exit 4

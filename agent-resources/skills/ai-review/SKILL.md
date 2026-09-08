@@ -25,6 +25,7 @@ description: >-
 - 作成者と同じ系統の AI を独立 reviewer として扱わない。
 - Claude Code へ差分または review packet を送る前に、ユーザーの明示的な同意を得る。
 - reviewer がローカル対象を調査できたと検証できる結果だけを信頼する。
+- reviewer が `UNTRUSTED` または `BLOCKED` を自己申告した結果は、finding や行番号付き引用があっても `TRUSTED` として返さない。
 - 必要な reviewer を実行できない場合は `BLOCKED` として停止する。
 
 ## Workflow

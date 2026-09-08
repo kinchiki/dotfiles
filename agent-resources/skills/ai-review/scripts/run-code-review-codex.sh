@@ -34,6 +34,8 @@ CODEX_REVIEW_MODEL="${MODEL_FLAG:-${CODEX_REVIEW_MODEL:-gpt-5.6-luna}}"
 CODEX_REVIEW_EFFORT="${EFFORT_FLAG:-${CODEX_REVIEW_EFFORT:-high}}"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 TEST_POLICY_FILE="$SCRIPT_DIR/../references/test-selection-policy.md"
+# shellcheck source=review-trust.sh
+source "$SCRIPT_DIR/review-trust.sh"
 
 if [[ ! -f "$TEST_POLICY_FILE" ]]; then
   echo "UNTRUSTED: missing test selection policy: $TEST_POLICY_FILE"
@@ -49,6 +51,7 @@ Style / line-length 指摘は repo linter で確定検証する。
 
 $TEST_SELECTION_POLICY
 
+最終メッセージの最初に \`REVIEW_TRUST: TRUSTED\` または \`REVIEW_TRUST: UNTRUSTED\` を1行で置く。ローカル対象を読めない、またはレビュー結果を信頼できない場合は UNTRUSTED を選ぶ。finding や行番号付き引用があっても、この判定を変更しない。
 コマンドの成否は exit status で判定する。stderr に \`nice(5) failed: operation not permitted\` のような login shell 由来の警告が出ても、exit 0 なら成功として扱う。
 所見は最終メッセージへ直接書く。read only のレビューのため、一時ファイルと一時ディレクトリの作成は禁止する。
 
@@ -146,17 +149,26 @@ fi
 
 # reviewer が調査に成功しながら最終メッセージで自己申告停止した場合は、実際に調査できなかった
 # ケースと区別する。plan review の trust 判定と同じ分類にそろえる。
+REVIEW_STATUS="$(review_declared_status "$REVIEW_OUT")"
 if [[ "$CODEX_RC" -eq 0 && "$DIFF_INSPECTED" == true ]] \
   && [[ -s "$REVIEW_OUT" ]] \
-  && grep -Eq '^[[:space:]]*BLOCKED:' "$REVIEW_OUT"; then
+  && [[ "$REVIEW_STATUS" == BLOCKED ]]; then
   echo "UNTRUSTED: reviewer self-blocked despite successful local inspection"
   echo "----- review -----"
   cat "$REVIEW_OUT"
   exit 7
 fi
 
-if [[ -s "$REVIEW_OUT" ]] && grep -Eq '^[[:space:]]*(BLOCKED|UNTRUSTED):' "$REVIEW_OUT"; then
+if [[ -s "$REVIEW_OUT" ]] \
+  && [[ "$REVIEW_STATUS" == BLOCKED || "$REVIEW_STATUS" == UNTRUSTED ]]; then
   echo "UNTRUSTED: reviewer reported that the review is not trustworthy"
+  echo "----- review -----"
+  cat "$REVIEW_OUT"
+  exit 4
+fi
+
+if [[ -s "$REVIEW_OUT" && "$REVIEW_STATUS" == MISSING ]]; then
+  echo "UNTRUSTED: reviewer did not provide a REVIEW_TRUST declaration"
   echo "----- review -----"
   cat "$REVIEW_OUT"
   exit 4

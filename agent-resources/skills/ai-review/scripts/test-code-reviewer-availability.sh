@@ -118,7 +118,9 @@ if [[ "$prompt_output" == *'command substitution'* ]] || [[ "$prompt_output" == 
   exit 1
 fi
 
-if [[ ! -s "$prompt_dump" ]] || ! grep -q 'nice(5) failed: operation not permitted' "$prompt_dump"; then
+if [[ ! -s "$prompt_dump" ]] \
+  || ! grep -q 'nice(5) failed: operation not permitted' "$prompt_dump" \
+  || ! grep -q 'REVIEW_TRUST: TRUSTED' "$prompt_dump"; then
   printf 'FAIL: Code review prompt lost the login shell noise guidance\n' >&2
   [[ -s "$prompt_dump" ]] && cat "$prompt_dump" >&2
   exit 1
@@ -207,8 +209,15 @@ run_verdict_case \
   "$script_dir/run-code-review-codex.sh" \
   'reviewer reported that the review is not trustworthy'
 
+export FAKE_REVIEW_OUTPUT=$'レビュー本文は `UNTRUSTED` です。\n[P2] example.txt:42 に具体的な問題があります。'
+run_verdict_case \
+  'Code review rejects a labeled untrusted response even with line-numbered findings' \
+  4 \
+  "$script_dir/run-code-review-codex.sh" \
+  'reviewer reported that the review is not trustworthy'
+
 export FAKE_REVIEW_EVENTS='{"type":"item.completed","item":{"type":"command_execution","command":"pwd","aggregated_output":"/repo\n","exit_code":0}}'
-export FAKE_REVIEW_OUTPUT='No findings'
+export FAKE_REVIEW_OUTPUT=$'REVIEW_TRUST: TRUSTED\nNo findings'
 run_verdict_case \
   'Code review rejects a Codex review that skipped diff inspection' \
   4 \
@@ -218,6 +227,20 @@ run_verdict_case \
 export FAKE_REVIEW_EVENTS='{"type":"item.completed","item":{"type":"command_execution","command":"git diff","aggregated_output":"diff --git a/example.txt b/example.txt\n","exit_code":0}}'
 run_verdict_case \
   'Code review trusts a Codex review that inspected the working tree' \
+  0 \
+  "$script_dir/run-code-review-codex.sh" \
+  'TRUSTED'
+
+export FAKE_REVIEW_OUTPUT='No findings'
+run_verdict_case \
+  'Code review rejects a response without a trust declaration' \
+  4 \
+  "$script_dir/run-code-review-codex.sh" \
+  'reviewer did not provide a REVIEW_TRUST declaration'
+
+export FAKE_REVIEW_OUTPUT=$'REVIEW_TRUST: TRUSTED\nレビュー本文が自己申告で \`UNTRUSTED\` と言っていますが、wrapper は \`TRUSTED\` を返します。\n[P2] example.txt:42 に具体的な問題があります。'
+run_verdict_case \
+  'Code review ignores an untrusted token quoted as a finding after a trusted declaration' \
   0 \
   "$script_dir/run-code-review-codex.sh" \
   'TRUSTED'
@@ -282,7 +305,7 @@ run_verdict_case \
   "$script_dir/run-code-review-claude.sh" \
   'reviewer reported that the review is not trustworthy'
 
-export FAKE_REVIEW_OUTPUT='No findings'
+export FAKE_REVIEW_OUTPUT=$'REVIEW_TRUST: TRUSTED\nNo findings'
 run_verdict_case \
   'Code review trusts a nonempty Claude review' \
   0 \

@@ -118,7 +118,10 @@ run_case 'Codex separates a self-blocked response from unreadable files' 7 codex
 export FAKE_REVIEW_OUTPUT='UNTRUSTED: empty review range'
 run_case 'Codex keeps a self-reported untrusted response at status 4' 4 codex 'reviewer reported that the review is not trustworthy'
 
-export FAKE_REVIEW_OUTPUT='No findings'
+export FAKE_REVIEW_OUTPUT=$'信頼性: `UNTRUSTED`\n[P2] target.txt:7 に具体的な問題があります。'
+run_case 'Codex rejects a labeled untrusted response with a line-numbered finding' 4 codex 'reviewer reported that the review is not trustworthy'
+
+export FAKE_REVIEW_OUTPUT=$'REVIEW_TRUST: TRUSTED\nNo findings'
 run_case 'Codex trusts successful file inspection' 0 codex
 
 export FAKE_REVIEW_EVENTS="$(jq -nc \
@@ -135,7 +138,7 @@ export FAKE_REVIEW_EVENTS="$(jq -nc \
   '[
     {type:"assistant",message:{content:[{type:"tool_use",name:"Read",id:"read-1",input:{file_path:$file}}]}},
     {type:"user",message:{content:[{type:"tool_result",tool_use_id:"read-1",is_error:false,content:"local repository evidence"}]}},
-    {type:"result",result:"No findings"}
+    {type:"result",result:"REVIEW_TRUST: TRUSTED\nNo findings"}
   ] | .[]')"
 run_case 'Claude trusts successful Read inspection' 0 claude
 

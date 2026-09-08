@@ -174,6 +174,8 @@ review_out="$review_dir/review.md"
 review_err="$review_dir/review.err"
 review_events="$review_dir/review.jsonl"
 review_prompt="$review_dir/prompt.md"
+# shellcheck source=review-trust.sh
+source "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/review-trust.sh"
 
 cleanup() {
   if [[ "$keep_temp" == false ]]; then
@@ -216,6 +218,7 @@ inspection_output="$(sed -n '1,80p' "$inspection_file")"
       printf '\nReturn `BLOCKED: cannot read local files` only when the required Read above fails with an error.\n'
       ;;
   esac
+  printf '\nBegin the final message with exactly one line: `REVIEW_TRUST: TRUSTED` or `REVIEW_TRUST: UNTRUSTED`. Use UNTRUSTED when the local inspection fails or the review result is not trustworthy, even when findings or line-numbered citations exist.\n'
   printf '\nWrite all findings directly in the final message. This review is read-only, so creating a temporary file or a temporary directory is prohibited.\n'
 } > "$review_prompt"
 
@@ -348,13 +351,19 @@ esac
 
 # 必須 inspection が成功したのに reviewer が自己申告で停止した場合は、実際に読めなかった
 # ケースと区別する。呼び出し元はこの status だけ1回の再実行を意味のある回復手段として扱える。
-if [[ "$inspection_verified" == true ]] && grep -Eq '^[[:space:]]*BLOCKED:' "$review_out"; then
+review_status="$(review_declared_status "$review_out")"
+if [[ "$inspection_verified" == true && "$review_status" == BLOCKED ]]; then
   echo "UNTRUSTED: reviewer self-blocked despite successful local inspection" >&2
   exit 7
 fi
 
-if grep -Eq '^[[:space:]]*(BLOCKED|UNTRUSTED):' "$review_out"; then
+if [[ "$review_status" == BLOCKED || "$review_status" == UNTRUSTED ]]; then
   echo "UNTRUSTED: reviewer reported that the review is not trustworthy" >&2
+  exit 4
+fi
+
+if [[ "$review_status" == MISSING ]]; then
+  echo "UNTRUSTED: reviewer did not provide a REVIEW_TRUST declaration" >&2
   exit 4
 fi
 
