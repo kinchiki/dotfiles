@@ -47,6 +47,10 @@ Prefer explicit, readable code over clever or compressed code.
 
 Introduce abstractions and flexibility only when they serve the current requirement or an established repository pattern. Keep cleanup scoped to the requested change.
 
+Treat comments as exceptional. Prefer self-explanatory code over explanatory comments.
+
+Do not add comments that merely restate what the code does.
+
 ## 4. Make the Smallest Coherent Change
 
 Touch only what is necessary to implement and verify the requested behavior.
@@ -77,6 +81,8 @@ If verification is incomplete or fails, state:
 * whether the problem appears related to your change.
 
 Retry a failing action only after forming a new hypothesis or making a meaningful change.
+
+Before finishing, inspect the diff and remove any newly added or modified comment that does not provide necessary non-obvious context, rationale, constraints, invariants, or clarification.
 
 ## 6. Runtime and Package Managers
 
