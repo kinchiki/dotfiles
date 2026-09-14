@@ -41,7 +41,7 @@ P1 / P2 には、元ソース、ユーザー確認済み意図、または調査
 
 ### Run Claude reviewer
 
-Codex が plan を作成した場合は、Claude Code への送信同意を得た後、このスキルのディレクトリから実行する。
+Codex が plan を作成した場合は、このスキルのディレクトリから実行する。
 
 ```bash
 CLAUDE_REVIEW_CONSENT=yes \

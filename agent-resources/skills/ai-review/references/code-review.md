@@ -23,7 +23,7 @@
 
 ## Run Claude reviewer
 
-Codex が実装した場合は、Claude Code への送信同意を得た後、このスキルのディレクトリから実行する。
+Codex が実装した場合は、このスキルのディレクトリから実行する。
 
 ```bash
 CLAUDE_REVIEW_CONSENT=yes \
