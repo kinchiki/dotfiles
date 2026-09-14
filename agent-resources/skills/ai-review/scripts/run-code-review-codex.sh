@@ -7,6 +7,7 @@ set -uo pipefail
 
 MODEL_FLAG=""
 EFFORT_FLAG=""
+KEEP_TEMP=false
 while (($#)); do
   case "$1" in
     --model)
@@ -18,6 +19,10 @@ while (($#)); do
       (($# >= 2)) || { echo "error: --effort requires a value" >&2; exit 2; }
       EFFORT_FLAG="$2"
       shift 2
+      ;;
+    --keep-temp)
+      KEEP_TEMP=true
+      shift
       ;;
     *)
       echo "error: unexpected argument: $1" >&2
@@ -58,7 +63,11 @@ $TEST_SELECTION_POLICY
 問題がなければ、確認した差分の概要を示してから No findings と書く。"
 
 cleanup() {
-  rm -rf "$REVIEW_DIR"
+  if [[ "$KEEP_TEMP" == false ]]; then
+    rm -rf "$REVIEW_DIR"
+  else
+    echo "review artifacts: $REVIEW_DIR" >&2
+  fi
 }
 trap cleanup EXIT
 
@@ -84,24 +93,24 @@ if ! command -v jq >/dev/null 2>&1; then
   exit 2
 fi
 
-# codex exec review
-  # 向いている用途: コード差分レビュー
-  # --uncommitted、--base、--commitなどレビュー対象を理解する専用モード
-  # codex exec review では --uncommitted、--base、--commit、カスタムpromptを同時指定できません。
-  # 現在の wrapper はテスト選定方針を含むカスタムpromptが必要なので、--uncommittedを追加せず、prompt内で未コミット差分の確認を指示している。
+# codex exec review サブコマンドは最終メッセージを review 専用サマリに固定するため、
+# prompt で要求した REVIEW_TRUST 先頭行・[P1]/[P2]/[P3]・file:line が -o の出力に現れない。
+# trust 判定は自己申告行に依存するので、review サブコマンドの差分ターゲティングは使わず、
+# plan review と同じプレーンな codex exec で実行し、対象は prompt の git コマンド指示で特定する。
 # --ignore-user-config でMCP接続を止める
   # 利点: user config 由来の MCP 接続を止め、認証失敗を避けて外部状態に依存しないレビューにする。
   # 欠点: MCP の外部コンテキストに加え、provider・hook など user config 全体も適用されない。
 # --ignore-user-config で認証設定 cli_auth_credentials_store = "keyring" が読めないため、明示する
-# Codex の既定 sandbox は macOS で sandbox-exec を使うため、Claude Code の sandbox 内では入れ子適用に失敗する。
+# Codex の --sandbox は macOS で sandbox-exec を使うため、Claude Code の sandbox 内では入れ子適用に失敗する。
 # 失敗しても Codex はローカルファイルを読めないまま所見を返すので、呼び出す前に停止する。
 if [[ "$(uname -s)" == "Darwin" ]] && ! /usr/bin/sandbox-exec -p '(version 1)(allow default)' /usr/bin/true >/dev/null 2>&1; then
   echo "BLOCKED: nested sandbox-exec is unavailable; invoke ~/.claude/skills/ai-review/scripts/run-code-review-codex.sh as a single command with no env prefix and no pipe so it matches sandbox.excludedCommands" >&2
   exit 6
 fi
-codex exec review \
+codex exec \
   --ignore-user-config \
   -c cli_auth_credentials_store="keyring" \
+  --sandbox read-only \
   --model "$CODEX_REVIEW_MODEL" \
   -c "model_reasoning_effort=\"$CODEX_REVIEW_EFFORT\"" \
   --json \

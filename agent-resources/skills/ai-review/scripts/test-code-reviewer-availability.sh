@@ -103,14 +103,17 @@ run_case \
 cat > "$fake_bin/codex" <<'EOF'
 #!/usr/bin/env bash
 printf '%s\n' "${@: -1}" > "$PROMPT_DUMP"
+printf '%s\n' "$@" > "$ARGV_DUMP"
 exit 0
 EOF
 chmod +x "$fake_bin/codex"
 
 prompt_dump="$test_dir/prompt.txt"
+argv_dump="$test_dir/argv.txt"
 prompt_output="$(cd "$repo" && \
   PATH="$verdict_path" \
   PROMPT_DUMP="$prompt_dump" \
+  ARGV_DUMP="$argv_dump" \
   "$script_dir/run-code-review-codex.sh" 2>&1 || true)"
 
 if [[ "$prompt_output" == *'command substitution'* ]] || [[ "$prompt_output" == *'syntax error'* ]]; then
@@ -127,6 +130,21 @@ if [[ ! -s "$prompt_dump" ]] \
 fi
 
 printf 'PASS: Code review sends the reviewer prompt without shell expansion\n'
+
+# `codex exec review` は最終メッセージを review 専用サマリに固定し、prompt が要求した
+# REVIEW_TRUST 先頭行を落とすため、review サブコマンドへ戻る回帰を検出する。
+argv_line="$(tr '\n' ' ' < "$argv_dump")"
+if [[ "$argv_line" != 'exec '* ]] || [[ "$argv_line" == 'exec review '* ]]; then
+  printf 'FAIL: Code review must call a plain codex exec, not the review subcommand\n%s\n' "$argv_line" >&2
+  exit 1
+fi
+
+if [[ "$argv_line" != *'--sandbox read-only '* ]]; then
+  printf 'FAIL: Code review must pass --sandbox read-only to codex exec\n%s\n' "$argv_line" >&2
+  exit 1
+fi
+
+printf 'PASS: Code review runs a plain codex exec with a read-only sandbox\n'
 
 cat > "$fake_bin/codex" <<'EOF'
 #!/usr/bin/env bash
