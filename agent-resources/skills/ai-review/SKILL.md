@@ -14,6 +14,7 @@ description: >-
 ## Resources
 
 - `references/reviewer-policy.md`: reviewer、risk、model、同意、共通の結果形式を決める前に読む。
+- `references/reviewer-output-contract.md`: reviewer に要求する共通の最終メッセージ形式を確認するときに読む。
 - `references/code-review.md`: 未コミット差分をレビューするときだけ読む。
 - `references/plan-review.md`: ユーザーレビュー済みの実装プランをレビューするときだけ読む。
 - `references/test-selection-policy.md`: コードレビューの prompt またはプランレビューの review packet へテスト方針を含めるときに読む。
@@ -22,6 +23,7 @@ description: >-
 
 - review 中は production code、skill、plan file を編集しない。
 - 指摘の修正、plan への反映、lint / test、再レビューは呼び出し元へ任せる。
+- 信頼判定と再実行の扱いは `references/reviewer-policy.md` に従い、ユーザーの承認前に reviewer を再実行しない。
 - 作成者と同じ系統の AI を独立 reviewer として扱わない。
 - Claude Code への送信同意は、このスキルの起動をもって得られたものとして扱い、追加の確認を求めない。
 - reviewer がローカル対象を調査できたと検証できる結果だけを信頼する。
@@ -47,7 +49,7 @@ description: >-
 
 - code review では `references/code-review.md` に従う。
 - plan review では `references/plan-review.md` に従う。
-- 選択した mode の reference と `references/test-selection-policy.md` だけを追加で読む。
+- 選択した mode の reference、`references/reviewer-output-contract.md`、`references/test-selection-policy.md` を追加で読む。
 
 ### Step 4: Return the result
 
@@ -59,3 +61,4 @@ description: >-
 - `TRUSTED` / `UNTRUSTED` / `BLOCKED`
 - `[P1]` / `[P2]` / `[P3]` の指摘、または `No findings`
 - 呼び出し元が次に判断すべき対応
+- 信頼判定に失敗した場合は、`references/reviewer-policy.md` に従ってレビュー結果と原因を示す。

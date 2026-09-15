@@ -10,6 +10,8 @@ TEST_POLICY_FILE="$SCRIPT_DIR/../references/test-selection-policy.md"
 # shellcheck source=review-trust.sh
 source "$SCRIPT_DIR/review-trust.sh"
 
+REVIEW_OUTPUT_CONTRACT="$(review_output_contract)" || exit 4
+
 if [[ ! -f "$TEST_POLICY_FILE" ]]; then
   echo "UNTRUSTED: missing test selection policy: $TEST_POLICY_FILE"
   exit 4
@@ -55,7 +57,7 @@ Style / line-length 指摘は repo linter で確定検証する。
 
 $TEST_SELECTION_POLICY
 
-最終メッセージの最初に \`REVIEW_TRUST: TRUSTED\` または \`REVIEW_TRUST: UNTRUSTED\` を1行で置く。ローカル対象を読めない、またはレビュー結果を信頼できない場合は UNTRUSTED を選ぶ。finding や行番号付き引用があっても、この判定を変更しない。
+$REVIEW_OUTPUT_CONTRACT
 問題がなければ、確認した差分の概要を示してから No findings と書く。"
 
 # strict-mcp-config でMCP接続を止める
@@ -88,11 +90,13 @@ if [[ -s "$CLAUDE_REVIEW_OUT" ]] \
   exit 4
 fi
 
-if [[ -s "$CLAUDE_REVIEW_OUT" && "$REVIEW_STATUS" == MISSING ]]; then
-  echo "UNTRUSTED: reviewer did not provide a REVIEW_TRUST declaration"
-  echo "----- review -----"
-  cat "$CLAUDE_REVIEW_OUT"
-  exit 4
+if [[ -s "$CLAUDE_REVIEW_OUT" ]]; then
+  case "$REVIEW_STATUS" in
+    MISSING|AMBIGUOUS)
+      report_review_trust_format_error "$REVIEW_STATUS" "$CLAUDE_REVIEW_OUT"
+      exit 4
+      ;;
+  esac
 fi
 
 if [[ "$CLAUDE_RC" -eq 0 && -s "$CLAUDE_REVIEW_OUT" ]]; then
@@ -102,6 +106,6 @@ if [[ "$CLAUDE_RC" -eq 0 && -s "$CLAUDE_REVIEW_OUT" ]]; then
   exit 0
 fi
 
-echo "UNTRUSTED: rerun once after confirming CLAUDE_REVIEW_CONSENT=yes"
+review_retry_notice
 [[ -s "$CLAUDE_REVIEW_ERR" ]] && { echo "----- stderr -----"; cat "$CLAUDE_REVIEW_ERR"; }
 exit 4

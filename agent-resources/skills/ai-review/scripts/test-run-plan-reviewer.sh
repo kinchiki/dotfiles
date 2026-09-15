@@ -124,6 +124,16 @@ run_case 'Codex rejects a labeled untrusted response with a line-numbered findin
 export FAKE_REVIEW_OUTPUT=$'REVIEW_TRUST: TRUSTED\nNo findings'
 run_case 'Codex trusts successful file inspection' 0 codex
 
+export FAKE_REVIEW_OUTPUT=$'レビュー結果の概要です。\nNo findings\nREVIEW_TRUST: TRUSTED'
+run_case 'Codex accepts a trust declaration after the review body' 0 codex
+
+export FAKE_REVIEW_OUTPUT=$'レビュー結果の概要です。\n```text\nREVIEW_TRUST: TRUSTED\n```\nNo findings'
+run_case 'Codex ignores a trust token inside a code fence' 4 codex 'did not provide exactly one standalone REVIEW_TRUST declaration'
+
+export FAKE_REVIEW_OUTPUT=$'レビュー結果の概要です。\nREVIEW_TRUST: TRUSTED\nREVIEW_TRUST: UNTRUSTED'
+run_case 'Codex rejects multiple trust declarations as ambiguous' 4 codex 'multiple REVIEW_TRUST declarations'
+
+export FAKE_REVIEW_OUTPUT=$'REVIEW_TRUST: TRUSTED\nNo findings'
 export FAKE_REVIEW_EVENTS="$(jq -nc \
   --arg command "$inspection_command" \
   --arg output "$inspection_output" \
@@ -138,9 +148,9 @@ export FAKE_REVIEW_EVENTS="$(jq -nc \
   '[
     {type:"assistant",message:{content:[{type:"tool_use",name:"Read",id:"read-1",input:{file_path:$file}}]}},
     {type:"user",message:{content:[{type:"tool_result",tool_use_id:"read-1",is_error:false,content:"local repository evidence"}]}},
-    {type:"result",result:"REVIEW_TRUST: TRUSTED\nNo findings"}
+    {type:"result",result:"レビュー結果の概要です。\nNo findings\nREVIEW_TRUST: TRUSTED"}
   ] | .[]')"
-run_case 'Claude trusts successful Read inspection' 0 claude
+run_case 'Claude accepts a trust declaration after the review body' 0 claude
 
 export FAKE_REVIEW_EVENTS="$(jq -nc \
   --arg file "$repo/target.txt" \

@@ -1,67 +1,124 @@
 #!/usr/bin/env bash
 
-# Source this file from a review wrapper. The first nonempty line is the
-# reviewer's machine-readable trust declaration.
+# Source this file from a review wrapper. A standalone REVIEW_TRUST line may
+# appear anywhere in the reviewer's output, but exactly one is required.
+REVIEW_TRUST_SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+review_output_contract() {
+  local contract_file="$REVIEW_TRUST_SCRIPT_DIR/../references/reviewer-output-contract.md"
+
+  if [[ ! -r "$contract_file" ]]; then
+    echo "UNTRUSTED: missing reviewer output contract: $contract_file" >&2
+    return 1
+  fi
+  cat "$contract_file"
+}
+
+report_review_trust_format_error() {
+  local review_status="$1"
+  local review_file="${2:-}"
+
+  case "$review_status" in
+    MISSING)
+      echo "UNTRUSTED: reviewer did not provide exactly one standalone REVIEW_TRUST declaration"
+      ;;
+    AMBIGUOUS)
+      echo "UNTRUSTED: reviewer provided multiple REVIEW_TRUST declarations; trust format is ambiguous"
+      ;;
+    *)
+      return 1
+      ;;
+  esac
+
+  if [[ -n "$review_file" ]]; then
+    echo "----- review -----"
+    cat "$review_file"
+  fi
+}
+
+review_retry_notice() {
+  echo "UNTRUSTED: do not rerun automatically; ask the user whether to rerun the same reviewer once"
+}
+
 review_declared_status() {
   local review_file="$1"
 
   awk '
-    function normalize(line) {
+    function trim(line) {
+      sub(/^[[:space:]]+/, "", line)
+      sub(/[[:space:]]+$/, "", line)
+      return line
+    }
+
+    function normalize_legacy(line) {
       sub(/^[[:space:]#>*`_~+-]+/, "", line)
       sub(/[[:space:]#>*`_~+-]+$/, "", line)
       return line
     }
 
     BEGIN {
-      seen = 0
-    }
-
-    /^[[:space:]]*$/ {
-      next
+      first_line = ""
+      explicit_count = 0
+      in_fence = 0
     }
 
     {
-      seen = 1
-      line = normalize($0)
+      line = trim($0)
 
-      if (line ~ /^REVIEW[[:space:]_-]*TRUST[[:space:]:：-]*TRUSTED([^[:alnum:]_]|$)/) {
-        print "TRUSTED"
-        exit
-      }
-      if (line ~ /^REVIEW[[:space:]_-]*TRUST[[:space:]:：-]*UNTRUSTED([^[:alnum:]_]|$)/) {
-        print "UNTRUSTED"
-        exit
+      if (line ~ /^(```|~~~)/) {
+        in_fence = !in_fence
+        next
       }
 
-      # Keep compatibility with the old leading status format.
-      if (line ~ /^BLOCKED([[:space:]:：-]|$)/) {
-        print "BLOCKED"
-        exit
-      }
-      if (line ~ /^UNTRUSTED([[:space:]:：-]|$)/) {
-        print "UNTRUSTED"
-        exit
+      if (line == "") {
+        next
       }
 
-      # Recognize a natural-language or labeled self-declaration on the first
-      # line while avoiding status tokens in later code quotes and findings.
-      if (line ~ /(レビュー|review|信頼|confidence|reliab|verdict|trust|result|status|判定|結果)/ \
-        && line ~ /(^|[^[:alnum:]_])BLOCKED([^[:alnum:]_]|$)/) {
-        print "BLOCKED"
-        exit
-      }
-      if (line ~ /(レビュー|review|信頼|confidence|reliab|verdict|trust|result|status|判定|結果)/ \
-        && line ~ /(^|[^[:alnum:]_])UNTRUSTED([^[:alnum:]_]|$)/) {
-        print "UNTRUSTED"
-        exit
+      if (first_line == "") {
+        first_line = line
       }
 
-      print "MISSING"
-      exit
+      # Only accept an exact standalone declaration outside fenced code. This
+      # allows explanatory text before the declaration without treating quoted
+      # status tokens in findings as a declaration.
+      if (!in_fence && line == "REVIEW_TRUST: TRUSTED") {
+        explicit_count++
+        explicit_status = "TRUSTED"
+      } else if (!in_fence && line == "REVIEW_TRUST: UNTRUSTED") {
+        explicit_count++
+        explicit_status = "UNTRUSTED"
+      }
     }
 
     END {
-      if (!seen) {
+      legacy_line = normalize_legacy(first_line)
+      legacy_status = ""
+
+      # Keep compatibility with the old leading status format when no modern
+      # REVIEW_TRUST declaration is present.
+      if (legacy_line ~ /^BLOCKED([[:space:]:：-]|$)/) {
+        legacy_status = "BLOCKED"
+      } else if (legacy_line ~ /^UNTRUSTED([[:space:]:：-]|$)/) {
+        legacy_status = "UNTRUSTED"
+      } else if (legacy_line ~ /(レビュー|review|信頼|confidence|reliab|verdict|trust|result|status|判定|結果)/ \
+        && legacy_line ~ /(^|[^[:alnum:]_])BLOCKED([^[:alnum:]_]|$)/) {
+        legacy_status = "BLOCKED"
+      } else if (legacy_line ~ /(レビュー|review|信頼|confidence|reliab|verdict|trust|result|status|判定|結果)/ \
+        && legacy_line ~ /(^|[^[:alnum:]_])UNTRUSTED([^[:alnum:]_]|$)/) {
+        legacy_status = "UNTRUSTED"
+      }
+
+      if (explicit_count > 1 || (explicit_count == 1 && legacy_status != "")) {
+        print "AMBIGUOUS"
+        exit
+      }
+      if (explicit_count == 1) {
+        print explicit_status
+        exit
+      }
+      if (legacy_status != "") {
+        print legacy_status
+      } else {
         print "MISSING"
       }
     }

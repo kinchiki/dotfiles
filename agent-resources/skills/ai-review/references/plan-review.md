@@ -71,5 +71,6 @@ wrapper が exit 7 を返した場合は `reviewer-policy.md` の trust 判定�
 ## Result
 
 - reviewer、主要finding、risk、信頼性判定を返す。
+- trust 判定、形式不備、再実行の扱いは `reviewer-policy.md` に従う。
 - P1 / P2 の採否、plan更新、再調査、再レビューは planning workflow へ返す。
 - P3 は任意の改善として返す。

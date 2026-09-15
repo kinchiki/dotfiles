@@ -42,6 +42,8 @@ TEST_POLICY_FILE="$SCRIPT_DIR/../references/test-selection-policy.md"
 # shellcheck source=review-trust.sh
 source "$SCRIPT_DIR/review-trust.sh"
 
+REVIEW_OUTPUT_CONTRACT="$(review_output_contract)" || exit 4
+
 if [[ ! -f "$TEST_POLICY_FILE" ]]; then
   echo "UNTRUSTED: missing test selection policy: $TEST_POLICY_FILE"
   exit 4
@@ -59,7 +61,7 @@ Style / line-length 指摘は repo linter で確定検証する。
 
 $TEST_SELECTION_POLICY
 
-最終メッセージの最初に \`REVIEW_TRUST: TRUSTED\` または \`REVIEW_TRUST: UNTRUSTED\` を1行で置く。ローカル対象を読めない、またはレビュー結果を信頼できない場合は UNTRUSTED を選ぶ。finding や行番号付き引用があっても、この判定を変更しない。
+$REVIEW_OUTPUT_CONTRACT
 コマンドの成否は exit status で判定する。stderr に \`nice(5) failed: operation not permitted\` のような login shell 由来の警告が出ても、exit 0 なら成功として扱う。
 所見は最終メッセージへ直接書く。read only のレビューのため、一時ファイルと一時ディレクトリの作成は禁止する。
 
@@ -97,7 +99,7 @@ if ! command -v jq >/dev/null 2>&1; then
 fi
 
 # codex exec review サブコマンドは最終メッセージを review 専用サマリに固定するため、
-# prompt で要求した REVIEW_TRUST 先頭行・[P1]/[P2]/[P3]・file:line が -o の出力に現れない。
+# prompt で要求した REVIEW_TRUST・[P1]/[P2]/[P3]・file:line が -o の出力に現れない。
 # trust 判定は自己申告行に依存するので、review サブコマンドの差分ターゲティングは使わず、
 # plan review と同じプレーンな codex exec で実行し、対象は prompt の git コマンド指示で特定する。
 # --ignore-user-config でMCP接続を止める
@@ -179,11 +181,13 @@ if [[ -s "$REVIEW_OUT" ]] \
   exit 4
 fi
 
-if [[ -s "$REVIEW_OUT" && "$REVIEW_STATUS" == MISSING ]]; then
-  echo "UNTRUSTED: reviewer did not provide a REVIEW_TRUST declaration"
-  echo "----- review -----"
-  cat "$REVIEW_OUT"
-  exit 4
+if [[ -s "$REVIEW_OUT" ]]; then
+  case "$REVIEW_STATUS" in
+    MISSING|AMBIGUOUS)
+      report_review_trust_format_error "$REVIEW_STATUS" "$REVIEW_OUT"
+      exit 4
+      ;;
+  esac
 fi
 
 # 差分を読んだ証拠が無い結果は信頼しない。SKILL.md の hard constraint と plan review の判定にそろえる。
@@ -194,6 +198,6 @@ if [[ "$CODEX_RC" -eq 0 && "$DIFF_INSPECTED" == true ]]; then
   exit 0
 fi
 
-echo "UNTRUSTED: rerun once; if still untrusted, stop and report the blocker"
+review_retry_notice
 [[ -s "$REVIEW_ERR" ]] && { echo "----- stderr -----"; cat "$REVIEW_ERR"; }
 exit 4

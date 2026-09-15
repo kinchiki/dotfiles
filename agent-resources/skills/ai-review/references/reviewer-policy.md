@@ -33,18 +33,17 @@ code review と plan review で reviewer を選び、結果を扱うときに使
 ## Findings and trust
 
 - finding は `[P1]`、`[P2]`、`[P3]`、または `No findings` として返す。
-- reviewer は最終メッセージの最初に `REVIEW_TRUST: TRUSTED` または `REVIEW_TRUST: UNTRUSTED` を1行で返す。
-- `REVIEW_TRUST` が欠落または不正な場合は wrapper が `UNTRUSTED` として扱う。
+- reviewer の最終メッセージ形式は `reviewer-output-contract.md` に従う。
+- 宣言が欠落、コードフェンス・引用内、または複数ある場合は wrapper が形式不備として `UNTRUSTED` として扱う。
 - P1 は実装失敗、要件違反、重大な安全性またはデータ整合性問題につながる blocking issue とする。
 - P2 は完了または最終承認前に対処すべき重要な issue とする。
 - P3 は任意の改善とする。
 - reviewer がローカル対象を実際に調査したことを確認できた場合だけ `TRUSTED` とする。
 - reviewer が `UNTRUSTED` または `BLOCKED` を自己申告した場合は、finding や行番号付き引用があっても `TRUSTED` として扱わない。
 - reviewer が成功してもローカル対象を調査できたと確認できない場合は `UNTRUSTED` とする。
-- `UNTRUSTED` の場合は同じ reviewer を1回だけ再実行し、再度 `UNTRUSTED` なら停止する。
+- `UNTRUSTED` または exit 7 の場合は自動で再実行せず、レビュー結果と原因を返してユーザーに同じ reviewer を再実行するか確認する。
+- ユーザーが承認した場合だけ、同じ reviewer を1回再実行する。
 - reviewer が必須のローカル inspection に成功しながら最終メッセージで `BLOCKED` を返した場合、wrapper は exit 7 と `self-blocked despite successful local inspection` を返す。
-- exit 7 は reviewer の自己申告の誤りとして扱い、同じ reviewer を1回だけ再実行し、再度 exit 7 なら停止する。
-- exit 7 が続く場合は wrapper へ `--keep-temp` を付けて再実行し、`review.jsonl` の `command_execution` の exit code を報告する。
 - Claude によるコードレビューは tool 実行の記録を残さないため inspection の成否を判定できず、自己申告停止も `UNTRUSTED` として扱う。
 - sandbox または同意 gate が reviewer 実行前に停止した場合は `BLOCKED` とする。
 - P1 / P2 の採否、修正、lint / test、再レビューは呼び出し元へ返す。
