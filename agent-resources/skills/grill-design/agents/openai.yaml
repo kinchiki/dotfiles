@@ -1,0 +1,4 @@
+interface:
+  display_name: "Grill Design"
+  short_description: "設計判断を依存関係付きで整理し、未解決の判断がなくなるまでユーザーと詰める"
+  default_prompt: "Use $grill-design to map the design decisions as a dependency tree and resolve them with the user round by round."

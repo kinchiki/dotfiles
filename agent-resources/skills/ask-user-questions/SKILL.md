@@ -4,12 +4,14 @@ description: >-
   調査、設計、実装、レビュー対応の途中で、repo や既存資料だけでは解決できない不明点をユーザーへ短く確認する。
   スコープ、成功条件、互換性、優先順位、維持したい挙動など、ユーザー判断が必要な open question を整理するときに使う。
   例: 「この挙動は維持するか」「どの案を優先するか」「回答がない場合の default assumption は何か」。
+  依存関係のある複数の設計判断を詰める場合は grill-design を使う。
 ---
 
 # ask-user-questions
 
 repo や source を調べても解けない判断だけを、短く、決定しやすい形でユーザーへ確認するスキル。
 調査で埋められる事実確認や、単なる進捗報告には使いません。
+依存関係のある複数の設計判断は `grill-design` が扱い、承認ゲートは各ゲートを持つ skill が扱います。
 
 ## Hard constraints
 
@@ -34,7 +36,6 @@ repo や source を調べても解けない判断だけを、短く、決定し�
 - `acceptance criteria`
 - `backward compatibility or behavior choice`
 - `operational constraint`
-- `explicit approval for external or risky action`
 
 ### Step 2: Prepare the question
 

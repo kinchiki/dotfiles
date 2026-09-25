@@ -1,19 +1,19 @@
 ---
 name: implement-plan
 description: >-
-  承認済みの実装プランファイルを、同一セッションの継続または新しいセッションで端から端まで実行する。
+  承認済みの実装プランファイルを、参照する design doc と合わせて契約とし、同一セッションの継続または新しいセッションで端から端まで実行する。
   feature branch を作成し、プランの `## タスク` をテスト込みで進め、lint / test を緑にする。
   リスクに応じて ai-review で独立レビューを受け、commit-changes で論理コミットを作り、open-pr-followup で PR 作成後の CI と AI レビュー初回フォローまで進める。
   承認済みプランを渡されて実装を始めるときに使う。
   例: 「implement-plan スキルで実装して」「プランを実装して」
-  ticket-to-plan がプランファイルを指す実装セッションを起動したときにも使う。
-  これは ticket-to-plan → implement-plan → commit-changes → open-pr-followup パイプラインの実装フェーズである。
+  prepare-implementation がプランファイルを指す実装セッションを起動したときにも使う。
+  これは prepare-implementation → implement-plan → commit-changes → open-pr-followup パイプラインの実装フェーズである。
 ---
 
 # implement-plan
 
 承認済みプランを端から端まで実行する: feature branch を作成し、`## タスク` をテスト込みで実装し、lint / test を緑にし、risk に応じた独立レビューを受け、commit-changes と open-pr-followup へ引き継ぐ。
-承認済みプランは contract である。ゴール、受入基準、タスク、対象 files、done_when から外れる必要がない限り re-plan しない。
+承認済みプランと、プランの `Design` が指す design doc の要件・決定事項は contract である。ゴール、受入基準、決定事項、タスク、対象 files、done_when から外れる必要がない限り re-plan しない。
 plan file に `## 動作確認` がある場合は、その指示も contract として扱う。
 
 ## Resources
@@ -28,7 +28,7 @@ plan file に `## 動作確認` がある場合は、その指示も contract �
 - planning / approval mode が有効な場合は、1〜2行の実行 outline だけを示して終了し、plan を再提示・再議論しない。
 - default branch では作業しない。
 - `## タスク` のチェックボックスは orchestrator だけが編集し、進捗の唯一の source として使う。
-- ゴール、受入基準、タスク、対象 files、done_when から外れる scope change が必要な場合は停止して理由を説明する。
+- ゴール、受入基準、決定事項、タスク、対象 files、done_when から外れる scope change が必要な場合は停止して理由を説明する。決定事項に反する必要がある場合は、差し戻しが必要な decision の ID と理由を報告する。
 - 発生可能性と影響に見合う事象だけを専用実装として実装する。低確率で単純なエラー処理で足りる事象は、専用実装の対象外とし、単純なエラー処理で対処する。
 - test を弱める・削除する・skip / pending にしない。
 - AI review の全 finding は severity にかかわらずユーザーへ提示し、項目ごとの修正または見送りの明示承認を得てから対応する。
@@ -42,16 +42,18 @@ plan file に `## 動作確認` がある場合は、その指示も contract �
 
 ### Step 0: Load the plan and prepare the branch
 
-- 指定された絶対パスの plan file と repo convention file（`CLAUDE.md` / `AGENTS.md`）を読む。
+- 指定された絶対パスの plan file、plan の `Design` が指す design doc、repo convention file（`CLAUDE.md` / `AGENTS.md`）を読む。
+- plan の `Status` が `approved` でない場合は停止する。
 - `../ai-review/references/test-selection-policy.md` を読み、計画、実装、レビューで使うテスト選定基準として保持する。
 - plan 全体は要約せず、実行に必要な状態だけを抽出する。
-  - goal: 1 行
-  - acceptance criteria: checklist id
-  - 未チェック task: id、depends_on、files、test、done_when、parallel
+  - goal: design doc の `## 要件` から 1 行
+  - acceptance criteria: design doc の AC ID（sliced の場合は対象スライスの delivers だけ）
+  - decisions: 未チェック task の `implements` が参照する decision の ID と内容
+  - 未チェック task: id、implements、depends_on、files、test、done_when、parallel
   - `## 動作確認`: 要否、対象、各確認ポイント、skip 承認ルール
   - lint / test コマンド（plan が repo convention file より優先）
-- 同じディレクトリにある `_info_for_user.md` は読み込まず、実装 contract として扱わない。
-- plan file と同じディレクトリの今回の実装プランに対応する `_info_for_user.md` を除き、working tree が clean であることを要求する。そうでなければ停止する。
+- design doc の `## レビュー記録` は実装 contract として扱わない。
+- 今回の plan ID のディレクトリ（`.ai-local/plans/<plan-id>/`）を除き、working tree が clean であることを要求する。そうでなければ停止する。
 - clean な tree から feature branch を作る: `git switch -c <type>/<plan-id>-<slug>`。`<type>` は repo convention に従い、既存の ticket branch があれば再利用する。
 
 ### Step 1: Implement tasks in order
@@ -61,7 +63,7 @@ plan file に `## 動作確認` がある場合は、その指示も contract �
   - `task-implementer` が公開されていればそれを使う（Claude では sub-agent、Codex では agent として公開されている場合）。
   - `task-implementer` が無い環境では、その環境の標準 worker（sub-agent 相当）を使う。
   - どちらの worker 機構も使えない環境: 委譲せず **逐次実行**する。逐次実行時の既定モデルは Claude=`sonnet` / Codex=`gpt-5.6-terra`, effort=`high`（上位設定は明示指示があるときだけ）。
-  - worker brief には task 名、intent、期待する成果、許可された file set、追加・更新する test、`test-selection-policy.md`、local convention を含める。
+  - worker brief には task 名、intent、期待する成果、task が従う decision、許可された file set、追加・更新する test、`test-selection-policy.md`、local convention を含める。
   - worker は commit、branch 作成、plan file の編集を行わない。
   - worker が `status: blocked` または `needs-strong-implementer` を返した場合は、その task をチェックせず、serialize するかユーザーに確認する。
 
@@ -96,3 +98,4 @@ plan file に `## 動作確認` がある場合は、その指示も contract �
 
 日本語で報告: 変更概要 / 主な変更ファイル / lint・test 最終結果 / risk 分類と AI review 結果 / ユーザー承認に基づき対応した finding / 見送った finding / 残した blocking finding。
 その後 `commit-changes` で論理 commit を作る。commit 後、`open-pr-followup` で PR 作成と初回 follow-up を行う。
+plan の `Slice` がスライスを指す場合は、design doc の path を渡して `prepare-implementation` を再開すると次のスライスへ進むことを最後に伝える。

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Prepare Implementation"
+  short_description: "チケットや変更依頼から設計を詰め、承認済みの design doc と実装プランを作る"
+  default_prompt: "Use $prepare-implementation to turn a ticket or change request into an approved design doc and implementation plan."
