@@ -6,3 +6,7 @@ __pycache__/
 docs/plans
 .ai-local/verification/*.local.md
 .claude/skills/gh-stack/
+.agents/skills/setup-matt-pocock-skills/
+.agents/skills/grilling/
+.agents/skills/grill-with-docs/
+.agents/skills/domain-modeling/
