@@ -1,9 +1,9 @@
 ---
-name: design-and-ship
+name: simple-design-doc
 description: チケットまたはユーザー指示の内容をもとに、設計を検討してDesign docを作成する
 ---
 
-# design-and-ship
+# simple-design-doc
 
 チケットまたはユーザーで指示された内容について、以下の手順で対応する。
 
