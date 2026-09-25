@@ -1,3 +1,4 @@
 interface:
   display_name: "Simple Design Doc"
-  short_description: "Help with Design Doc tasks"
+  short_description: "確定済みの要件と設計判断を人間が短時間で読める design doc にまとめる"
+  default_prompt: "Use $simple-design-doc to record the settled requirements and design decisions as a concise design doc."

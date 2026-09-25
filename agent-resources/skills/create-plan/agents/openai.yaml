@@ -1,0 +1,4 @@
+interface:
+  display_name: "Create Plan"
+  short_description: "設計確定済みの design doc を承認済みの実装プランに変換する"
+  default_prompt: "Use $create-plan to turn a settled design doc into an approved implementation plan with human and AI review."

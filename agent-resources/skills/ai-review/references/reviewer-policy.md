@@ -1,6 +1,6 @@
 # Reviewer Policy
 
-code review と plan review で reviewer を選び、結果を扱うときに使う。
+code review、design review、plan review で reviewer を選び、結果を扱うときに使う。
 
 ## Independence
 

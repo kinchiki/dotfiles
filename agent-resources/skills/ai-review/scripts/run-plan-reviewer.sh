@@ -271,7 +271,7 @@ case "$reviewer" in
         --effort "$effort" \
         --output-format stream-json \
         --verbose \
-        "標準入力の review packet を読み、 read only で実装用の draft plan をレビューする。" \
+        "標準入力の review packet を読み、 read only で実装前の design doc または draft plan をレビューする。" \
         < "$review_prompt" > "$review_events" 2> "$review_err"
     ) || status=$?
     ;;

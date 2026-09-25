@@ -11,7 +11,7 @@ description: >-
 # open-pr
 
 既に commit 済みの branch を push し、チームの期待に沿った pull request を作るスキル。
-`ticket-to-plan` → `implement-plan` → `commit-changes` → `open-pr` の最後の段階として使える。
+`prepare-implementation` → `implement-plan` → `commit-changes` → `open-pr` の最後の段階として使える。
 
 ## Scope
 
