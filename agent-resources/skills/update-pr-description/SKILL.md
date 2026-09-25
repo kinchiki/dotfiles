@@ -22,14 +22,19 @@ GitHub PR の description/body を、現在の実装内容に合わせて更新�
 ## Resources
 
 - `references/pr-description-update-commands.md`: PR 特定、body 取得、更新前確認、`gh pr edit` 実行条件が必要になったら読む。
-- `../open-pr/references/pr-body-template.md`: 現在の PR body が空で、repo 固有 template も見当たらない場合だけ読む。
+- `../open-pr/references/pr-body-template.md`: PR body を作成・更新する前に読む。現在の PR body が空で、repo 固有 template も見当たらない場合は template 部分も使う。
+
+## PR descriptionの書き方
+
+PR description の方針は `../open-pr/references/pr-body-template.md` の「PR descriptionの書き方」を正典とする。
+既存の body を更新するときも、実装手順や diff から分かる情報を残さず、同じ方針を適用する。
 
 ## Hard constraints
 
 - PR 番号、`owner/repo#123`、PR URL の順で対象 PR を優先して解決する。
 - 指定がなければ current branch の PR を使う。
-- 実装と矛盾しない既存 section は保持する。
-- 実装と矛盾する section、古い検証結果、見出しだけ残って中身が空の section だけを更新または整理する。
+- 実装と矛盾しない既存 section は保持する。ただし、実装手順や diff から分かる情報など、共通方針に反する冗長な説明は削除・整理する。
+- 実装と矛盾する section、古い検証結果、見出しだけ残って中身が空の section を更新または整理する。
 - 本文更新が不要なら `gh pr edit` を実行しない。
 - 単独実行時は `gh pr edit` の前に、更新要約をユーザーへ示して確認を取る。
 - 呼び出し元 skill が PR description 更新まで承認済みなら、その承認を使ってよい。
@@ -47,13 +52,14 @@ GitHub PR の description/body を、現在の実装内容に合わせて更新�
 
 - 現在の実装差分、ユーザーが明示した補足を集める。
 - PR body にすでに書かれている内容と、現在の実装で変わった点を比較する。
-- repo 固有の PR template や section 構成が見える場合は、それを維持する。
-- 現在の PR body が空で、repo 固有 template も見当たらない場合だけ `../open-pr/references/pr-body-template.md` を読む。
+- repo 固有の PR template や section 構成が見える場合は、それを維持しながら共通方針に沿って内容を整える。
+- `../open-pr/references/pr-body-template.md` の「PR descriptionの書き方」を適用する。
+- 現在の PR body が空で、repo 固有 template も見当たらない場合は、同 reference の template を使う。
 
 ### Step 2: Draft the minimal update
 
-- 読み手が最終実装を理解するために必要な差分だけを body に反映する。
-- 非自明な設計判断、意図的に見送った項目、レビュワーに再確認してほしい点がある場合だけ短い note を足す。
+- 「何を変更したか」と「レビュアーが見るべき点」に絞り、読み手が最終実装を理解するために必要な差分だけを body に反映する。
+- 非自明な設計判断、意図的に見送った項目、レビュアーに再確認してほしい点がある場合だけ短い note を足す。
 - テスト欄や検証欄は、実行していないことを完了済みのように書き換えない。
 - 更新後 body の要約を作る。
 - 差分がなければ「変更なし」と判定して Step 4 へ進む。

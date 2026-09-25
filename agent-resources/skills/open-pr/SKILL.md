@@ -23,7 +23,12 @@ description: >-
 
 ## Resources
 
-- `references/pr-body-template.md`: Step 2 で repo 固有 template がない場合に読む。
+- `references/pr-body-template.md`: PR body を作成する前に読む。repo 固有 template がない場合は template 部分も使う。
+
+## PR descriptionの書き方
+
+PR description の方針は `references/pr-body-template.md` の「PR descriptionの書き方」を正典とする。
+repo 固有 template がある場合も、その構成を維持しながら同じ方針で本文を作成する。
 
 ## Hard constraints
 
@@ -69,9 +74,9 @@ gh pr create --base <default-branch> --title "<title>" --body "<body>" --assigne
 - Title は `<チケット名> <実装内容概要>` の形式で書く。
 - team が日本語で PR を書く場合は日本語にする。
 - ticket key を title に含める convention がある場合は `<チケット名>` に反映し、なければ `<チケット名> ` は空にする。
-- Body は plan と ticket から生成する。
+- Body は plan と ticket を参照し、`references/pr-body-template.md` の方針に沿って必要な内容だけを書く。
 - `.github/pull_request_template.md` がある場合は、generic body ではなく template を埋める。
-- repo 固有 template がない場合は `references/pr-body-template.md` の generic body を使う。
+- repo 固有 template がない場合は `references/pr-body-template.md` の template を使う。
 
 ### Step 3: Report
 
