@@ -61,10 +61,10 @@ Claude Code がレビュー対象を作成した場合は、Claude Code の `san
 環境変数の前置、パイプ、リダイレクト、`&&`、`tee` を付けず、展開済み絶対パスまたはdotfiles実体パスを使わない。
 
 ```bash
-~/.claude/skills/ai-review/scripts/run-plan-review-codex.sh --repo "<absolute repo path>" --prompt-file "<review packet file>" --model gpt-5.6-luna --effort high
+~/.claude/skills/ai-review/scripts/run-plan-review-codex.sh --repo "<absolute repo path>" --prompt-file "<review packet file>" --model gpt-6-luna --effort high
 ```
 
-high risk の場合は `--model gpt-5.6-terra` を使う。
+high risk の場合は `--model gpt-6-luna -effort xhigh` を使う。
 wrapper が `BLOCKED: nested sandbox-exec` を返した場合は、コマンド形を戻して1回だけ再実行し、再度 `BLOCKED` なら停止する。
 wrapper が exit 7 を返した場合は `reviewer-policy.md` の trust 判定に従う。
 結果を調査するときは `--keep-temp` を付け、一時ディレクトリの `review.err` と `review.jsonl` を読む。

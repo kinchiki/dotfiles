@@ -159,7 +159,7 @@ fi
 case "$reviewer" in
   codex)
     # this path runs a plain `codex exec` prompt review, not the `codex exec review` subcommand.
-    model="${model:-${CODEX_REVIEW_MODEL:-gpt-5.6-luna}}"
+    model="${model:-${CODEX_REVIEW_MODEL:-gpt-6-luna}}"
     effort="${effort:-${CODEX_REVIEW_EFFORT:-high}}"
     ;;
   claude)

@@ -40,10 +40,10 @@ Claude Code が実装した場合は、Claude Code の `sandbox.excludedCommands
 環境変数の前置、パイプ、リダイレクト、`&&`、`tee` を付けず、model と effort は flag で渡す。
 
 ```bash
-~/.claude/skills/ai-review/scripts/run-code-review-codex.sh --model gpt-5.6-luna --effort high
+~/.claude/skills/ai-review/scripts/run-code-review-codex.sh --model gpt-6-luna --effort high
 ```
 
-high risk の場合は `--model gpt-5.6-terra` を使う。
+high risk の場合は `--model gpt-6-luna --effort xhigh` を使う。
 wrapper が `BLOCKED: nested sandbox-exec` を返した場合は、コマンド形を戻して1回だけ再実行し、再度 `BLOCKED` なら停止する。
 
 ## Result

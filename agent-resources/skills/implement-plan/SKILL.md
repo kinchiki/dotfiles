@@ -61,7 +61,7 @@ description: >-
 - plan の `Risk` が low・medium で、depends_on を満たした ready な task が複数あり、各 task に重ならない file set を実行時に割り当てられる場合に限り、worker へ並列に委譲する。それ以外は serialize する。委譲先はその環境で公開されているかで選ぶ:
   - `task-implementer` が公開されていればそれを使う（Claude では sub-agent、Codex では agent として公開されている場合）。
   - `task-implementer` が無い環境では、その環境の標準 worker（sub-agent 相当）を使う。
-  - どちらの worker 機構も使えない環境: 委譲せず **逐次実行**する。逐次実行時の既定モデルは Claude=`sonnet` / Codex=`gpt-5.6-terra`, effort=`high`（上位設定は明示指示があるときだけ）。
+  - どちらの worker 機構も使えない環境: 委譲せず **逐次実行**する。逐次実行時の既定モデルは Claude=`sonnet` / Codex=`gpt-6-luna`, effort=`high`（上位設定は明示指示があるときだけ）。
   - worker brief は承認済み plan の task を実コードに合わせて具体化したものにし、task の範囲を広げない。
   - worker brief には task 名、intent、期待する成果と `done_when`、task が従う decision、`## 変更面` の制約、実行時に割り当てた file set、追加・更新する test、`test-selection-policy.md`、local convention を含める。
   - worker は commit、branch 作成、plan file の編集を行わない。
