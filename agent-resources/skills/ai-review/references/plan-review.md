@@ -24,9 +24,10 @@
 - design.md の受入基準（sliced では対象スライスの delivers）のうち、どのタスクの `implements` にも含まれないもの
 - `decided` の decision に反するタスク、または design.md のやらないことへの逸脱
 - data flow、auth / permission、background job、API、migration、互換性の見落とし
-- task の順序、依存関係、`parallel: yes` の安全性
+- task の順序と依存関係
+- `## 変更面` の宣言漏れ、または宣言した面を実装するタスクの欠落
 - テスト範囲、lint / test command、観測可能な `done_when`
-- scope creep、不要な抽象化、fresh session に対する自己完結性
+- scope creep、不要な抽象化、fresh session に対する自己完結性（entry point、既存パターン、`done_when` で判断し、想定変更箇所は非拘束として扱う）
 - `test-selection-policy.md` が除外する標準保証の直接テスト要求
 
 P1 / P2 には、元ソース、design.md、または調査したコードの根拠を含めるよう reviewer へ指示する。

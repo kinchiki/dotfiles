@@ -1,9 +1,9 @@
 ---
 name: create-plan
 description: >-
-  設計確定済みの design.md（sliced の変更では1スライス）を、fresh session でも実装できるタスク分解の実装プラン（plan.md）に変換し、human review、実行前確認付きの独立AIレビュー、finding ごとの採否、最終承認まで進める。
-  prepare-implementation から plan 作成を委譲されたとき、または「この設計から実装プランを作って」と依頼されたときに使う。
-  承認済みの plan.md は design.md と合わせて implement-plan の契約になる。
+  prepare-implementation の plan 作成フェーズとして、設計確定済みの design.md（sliced の変更では1スライス）を、fresh session でも実装できるタスク分解の実装プラン（plan.md）に変換し、human review、実行前確認付きの独立AIレビュー、finding ごとの採否、最終承認まで進める。
+  prepare-implementation から plan 作成を委譲されたときだけ使う。
+disable-model-invocation: true
 ---
 
 # create-plan
@@ -12,6 +12,7 @@ design.md の決定を変えずに、「どう・どの順で作るか」を pla
 
 ## 参照先
 
+- `../prepare-implementation/SKILL.md`: Step 1 で prepare-implementation から委譲されていないと判断したときに読む。
 - `../simple-design-doc/references/design-doc-template.md`: Step 1 で design.md を読む直前に読む。
 - `references/task-decomposition.md`: Step 2 の影響範囲の調査とタスク分解を始める前に読む。
 - `../ai-review/references/test-selection-policy.md`: Step 2 でテスト方針と各タスクの `test` を決める直前に読む。
@@ -34,6 +35,7 @@ design.md の決定を変えずに、「どう・どの順で作るか」を pla
 
 ### Step 1: 入力を確認する
 
+prepare-implementation から委譲されていない場合は、plan を作らず、`../prepare-implementation/SKILL.md` を読んで design.md を入力に再開する。
 design.md の全文と repo の convention file を読む。
 sliced の場合は対象スライスを特定する。
 指定が無い場合は、blocked_by がすべて完了済みで plan が未作成の最初のスライスを対象にする。
@@ -44,9 +46,10 @@ sliced の場合は対象スライスを特定する。
 
 ### Step 3: human review を受ける
 
-plan.md の要約、タスク分解、各タスクと受入基準・decision の対応を提示してレビューを求める。
+plan.md の要約、`## 変更面`、各タスクと受入基準・decision の対応、各タスクの `done_when`、テスト方針、`Risk` を提示してレビューを求める。
 この時点で AI review が未実施であることを明記する。
-このレビューで確定するのは「plan.md が design.md を忠実に実装していること」であり、design.md の決定は対象外であることを示す。
+このレビューで確定するのは、plan-template の拘束項目が design.md を忠実に実装していることと `Risk` であり、design.md の決定と非拘束項目は対象外であることを示す。
+Step 4 で採用する指摘が無い場合は、この承認を最終承認として扱うことも示す。
 承認UIがある環境では、それを使う。
 
 plan.md の範囲のフィードバックは仕様として扱い、前提が変わる場合は影響範囲を再調査して plan.md を更新し、再提示する。
@@ -60,12 +63,11 @@ reviewer には、ユーザーレビュー済みの最新の plan.md と design.
 
 ### Step 5: 最終承認を得る
 
-human review 以降の変更点（採用した指摘の反映内容）と、見送った指摘を提示して最終承認を得る。
-変更点が無い場合は、その旨を示す。
+Step 4 で採用した指摘がある場合は、human review 以降の変更点（採用した指摘の反映内容）と、見送った指摘を提示して最終承認を得る。
+review を実行しなかった場合、または採用した指摘が無い場合は、Step 3 の承認を最終承認として扱う。
 追加のフィードバックは Step 3 と同じように扱い、plan.md が実質的に変わった場合は review-gate の再レビュー確認に従う。
 承認後、plan.md を `Status: approved` にする。
 sliced の場合は、plan.md の path を design.md の `## スライス` に記録するよう呼び出し元へ返す。
-呼び出し元が prepare-implementation でない場合は、自分で記録する。
 最終承認後も、実装は開始しない。
 
 ## Report

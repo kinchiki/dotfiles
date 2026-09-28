@@ -13,22 +13,21 @@ description: >-
 # implement-plan
 
 承認済みプランを端から端まで実行する: feature branch を作成し、`## タスク` をテスト込みで実装し、lint / test を緑にし、risk に応じた独立レビューを受け、commit-changes と open-pr-followup へ引き継ぐ。
-承認済みプランと、プランの `Design` が指す design doc の要件・決定事項は contract である。ゴール、受入基準、決定事項、タスク、対象 files、done_when から外れる必要がない限り re-plan しない。
-plan file に `## 動作確認` がある場合は、その指示も contract として扱う。
+承認済みプランの拘束項目と、プランの `Design` が指す design doc の要件・決定事項は contract である。contract から外れる必要がない限り re-plan しない。
 
 ## Resources
 
+- `../create-plan/references/plan-template.md`: Step 0 で plan file を読む直前に `## 拘束力` を読み、拘束項目と非拘束項目の区別に使う。
 - `../ai-review/SKILL.md`: lint / test が緑になり、実際の diff が medium または high risk に分類された後にコードレビューを委譲する直前に読む。low risk では読まない。
 - `../ai-review/references/test-selection-policy.md`: Step 0 でテスト方針を抽出する直前に読む。
-- `../create-verification/SKILL.md`: plan の `## 動作確認` が yes で、コミット前 verification の準備をする直前に読む。
-- `../run-verification/SKILL.md`: plan の `## 動作確認` が yes で、コミット前 verification を実行する直前に読む。
 
 ## Hard constraints
 
 - planning / approval mode が有効な場合は、1〜2行の実行 outline だけを示して終了し、plan を再提示・再議論しない。
 - default branch では作業しない。
-- `## タスク` のチェックボックスは orchestrator だけが編集し、進捗の唯一の source として使う。
-- ゴール、受入基準、決定事項、タスク、対象 files、done_when から外れる scope change が必要な場合は停止して理由を説明する。決定事項に反する必要がある場合は、差し戻しが必要な decision の ID と理由を報告する。
+- `## タスク` のチェックボックスと `## 実行メモ` は orchestrator だけが編集し、チェックボックスを進捗の唯一の source として使う。
+- 次のいずれかが必要な場合は scope change として停止し、理由を説明する: ゴール・受入基準・決定事項・やらないことに反する / plan の拘束項目を変える / `## 変更面` に無い面を変更する。決定事項に反する必要がある場合は、差し戻しが必要な decision の ID と理由を報告する。
+- 拘束項目を変えない逸脱（`## 影響範囲と既存パターン` に無い test・fixture・生成物・同じモジュール内の file の変更、command の修正など）は停止せずに進める。後続 task、再開したセッション、reviewer が知るべき逸脱は `## 実行メモ` に1行で記録する。
 - 発生可能性と影響に見合う事象だけを専用実装として実装する。低確率で単純なエラー処理で足りる事象は、専用実装の対象外とし、単純なエラー処理で対処する。
 - test を弱める・削除する・skip / pending にしない。
 - AI review の全 finding は severity にかかわらずユーザーへ提示し、項目ごとの修正または見送りの明示承認を得てから対応する。
@@ -49,8 +48,8 @@ plan file に `## 動作確認` がある場合は、その指示も contract �
   - goal: design doc の `## 要件` から 1 行
   - acceptance criteria: design doc の AC ID（sliced の場合は対象スライスの delivers だけ）
   - decisions: 未チェック task の `implements` が参照する decision の ID と内容
-  - 未チェック task: id、implements、depends_on、files、test、done_when、parallel
-  - `## 動作確認`: 要否、対象、各確認ポイント、skip 承認ルール
+  - 未チェック task: id、implements、depends_on、done_when、test
+  - `## 変更面` と `## 実行メモ`
   - lint / test コマンド（plan が repo convention file より優先）
 - design doc の `## レビュー記録` は実装 contract として扱わない。
 - 今回の plan ID のディレクトリ（`.ai-local/plans/<plan-id>/`）を除き、working tree が clean であることを要求する。そうでなければ停止する。
@@ -59,25 +58,27 @@ plan file に `## 動作確認` がある場合は、その指示も contract �
 ### Step 1: Implement tasks in order
 
 - 未チェック task を依存順に実装する。基本は sequential に進める。
-- `parallel: yes` かつ `files` が重ならない ready な task で、かつ low・medium risk の場合に限り worker へ委譲する。それ以外は serialize する。委譲先はその環境で公開されているかで選ぶ:
+- plan の `Risk` が low・medium で、depends_on を満たした ready な task が複数あり、各 task に重ならない file set を実行時に割り当てられる場合に限り、worker へ並列に委譲する。それ以外は serialize する。委譲先はその環境で公開されているかで選ぶ:
   - `task-implementer` が公開されていればそれを使う（Claude では sub-agent、Codex では agent として公開されている場合）。
   - `task-implementer` が無い環境では、その環境の標準 worker（sub-agent 相当）を使う。
   - どちらの worker 機構も使えない環境: 委譲せず **逐次実行**する。逐次実行時の既定モデルは Claude=`sonnet` / Codex=`gpt-5.6-terra`, effort=`high`（上位設定は明示指示があるときだけ）。
-  - worker brief には task 名、intent、期待する成果、task が従う decision、許可された file set、追加・更新する test、`test-selection-policy.md`、local convention を含める。
+  - worker brief は承認済み plan の task を実コードに合わせて具体化したものにし、task の範囲を広げない。
+  - worker brief には task 名、intent、期待する成果と `done_when`、task が従う decision、`## 変更面` の制約、実行時に割り当てた file set、追加・更新する test、`test-selection-policy.md`、local convention を含める。
   - worker は commit、branch 作成、plan file の編集を行わない。
-  - worker が `status: blocked` または `needs-strong-implementer` を返した場合は、その task をチェックせず、serialize するかユーザーに確認する。
+  - 委譲の前後で `git status --short` と `git diff` を比較して worker が変更した file を特定し、割り当てた file set の外の変更がある場合は、その task をチェックせずに原因を確認する。
+  - worker が file set の不足で `status: blocked` を返し、追加する file が拘束項目を変えない場合は、file set を広げて再委譲するか orchestrator が実装する。
+  - それ以外の `status: blocked` または `needs-strong-implementer` の場合は、その task をチェックせず、serialize するかユーザーに確認する。
 
 ### Step 2: Run targeted checks and mark tasks done
 
 - task が production code に触れる、挙動を変える、medium・high risk である、または後で失敗箇所の特定が難しくなる場合だけ、その task の後に targeted lint / test を実行する。docs / copy / type のみの task はまとめて実行してよい。
 - task の `test` と `done_when` が通った場合だけ `- [x]` にする。
 
-### Step 3: Run the full suite and classify risk
+### Step 3: Run the full suite, trace the diff, and classify risk
 
 - review や引き継ぎの前に、該当する full lint / test suite を実行する。失敗した場合は修正して再実行し、最大 3 round までとする。それでも失敗する場合は停止して出力を報告する。
-- plan の `## 動作確認` が yes の場合は、full lint / test が緑になった後、commit 前に `create-verification` で verification を生成または更新し、`run-verification` を実行するかスキップするかをユーザーに確認する。
-- ユーザーが実行を選んだ場合は `run-verification` を進める。スキップを選んだ場合は、理由と承認を plan の運用記録として報告に残す。
-- lint / test が緑になったら、実際の diff を分類する。
+- lint / test が緑になったら、今回の plan ID のディレクトリを除く `git status --short` の全変更 file をタスク ID に対応づける（diff trace）。どのタスクにも対応しない変更は戻すか、scope change として停止する。`## 変更面` に無い面を変更していないことも確認する。
+- diff trace の後、実際の diff を分類する。
   - low: docs・comment・copy・軽微な type / test / UI 文言・style の変更 → self-review のみ。
   - medium: 通常の feature・bugfix・UI 挙動・API 隣接の変更 → 独立 review を 1 回。
   - high: auth・billing・permission・data 削除・migration・security・production data・広範な refactor・影響範囲不明 → 独立 review。P1 / P2 修正後にもう一度 review をするかユーザーに確認する。
@@ -96,6 +97,6 @@ plan file に `## 動作確認` がある場合は、その指示も contract �
 
 ## Report
 
-日本語で報告: 変更概要 / 主な変更ファイル / lint・test 最終結果 / risk 分類と AI review 結果 / ユーザー承認に基づき対応した finding / 見送った finding / 残した blocking finding。
+日本語で報告: 変更概要 / 主な変更ファイルと対応するタスク / `## 実行メモ` に記録した逸脱 / lint・test 最終結果 / risk 分類と AI review 結果 / ユーザー承認に基づき対応した finding / 見送った finding / 残した blocking finding。
 その後 `commit-changes` で論理 commit を作る。commit 後、`open-pr-followup` で PR 作成と初回 follow-up を行う。
 plan の `Slice` がスライスを指す場合は、design doc の path を渡して `prepare-implementation` を再開すると次のスライスへ進むことを最後に伝える。

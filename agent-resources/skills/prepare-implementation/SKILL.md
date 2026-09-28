@@ -2,7 +2,7 @@
 name: prepare-implementation
 description: >-
   GitHub や Linear のチケット、またはユーザーの自然言語の変更依頼を受け取り、要件の解決、分類、grill-design による設計判断、design review、create-plan による実装プラン作成を順に進めて、承認済みの design.md と plan.md を作る入口の orchestrator。
-  ユーザーがチケットや変更依頼を示して実装前の準備を求めたとき、または途中まで進んだ design.md / plan.md から再開するときに使う。
+  ユーザーがチケットや変更依頼を示して実装前の準備を求めたとき、design.md から実装プランを作るよう依頼されたとき、または途中まで進んだ design.md / plan.md から再開するときに使う。
   承認後は実装開始の確認を得て implement-plan へ進むか、別セッションへ引き継ぐ。
 ---
 
@@ -44,9 +44,9 @@ sliced の変更では、design.md を1つ作り、create-plan と実装開始�
 | 設計方針の選択 | grill-design | 各ラウンドの decision |
 | 設計確定 | grill-design | design.md の要件、決定事項、設計、スライス（`Status: designed`） |
 | design review の実行確認と指摘の採否 | prepare-implementation | review を実行するか、各指摘の採用・見送り |
-| plan の human review | create-plan | plan.md が design.md を忠実に実装していること |
+| plan の human review | create-plan | plan.md の拘束項目が design.md を忠実に実装していることと `Risk` |
 | plan review の実行確認と指摘の採否 | create-plan | review を実行するか、各指摘の採用・見送り |
-| 最終承認 | create-plan | human review 以降の変更点と plan.md 全体（`Status: approved`） |
+| 最終承認 | create-plan | 採用した指摘の反映と plan.md 全体（`Status: approved`）。採用した指摘が無い場合は human review の承認が兼ねる |
 | 実装開始 | prepare-implementation | 同一セッションで実装するか、引き継ぐか |
 | commit / push / PR | implement-plan 以降の各 skill | 外部への操作 |
 
@@ -57,5 +57,5 @@ sliced の変更では、design.md を1つ作り、create-plan と実装開始�
 - **Step 2: 調査して分類する。** コードベースを read-only で調査し、simple / non-simple と single / sliced を判定して、分類と理由をヘッダーに書き、ユーザーへ示す。simple の場合は `## 決定事項` と `## リスク` を書き、`Status: designed` にして Step 5 へ進む。
 - **Step 3: 設計判断を詰める。** grill-design に design.md と設計判断の候補を渡し、`Status: designed` になるまで任せる。
 - **Step 4: design review を実行する。** review-gate に従い、実行前確認、ai-review の design review mode、指摘の採否を進める。採用した指摘は review-gate の指摘タグに応じた戻し先で反映し、設計確定後に review-gate の再レビュー確認へ進む。
-- **Step 5: plan を作る。** create-plan に design.md を渡し、sliced の場合は対象スライスを指定する。返された plan.md の path を `## スライス` に記録する。
+- **Step 5: plan を作る。** `../create-plan/SKILL.md` を読んで同じセッションで従い、design.md と、sliced の場合は対象スライスを入力にする。返された plan.md の path を `## スライス` に記録する。
 - **Step 6: 実装を続行または引き継ぐ。** デフォルトは同一セッションとし、実装開始の承認を得てから `implement-plan` を起動する。コンテキストが乏しい、大規模・high risk、または sliced で同じセッションが直前のスライスを実装した場合は、working directory、design.md と plan.md の絶対パス、plan ID、次に使う skill を含む自己完結した引き継ぎ文を1つの fenced code block で提示し、実装や別 agent の起動を行わず停止する。sliced の場合は、スライスの実装後に design.md の path を渡してこの skill を再開すると次のスライスへ進むことを伝える。選んだ経路、理由、入力要約、保存先、分類、主要な decision、タスク概要、AI review の結果を報告する。
