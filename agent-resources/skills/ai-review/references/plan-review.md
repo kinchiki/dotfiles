@@ -1,44 +1,47 @@
 # Plan Review
 
-ユーザーレビュー済みの draft plan を最終承認前に独立レビューするときだけ使う。
-目的はユーザーに代わって承認することではなく、元ソースとユーザー確認済みの意図に照らしてプランの問題を発見することである。
+設計とタスクをまとめた実装プラン（plan.md）を、最終承認前に独立レビューするときだけ使う。
+目的はユーザーに代わって承認することではなく、元ソースとユーザーの判断に照らして設計とプランの問題を発見することである。
 
 ## Build the review packet
 
 `test-selection-policy.md` を読み、プラン評価に必要な次のコンテキストだけを review packet に含める。
 
-- draft plan file の絶対パスと最新の全文
-- plan が参照する design.md の絶対パスと最新の全文
+- plan.md の絶対パスと最新の全文
 - 元ソースの参照先またはユーザー依頼の抜粋
 - planner が調査した path と既存 pattern
-- design.md の `## レビュー記録` で見送り済みの指摘
+- plan.md の `## AIレビュー` で見送り済みの指摘
 - `test-selection-policy.md` の内容
 
-元ソース、design.md の要件、`decided` の decision を source of truth とするよう reviewer へ指示する。
-具体的な安全性、データ損失、実装不可能、repository constraint がある場合を除き、decision の変更やユーザーが維持を明示した挙動の変更を提案させない。
-各指摘に `review-gate.md` の `## 指摘タグ` のいずれか1つを付けさせる。design.md に関わるタグは、具体的な根拠がある場合だけ使わせる。
+元ソース、plan.md の `## 要件`、`### ユーザー判断` を source of truth とするよう reviewer へ指示する。
+`### ユーザー判断` はユーザーが決めた判断であると reviewer へ伝える。
+具体的な安全性、データ損失、実装不可能、要件違反、repository constraint の根拠がある場合を除き、ユーザー判断の変更やユーザーが維持を明示した挙動の変更を提案させない。
+sliced の場合は、対象スライスを伝え、`outline` のスライスのタスクを指摘の対象にさせない。
 見送り済みの指摘を再提起させない。
 
 ## Review focus
 
-- design.md の受入基準（sliced では対象スライスの delivers）のうち、どのタスクの `implements` にも含まれないもの
-- `decided` の decision に反するタスク、または design.md のやらないことへの逸脱
-- data flow、auth / permission、background job、API、migration、互換性の見落とし
-- task の順序と依存関係
-- `## 変更面` の宣言漏れ、または宣言した面を実装するタスクの欠落
+- 受入基準（sliced では対象スライスの delivers）を満たさない設計、またはどのタスクの `implements` にも含まれない受入基準
+- 決定事項同士の矛盾、決定事項に反する設計やタスク、やらないことへの逸脱
+- ユーザー判断が必要なのに `### AI判断` で決めている判断、またはどこにも記録されていない判断
+- 調査したコードや既存 pattern と食い違う前提
+- data flow、auth / permission、background job、API、migration、互換性、運用特性の見落とし
+- `## 変更面` の宣言漏れ、宣言した面を実装するタスクの欠落、`## 展開順` の誤りや欠落
+- タスクの順序と依存関係、sliced ではスライスの独立性と blocked_by
 - テスト範囲、lint / test command、観測可能な `done_when`
-- scope creep、不要な抽象化、fresh session に対する自己完結性（entry point、既存パターン、`done_when` で判断し、想定変更箇所は非拘束として扱う）
+- まれなケースへの過剰な実装（低確率で単純なエラー処理で足りる事象への専用の処理）
+- scope creep、不要な抽象化、fresh session に対する自己完結性（entry point、既存 pattern、`done_when` で判断し、想定変更箇所は非拘束として扱う）
 - `test-selection-policy.md` が除外する標準保証の直接テスト要求
 
-P1 / P2 には、元ソース、design.md、または調査したコードの根拠を含めるよう reviewer へ指示する。
+P1 / P2 には、元ソース、plan.md、または調査したコードの根拠を含めるよう reviewer へ指示する。
+各指摘には、対象のセクションまたは ID（AC、D、A、T など）を示させる。
 必須のローカル inspection 指示と `BLOCKED` を返してよい条件は wrapper が review packet へ追記するため、packet 本文では省略する。
 
 ## Run the reviewer
 
 - review packet を一時ファイルへ先に書き、その絶対パスを `--prompt-file` に渡す。
-- production code、skill、plan file、design.md の編集を禁止し、read-only mode を使う。
-- script は reviewer 実行だけを行い、packet 構築や plan / design.md の更新を行わない。
-- design review もこの節の wrapper とコマンドを使う。
+- production code、skill、plan file の編集を禁止し、read-only mode を使う。
+- script は reviewer 実行だけを行い、packet 構築や plan の更新を行わない。
 
 ### Run Claude reviewer
 
@@ -64,7 +67,7 @@ Claude Code がレビュー対象を作成した場合は、Claude Code の `san
 ~/.claude/skills/ai-review/scripts/run-plan-review-codex.sh --repo "<absolute repo path>" --prompt-file "<review packet file>" --model gpt-6-luna --effort high
 ```
 
-high risk の場合は `--model gpt-6-luna -effort xhigh` を使う。
+high risk の場合は `--model gpt-6-luna --effort xhigh` を使う。
 wrapper が `BLOCKED: nested sandbox-exec` を返した場合は、コマンド形を戻して1回だけ再実行し、再度 `BLOCKED` なら停止する。
 wrapper が exit 7 を返した場合は `reviewer-policy.md` の trust 判定に従う。
 結果を調査するときは `--keep-temp` を付け、一時ディレクトリの `review.err` と `review.jsonl` を読む。

@@ -1,61 +1,81 @@
 ---
 name: prepare-implementation
 description: >-
-  GitHub や Linear のチケット、またはユーザーの自然言語の変更依頼を受け取り、要件の解決、分類、grill-design による設計判断、design review、create-plan による実装プラン作成を順に進めて、承認済みの design.md と plan.md を作る入口の orchestrator。
-  ユーザーがチケットや変更依頼を示して実装前の準備を求めたとき、design.md から実装プランを作るよう依頼されたとき、または途中まで進んだ design.md / plan.md から再開するときに使う。
-  承認後は実装開始の確認を得て implement-plan へ進むか、別セッションへ引き継ぐ。
+  GitHub や Linear のチケット、またはユーザーの自然言語の変更依頼から、設計とタスクを1ファイルにまとめた承認済みの実装プラン（plan.md）を作り、implement-plan へ渡す。
+  ユーザーが判断すべき設計判断だけを質問し、内容のブリーフィング、実行前承認付きの AI レビュー、最終承認を経て実装開始か引き継ぎへ進む。
+  チケットや変更依頼を示して実装前の準備を求められたとき、「設計を詰めたい」「実装プランを作って」と依頼されたとき、途中まで進んだ plan.md から再開するとき、または sliced の次のスライスへ進むときに使う。
 ---
 
 # prepare-implementation
 
-チケットまたは依頼から承認済みの design.md と plan.md を作り、implement-plan へ渡す。
-各フェーズは専門 skill に委譲し、このスキルは入力の解決、分類、フェーズの順序、design review と実装開始のゲート、引き継ぎを持つ。
+チケットまたは依頼から承認済みの plan.md を作り、implement-plan へ渡す。
+plan.md は「何を・なぜ」と「どう・どの順で」を1ファイルで持ち、このスキルだけが書く（`## タスク` のチェックボックスと `## 実行メモ` を除く）。
 
 ```text
-Resolve → 分類 ─ simple ────────────────────────────────────┐
-                └ non-simple → grill-design → design review ─┴→ create-plan → 実装開始
+入力の解決 → 調査と質問 → plan.md 作成 → self-check
+  → [G1] 内容の理解 ＋ AIレビューの実行可否
+  → AIレビュー（G1 で見送った場合は行わない）
+  → [G2] 指摘の採否 ＋ 最終承認 ＋ 実装開始か引き継ぎか
 ```
-
-sliced の変更では、design.md を1つ作り、create-plan と実装開始をスライスごとに繰り返す。
 
 ## 参照先
 
 - `references/source-resolution.md`: Step 1 で入力種別を判定して内容を取得する前に読む。
-- `../simple-design-doc/references/design-doc-template.md`: Step 0 で既存の design.md を読む、または Step 1 で design.md を作成する直前に読む。
-- `../ask-user-questions/SKILL.md`: Step 1 で入力の不足をユーザーへ確認する直前に読む。
-- `references/triage.md`: Step 2 の調査と分類を始める前に読む。
-- `../grill-design/SKILL.md`: Step 3 で設計判断へ進む直前に読む。
-- `../ai-review/references/review-gate.md`: Step 4 で design review の実行確認を求める直前に読み、finding の採否まで従う。
-- `../grill-design/references/decision-log.md`: design review の指摘を採用して decision を差し戻すときに読む。
-- `../create-plan/SKILL.md`: Step 5 で plan 作成へ進む直前に読む。
+- `references/decisions.md`: Step 2 の調査と質問を始める前に読む。G1 や G2 で新しいユーザー判断が生じたときにも従う。
+- `references/plan-template.md`: Step 0 で既存の plan.md を読む前、および Step 3 で plan.md を書く前に読む。
+- `references/gates.md`: Step 4 の self-check を始める前に読み、G2 まで従う。
 - `../implement-plan/SKILL.md`: Step 6 で同一セッションの実装開始が承認された後、実装へ進む直前に読む。
 
 ## 必須制約
 
-- orchestrator は現在の AI agent で利用できる上位推論モデルを使う。満たせない、または確認できない場合は一度警告し、ユーザーが明示的に品質上の不利益を受け入れた場合だけ続行する。
+- 現在の AI agent で利用できる上位推論モデルを使う。満たせない、または確認できない場合は一度警告し、ユーザーが明示的に品質上の不利益を受け入れた場合だけ続行する。
 - 準備中は production code を編集しない。書き込むのは `.ai-local/plans/<plan-id>/` 配下だけにする。
-- design.md は template の section ownership に従って書き、他の skill が書き手のセクションを直接書き換えない。
-- 確定済みの decision と承認済みの plan を後続のゲートで聞き直さない。変更は差し戻しだけで行う。
-- 各ゲートでは、次の表の「確定するもの」だけを承認の対象として提示する。
-- 最終承認は計画内容の承認として扱い、実装開始は Step 6 で別途確認する。
+- ユーザーに聞くのは `references/decisions.md` の「ユーザーに聞く判断」だけにする。repo、チケット、ドキュメントで分かる事実を聞かない。
+- AI レビューは G1 でユーザーが実行を承認した場合だけ実行する。
+- 承認は G2 の最終承認だけで行う。G1 では承認も実装開始も扱わない。
+- AI レビューの指摘は1件ずつ採否の判断を得る。一括承認を受け付けない。
+- 最終承認の前に `Status: approved`（sliced ではスライスの `approved`）にしない。
 
-| ゲート | 持つ skill | 確定するもの |
-|---|---|---|
-| 設計方針の選択 | grill-design | 各ラウンドの decision |
-| 設計確定 | grill-design | design.md の要件、決定事項、設計、スライス（`Status: designed`） |
-| design review の実行確認と指摘の採否 | prepare-implementation | review を実行するか、各指摘の採用・見送り |
-| plan の human review | create-plan | plan.md の拘束項目が design.md を忠実に実装していることと `Risk` |
-| plan review の実行確認と指摘の採否 | create-plan | review を実行するか、各指摘の採用・見送り |
-| 最終承認 | create-plan | 採用した指摘の反映と plan.md 全体（`Status: approved`）。採用した指摘が無い場合は human review の承認が兼ねる |
-| 実装開始 | prepare-implementation | 同一セッションで実装するか、引き継ぐか |
-| commit / push / PR | implement-plan 以降の各 skill | 外部への操作 |
+## Workflow
 
-## オーケストレーション
+### Step 0: 再開位置を決める
 
-- **Step 0: モデルを確認し、再開位置を決める。** 上位推論モデルであることを確認し、使用モデルと品質上の不利益を design.md のヘッダーの `作成` に残す。入力が design.md、plan.md、または plan ID の場合は、design.md の `Status`、`## スライス` の進捗、plan.md の `Status` と未チェックのタスクから再開する Step を決める。完了したスライスは、plan.md のタスクがすべてチェック済みなら `## スライス` のチェックボックスを付ける。
-- **Step 1: 入力を解決する。** 入力の全内容を取得または抽出し、3〜6行の入力要約をユーザーへ返して、計画を左右する不足を確認する。design.md を `Status: deciding` で作成し、ヘッダーと `## 要件` を書く。
-- **Step 2: 調査して分類する。** コードベースを read-only で調査し、simple / non-simple と single / sliced を判定して、分類と理由をヘッダーに書き、ユーザーへ示す。simple の場合は `## 決定事項` と `## リスク` を書き、`Status: designed` にして Step 5 へ進む。
-- **Step 3: 設計判断を詰める。** grill-design に design.md と設計判断の候補を渡し、`Status: designed` になるまで任せる。
-- **Step 4: design review を実行する。** review-gate に従い、実行前確認、ai-review の design review mode、指摘の採否を進める。採用した指摘は review-gate の指摘タグに応じた戻し先で反映し、設計確定後に review-gate の再レビュー確認へ進む。
-- **Step 5: plan を作る。** `../create-plan/SKILL.md` を読んで同じセッションで従い、design.md と、sliced の場合は対象スライスを入力にする。返された plan.md の path を `## スライス` に記録する。
-- **Step 6: 実装を続行または引き継ぐ。** デフォルトは同一セッションとし、実装開始の承認を得てから `implement-plan` を起動する。コンテキストが乏しい、大規模・high risk、または sliced で同じセッションが直前のスライスを実装した場合は、working directory、design.md と plan.md の絶対パス、plan ID、次に使う skill を含む自己完結した引き継ぎ文を1つの fenced code block で提示し、実装や別 agent の起動を行わず停止する。sliced の場合は、スライスの実装後に design.md の path を渡してこの skill を再開すると次のスライスへ進むことを伝える。選んだ経路、理由、入力要約、保存先、分類、主要な decision、タスク概要、AI review の結果を報告する。
+入力が plan.md、plan ID、または plan.md のあるディレクトリの場合は、`references/plan-template.md` の `## 再開` に従って再開する Step を決める。
+それ以外は Step 1 から始める。
+
+### Step 1: 入力を解決する
+
+`references/source-resolution.md` に従って入力の全内容を取得または抽出し、3〜6行の入力要約をユーザーへ返す。
+調査を始められない gap だけをこの時点で確認する。
+
+### Step 2: 調査して、ユーザー判断を質問する
+
+`references/decisions.md` に従ってコードベースを read-only で調査し、判断をユーザー判断と AI判断に分ける。
+ユーザー判断が残る間は質問ラウンドを回し、回答をその都度 plan.md に反映する。
+plan.md がまだ無い場合は、最初の質問の前に `Status: draft` で作成し、`## 要件` と `## 未決事項` を書く。
+
+### Step 3: plan.md を書く
+
+`references/plan-template.md` に従い、残りのセクションとタスクを書く。
+sliced の場合は、対象スライスのタスクだけを詳細に書き、後のスライスは `outline` のままにする。
+
+### Step 4: self-check と G1
+
+`references/gates.md` に従って self-check を行い、満たさない項目を直してから G1 のブリーフィングを示す。
+修正のフィードバックは plan.md に反映し、新しいユーザー判断が生じた場合は Step 2 の質問ラウンドで決めてから G1 をやり直す。
+
+### Step 5: AI レビューと G2
+
+G1 で実行が承認された場合は、`references/gates.md` に従って ai-review の plan review mode を実行する。
+G1 で見送った場合は、`## AIレビュー` に見送りと理由を書く。
+どちらの場合も `references/gates.md` の G2 に進み、最終承認と実装開始か引き継ぎかの回答を得る。
+
+### Step 6: 実装を続行または引き継ぐ
+
+同一セッションでの実装開始が選ばれた場合は、`../implement-plan/SKILL.md` を読み、plan.md の絶対パスを入力にして従う。
+引き継ぎが選ばれた場合、またはコンテキストが乏しい、大規模・high risk、sliced で同じセッションが直前のスライスを実装した場合は、working directory、plan.md の絶対パス、plan ID、対象スライス、次に使う skill（`implement-plan`）を含む自己完結した引き継ぎ文を1つの fenced code block で提示し、実装や別 agent の起動を行わずに停止する。
+sliced の場合は、スライスの実装後に plan.md の path を渡してこのスキルを再開すると次のスライスへ進むことを伝える。
+
+## Report
+
+plan.md の path、対象スライス、主要なユーザー判断、タスク概要、AI レビューの結果と採否、選んだ経路と理由を報告する。

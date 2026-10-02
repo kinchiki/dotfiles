@@ -16,7 +16,7 @@ commit 数の少なさより、各 commit の論理的な独立性を優先す�
 * default branch では commit しない。
 * staging 前に branch、status、unstaged diff、staged diff を確認する。
 * 無関係なユーザー変更、secrets、debug print、生成物の noise を含めない。安全に分離できない場合は停止する。
-* ユーザーがこの turn で commit を明示的に許可していない場合は、実行前に commit plan を提示する。
+* この skill の対象となる依頼は local commit の実行許可を含むものとして扱い、commit plan を作成した後は追加承認を求めず実行する。
 * commit message は日本語で書き、repository の prefix / Conventional Commit ルールに従う。
 
 ## Workflow

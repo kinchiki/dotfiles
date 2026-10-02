@@ -1,7 +1,0 @@
-interface:
-  display_name: "Create Plan"
-  short_description: "prepare-implementation の plan 作成フェーズとして、設計確定済みの design doc を承認済みの実装プランに変換する"
-  default_prompt: "Use $create-plan as the plan phase of $prepare-implementation to turn a settled design doc into an approved implementation plan with human and AI review."
-
-policy:
-  allow_implicit_invocation: false

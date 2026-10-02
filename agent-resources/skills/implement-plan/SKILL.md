@@ -1,7 +1,7 @@
 ---
 name: implement-plan
 description: >-
-  承認済みの実装プランファイルを、参照する design doc と合わせて契約とし、同一セッションの継続または新しいセッションで端から端まで実行する。
+  承認済みの実装プランファイル（plan.md）を契約とし、同一セッションの継続または新しいセッションで端から端まで実行する。
   feature branch を作成し、プランの `## タスク` をテスト込みで進め、lint / test を緑にする。
   リスクに応じて ai-review で独立レビューを受け、commit-changes で論理コミットを作り、open-pr-followup で PR 作成後の CI と AI レビュー初回フォローまで進める。
   承認済みプランを渡されて実装を始めるときに使う。
@@ -13,11 +13,11 @@ description: >-
 # implement-plan
 
 承認済みプランを端から端まで実行する: feature branch を作成し、`## タスク` をテスト込みで実装し、lint / test を緑にし、risk に応じた独立レビューを受け、commit-changes と open-pr-followup へ引き継ぐ。
-承認済みプランの拘束項目と、プランの `Design` が指す design doc の要件・決定事項は contract である。contract から外れる必要がない限り re-plan しない。
+承認済みプランの拘束項目は contract である。contract から外れる必要がない限り re-plan しない。
 
 ## Resources
 
-- `../create-plan/references/plan-template.md`: Step 0 で plan file を読む直前に `## 拘束力` を読み、拘束項目と非拘束項目の区別に使う。
+- `../prepare-implementation/references/plan-template.md`: Step 0 で plan file を読む直前に `## 状態` と `## 拘束力` を読み、承認状態の確認と、拘束項目と非拘束項目の区別に使う。
 - `../ai-review/SKILL.md`: lint / test が緑になり、実際の diff が medium または high risk に分類された後にコードレビューを委譲する直前に読む。low risk では読まない。
 - `../ai-review/references/test-selection-policy.md`: Step 0 でテスト方針を抽出する直前に読む。
 
@@ -26,7 +26,7 @@ description: >-
 - planning / approval mode が有効な場合は、1〜2行の実行 outline だけを示して終了し、plan を再提示・再議論しない。
 - default branch では作業しない。
 - `## タスク` のチェックボックスと `## 実行メモ` は orchestrator だけが編集し、チェックボックスを進捗の唯一の source として使う。
-- 次のいずれかが必要な場合は scope change として停止し、理由を説明する: ゴール・受入基準・決定事項・やらないことに反する / plan の拘束項目を変える / `## 変更面` に無い面を変更する。決定事項に反する必要がある場合は、差し戻しが必要な decision の ID と理由を報告する。
+- 次のいずれかが必要な場合は scope change として停止し、理由を説明する: ゴール・受入基準・決定事項・やらないことに反する / plan の拘束項目を変える / `## 変更面` に無い面を変更する。決定事項に反する必要がある場合は、変更が必要な決定事項の ID と理由を報告する。
 - 拘束項目を変えない逸脱（`## 影響範囲と既存パターン` に無い test・fixture・生成物・同じモジュール内の file の変更、command の修正など）は停止せずに進める。後続 task、再開したセッション、reviewer が知るべき逸脱は `## 実行メモ` に1行で記録する。
 - 発生可能性と影響に見合う事象だけを専用実装として実装する。低確率で単純なエラー処理で足りる事象は、専用実装の対象外とし、単純なエラー処理で対処する。
 - test を弱める・削除する・skip / pending にしない。
@@ -41,19 +41,19 @@ description: >-
 
 ### Step 0: Load the plan and prepare the branch
 
-- 指定された絶対パスの plan file、plan の `Design` が指す design doc、repo convention file（`CLAUDE.md` / `AGENTS.md`）を読む。
-- plan の `Status` が `approved` でない場合は停止する。
+- 指定された絶対パスの plan file と repo convention file（`CLAUDE.md` / `AGENTS.md`）を読む。
+- 実装対象を決める。single では plan の `Status` が `approved` でない場合は停止する。sliced では、`approved` で未チェックのタスクがあり、blocked_by がすべて完了している最初のスライスを対象にし、該当が無い場合は停止する。
 - `../ai-review/references/test-selection-policy.md` を読み、計画、実装、レビューで使うテスト選定基準として保持する。
 - plan 全体は要約せず、実行に必要な状態だけを抽出する。
-  - goal: design doc の `## 要件` から 1 行
-  - acceptance criteria: design doc の AC ID（sliced の場合は対象スライスの delivers だけ）
+  - goal: `## 要件` から 1 行
+  - acceptance criteria: AC ID（sliced の場合は対象スライスの delivers だけ）
   - decisions: 未チェック task の `implements` が参照する decision の ID と内容
-  - 未チェック task: id、implements、depends_on、done_when、test
-  - `## 変更面` と `## 実行メモ`
+  - 未チェック task（sliced の場合は対象スライスのタスクだけ）: id、implements、depends_on、done_when、test
+  - `## 変更面`、`## 展開順`、`## まれなケースの扱い`、`## 実行メモ`
   - lint / test コマンド（plan が repo convention file より優先）
-- design doc の `## レビュー記録` は実装 contract として扱わない。
+- `## AIレビュー` は実装 contract として扱わない。
 - 今回の plan ID のディレクトリ（`.ai-local/plans/<plan-id>/`）を除き、working tree が clean であることを要求する。そうでなければ停止する。
-- clean な tree から feature branch を作る: `git switch -c <type>/<plan-id>-<slug>`。`<type>` は repo convention に従い、既存の ticket branch があれば再利用する。
+- clean な tree から feature branch を作る: `git switch -c <type>/<plan-id>-<slug>`。sliced の場合は `<slug>` の末尾に `-s<N>` を付ける。`<type>` は repo convention に従い、既存の ticket branch があれば再利用する。
 
 ### Step 1: Implement tasks in order
 
@@ -99,4 +99,4 @@ description: >-
 
 日本語で報告: 変更概要 / 主な変更ファイルと対応するタスク / `## 実行メモ` に記録した逸脱 / lint・test 最終結果 / risk 分類と AI review 結果 / ユーザー承認に基づき対応した finding / 見送った finding / 残した blocking finding。
 その後 `commit-changes` で論理 commit を作る。commit 後、`open-pr-followup` で PR 作成と初回 follow-up を行う。
-plan の `Slice` がスライスを指す場合は、design doc の path を渡して `prepare-implementation` を再開すると次のスライスへ進むことを最後に伝える。
+sliced の場合は、plan.md の path を渡して `prepare-implementation` を再開すると次のスライスへ進むことを最後に伝える。
