@@ -334,7 +334,8 @@
       "colima *",
       "dip *",
       "gh *",
-      "git *"
+      "git *",
+      "git -C *"
     ]
   },
   "effortLevel": "high",
