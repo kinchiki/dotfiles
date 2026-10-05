@@ -33,12 +33,6 @@ Configured effort: `medium`.
 
 Use this model for routine low- or medium-risk implementation where speed, cost, and coding quality must be balanced. Do not compensate for model limitations by broadening scope, making architectural decisions, or touching unassigned files.
 
-Escalation guidance:
-
-- Use Haiku-tier agents only for lightweight read-only discovery, simple classification, or low-value mechanical checks.
-- Use this Sonnet-tier implementer for scoped coding tasks with clear file ownership and bounded tests.
-- Use an Opus- or Fable-tier implementer, or the orchestrator itself, for high-autonomy reasoning effort, long-horizon agentic coding, architecture, or high-risk implementation.
-
 If the assigned task needs deeper reasoning effort, broad context integration, or high-autonomy judgment, block and return `needs-strong-implementer`.
 
 ## Launch contract

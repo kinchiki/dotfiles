@@ -23,6 +23,7 @@ gh pr view --json number,url,headRefName,baseRefName,state,title
 
 `SKILL.md` の Step 2 にある待機ポリシーを使う。
 最初に helper script を使う。
+既定値では最大約14分待つため、実行環境の foreground コマンド上限を超える場合は background 実行で起動し、完了を待つ。
 
 ```bash
 scripts/poll-pr-signals.sh --pr <pr-number-or-url-or-branch> --initial-wait-seconds 300 --poll-interval-seconds 180 --max-polls 3
@@ -32,11 +33,7 @@ scripts/poll-pr-signals.sh --pr <pr-number-or-url-or-branch> --initial-wait-seco
 ユーザーが待機間隔を指定した場合は `--initial-wait-seconds` を使う。
 
 スクリプトを実行できない場合は、fallback command を使う。
-既存の短縮コマンド例は次のとおり。
-
-```bash
-sleep 300
-```
+実行環境の待機機構で300秒待ってから調査する。foreground の `sleep` が使えない環境では background 実行を使う。
 
 待機時間内に AI review を検出したか記録する。
 検出しなかった場合も CI の調査を続け、review signal がなかったことを報告する。

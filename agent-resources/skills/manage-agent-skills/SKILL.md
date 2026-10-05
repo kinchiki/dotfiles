@@ -48,7 +48,7 @@ skill を更新する場合は、関連する `SKILL.md` セクション・refer
 ### Step 2: Create or update skill
 
 新しい skill を作る場合は `skill-creator` initializer を使う。
-`SKILL.md` の frontmatter は `name` と `description` だけにする。
+`SKILL.md` の frontmatter は `name` と `description` を基本とし、それ以外の key は `../scripts/quick_validate.py` が許可するものを必要な場合だけ使う（例: 副作用があり明示呼び出しに限定する skill の `disable-model-invocation: true`）。
 skill が何をするか・いつ使うかは `description` に書く。
 実行時の workflow・制約・resource の使い方は本文に書く。
 反復的で決定論的な作業は `scripts/` に切り出して実行する。

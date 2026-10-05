@@ -64,11 +64,12 @@ staging 前に ordered plan を作る。
 ### 3. Stage and commit one concern at a time
 
 ```bash
-git add -p
+git add <path>
 git diff --staged
 git commit
 ```
 
+* 1 file 内の hunk を分ける場合は、対象 hunk だけの patch を作り `git apply --cached <patch>` で stage する。
 * pre-staged diff が複数 commit にまたがる場合は unstage して plan に従って restage する。
 * `git add -A` は、remaining diff 全体が明らかに次の 1 commit に属する場合だけ使う。
 * staged diff がその commit の intent だけを含むことを確認する。

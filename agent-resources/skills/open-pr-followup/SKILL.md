@@ -62,7 +62,7 @@ AI review が検出できなくても CI inspection は続ける。
 
 ### Step 3: Delegate follow-up work
 
-CI failure がある場合は `gh-fix-ci` に委譲する。
+CI failure がある場合は `gh-fix-ci` に委譲する。`gh-fix-ci` が使えない環境では、`gh run view <run-id> --log-failed` で失敗ログを読み、同じ確認ポイントを守って orchestrator が修正する。
 Actionable review comments がある場合は `address-pr-comments` 優先、または `gh-address-comments` に委譲する。
 委譲先には、修正後の commit を実行する前にユーザー確認を取り、`../ai-review/references/test-selection-policy.md` を適用するよう指示する。
 review lane が `address-pr-comments` 以外の場合は、PR description 更新まで完了したか確認する。
