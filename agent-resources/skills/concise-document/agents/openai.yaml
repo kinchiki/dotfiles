@@ -1,0 +1,3 @@
+interface:
+  display_name: "簡潔なドキュメント"
+  short_description: "読み手の判断や実行に必要な情報を保ち、文書の構成と表現を簡潔に整える"
