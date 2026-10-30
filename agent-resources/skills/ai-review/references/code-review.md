@@ -5,6 +5,7 @@
 ## Preconditions
 
 - target repository の convention file を読む。
+- `change-necessity-policy.md` を読み、指摘の生成と対応推奨に共通基準を適用する。
 - `test-selection-policy.md` を読む。
 - `git status --short` と `git diff --stat HEAD` で未コミット差分があることを確認する。
 - 差分が空の場合は `UNTRUSTED: empty review range` として停止する。
@@ -49,6 +50,7 @@ wrapper が `BLOCKED: nested sandbox-exec` を返した場合は、コマンド�
 ## Result
 
 - script が `TRUSTED` を返し、出力が実際の差分に言及した場合だけ結果を採用する。
+- `change-necessity-policy.md` に基づく評価と対応推奨を、元の finding と severity に添える。
 - trust 判定、形式不備、再実行の扱いは `reviewer-policy.md` に従う。
 - wrapper が exit 7 を返した場合は `reviewer-policy.md` の trust 判定に従う。
 - working tree 以外の commit range または PR review はこの workflow の対象外とする。

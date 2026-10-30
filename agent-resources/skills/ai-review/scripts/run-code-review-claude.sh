@@ -7,6 +7,7 @@ CLAUDE_REVIEW_MODEL="${CLAUDE_REVIEW_MODEL:-sonnet}"
 CLAUDE_REVIEW_EFFORT="${CLAUDE_REVIEW_EFFORT:-high}"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 TEST_POLICY_FILE="$SCRIPT_DIR/../references/test-selection-policy.md"
+CHANGE_POLICY_FILE="$SCRIPT_DIR/../references/change-necessity-policy.md"
 # shellcheck source=review-trust.sh
 source "$SCRIPT_DIR/review-trust.sh"
 
@@ -18,6 +19,13 @@ if [[ ! -f "$TEST_POLICY_FILE" ]]; then
 fi
 
 TEST_SELECTION_POLICY="$(<"$TEST_POLICY_FILE")"
+
+if [[ ! -r "$CHANGE_POLICY_FILE" ]]; then
+  echo "UNTRUSTED: missing change necessity policy: $CHANGE_POLICY_FILE"
+  exit 4
+fi
+
+CHANGE_NECESSITY_POLICY="$(<"$CHANGE_POLICY_FILE")"
 
 REVIEW_DIR="$(mktemp -d "${TMPDIR:-/tmp}/claude-review.XXXXXX")"
 CLAUDE_REVIEW_OUT="$REVIEW_DIR/review.md"
@@ -53,6 +61,10 @@ CLAUDE_REVIEW_PROMPT="読み取り専用でこのリポジトリの未コミッ�
 まず git status --short, git diff --stat HEAD, git diff --cached, git diff を確認する。
 指摘は [P1]/[P2]/[P3] の重大度、file:line、根拠、修正案を含めて日本語で返す。
 Style / line-length 指摘は repo linter で確定検証する。
+次の変更要否の共通基準を、指摘の生成に適用する。
+
+$CHANGE_NECESSITY_POLICY
+
 次のテスト選定方針に従い、除外対象の直接保証チェックを追加するよう求めたり、不足テストとして指摘しない。
 
 $TEST_SELECTION_POLICY

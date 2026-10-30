@@ -175,6 +175,25 @@ done
 
 printf 'PASS: Code review prompts keep the target content as review data\n'
 
+change_policy="$(<"$script_dir/../references/change-necessity-policy.md")"
+test_policy="$(<"$script_dir/../references/test-selection-policy.md")"
+for dump in "$prompt_dump" "$claude_prompt_dump"; do
+  prompt="$(<"$dump")"
+  for policy in "$change_policy" "$test_policy"; do
+    if [[ "$prompt" != *"$policy"* ]]; then
+      printf 'FAIL: Code review prompt lost a shared policy: %s\n' "$dump" >&2
+      exit 1
+    fi
+    remainder="${prompt#*"$policy"}"
+    if [[ "$remainder" == *"$policy"* ]]; then
+      printf 'FAIL: Code review prompt duplicated a shared policy: %s\n' "$dump" >&2
+      exit 1
+    fi
+  done
+done
+
+printf 'PASS: Code review prompts include each shared policy exactly once\n'
+
 cat > "$fake_bin/codex" <<'EOF'
 #!/usr/bin/env bash
 output_file=""

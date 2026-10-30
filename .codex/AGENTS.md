@@ -60,6 +60,8 @@
 
 要求された挙動の実装と検証に必要な範囲だけ変更する。
 
+追加の対策や改善提案、レビュー指摘への対応要否を決めるときは、`~/.agents/skills/ai-review/references/change-necessity-policy.md` を読み、共通基準を適用する。
+
 既存のコードスタイルに合わせる。
 
 テスト、import、fixture、schema、migration、生成物、ドキュメント、lockfile など、変更に直接必要なものは合わせて更新してよい。

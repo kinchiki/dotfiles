@@ -18,6 +18,8 @@ trap cleanup EXIT
 mkdir -p "$fake_bin" "$repo"
 printf 'local repository evidence\nsecond line\n' > "$repo/target.txt"
 printf 'Review the plan against target.txt.\n' > "$prompt_file"
+printf '\n' >> "$prompt_file"
+cat "$script_dir/../references/test-selection-policy.md" >> "$prompt_file"
 
 cat > "$fake_bin/uname" <<'EOF'
 #!/usr/bin/env bash
@@ -28,6 +30,9 @@ cat > "$fake_bin/codex" <<'EOF'
 #!/usr/bin/env bash
 if [[ -n "${FAKE_REVIEWER_STATUS:-}" ]]; then
   exit "$FAKE_REVIEWER_STATUS"
+fi
+if [[ -n "${PROMPT_DUMP:-}" ]]; then
+  cat > "$PROMPT_DUMP"
 fi
 output_file=""
 while (($#)); do
@@ -49,6 +54,9 @@ cat > "$fake_bin/claude" <<'EOF'
 #!/usr/bin/env bash
 if [[ -n "${FAKE_REVIEWER_STATUS:-}" ]]; then
   exit "$FAKE_REVIEWER_STATUS"
+fi
+if [[ -n "${PROMPT_DUMP:-}" ]]; then
+  cat > "$PROMPT_DUMP"
 fi
 printf '%s\n' "${FAKE_REVIEW_EVENTS:?}"
 EOF
@@ -122,7 +130,9 @@ export FAKE_REVIEW_OUTPUT=$'信頼性: `UNTRUSTED`\n[P2] target.txt:7 に具体�
 run_case 'Codex rejects a labeled untrusted response with a line-numbered finding' 4 codex 'reviewer reported that the review is not trustworthy'
 
 export FAKE_REVIEW_OUTPUT=$'REVIEW_TRUST: TRUSTED\nNo findings'
+export PROMPT_DUMP="$test_dir/codex-prompt.md"
 run_case 'Codex trusts successful file inspection' 0 codex
+unset PROMPT_DUMP
 
 export FAKE_REVIEW_OUTPUT=$'レビュー結果の概要です。\nNo findings\nREVIEW_TRUST: TRUSTED'
 run_case 'Codex accepts a trust declaration after the review body' 0 codex
@@ -150,7 +160,9 @@ export FAKE_REVIEW_EVENTS="$(jq -nc \
     {type:"user",message:{content:[{type:"tool_result",tool_use_id:"read-1",is_error:false,content:"local repository evidence"}]}},
     {type:"result",result:"レビュー結果の概要です。\nNo findings\nREVIEW_TRUST: TRUSTED"}
   ] | .[]')"
+export PROMPT_DUMP="$test_dir/claude-prompt.md"
 run_case 'Claude accepts a trust declaration after the review body' 0 claude
+unset PROMPT_DUMP
 
 export FAKE_REVIEW_EVENTS="$(jq -nc \
   --arg file "$repo/target.txt" \
@@ -172,3 +184,27 @@ export FAKE_REVIEW_EVENTS="$(jq -nc \
     {type:"result",result:"UNTRUSTED: empty review range"}
   ] | .[]')"
 run_case 'Claude keeps a self-reported untrusted response at status 4' 4 claude 'reviewer reported that the review is not trustworthy'
+
+packet="$(<"$prompt_file")"
+change_policy="$(<"$script_dir/../references/change-necessity-policy.md")"
+test_policy="$(<"$script_dir/../references/test-selection-policy.md")"
+for dump in "$test_dir/codex-prompt.md" "$test_dir/claude-prompt.md"; do
+  prompt="$(<"$dump")"
+  if [[ "$prompt" != *"$packet"* ]]; then
+    printf 'FAIL: Plan review prompt lost the input packet: %s\n' "$dump" >&2
+    exit 1
+  fi
+  for policy in "$change_policy" "$test_policy"; do
+    if [[ "$prompt" != *"$policy"* ]]; then
+      printf 'FAIL: Plan review prompt lost a shared policy: %s\n' "$dump" >&2
+      exit 1
+    fi
+    remainder="${prompt#*"$policy"}"
+    if [[ "$remainder" == *"$policy"* ]]; then
+      printf 'FAIL: Plan review prompt duplicated a shared policy: %s\n' "$dump" >&2
+      exit 1
+    fi
+  done
+done
+
+printf 'PASS: Plan review prompts preserve the packet and include each shared policy exactly once\n'

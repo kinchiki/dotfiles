@@ -5,13 +5,16 @@
 
 ## Build the review packet
 
-`test-selection-policy.md` を読み、プラン評価に必要な次のコンテキストだけを review packet に含める。
+`change-necessity-policy.md` と `test-selection-policy.md` を読み、プラン評価に必要な次のコンテキストだけを review packet に含める。
 
 - plan.md の絶対パスと最新の全文
 - 元ソースの参照先またはユーザー依頼の抜粋
 - planner が調査した path と既存 pattern
 - plan.md の `## AIレビュー` で見送り済みの指摘
 - `test-selection-policy.md` の内容
+
+`change-necessity-policy.md` の本文は wrapper が追加するため、packet 本文では省略する。
+テスト選定方針の本文は引き続き packet 作成側が含める。
 
 元ソース、plan.md の `## 要件`、`### ユーザー判断` を source of truth とするよう reviewer へ指示する。
 `### ユーザー判断` はユーザーが決めた判断であると reviewer へ伝える。
@@ -41,7 +44,7 @@ P1 / P2 には、元ソース、plan.md、または調査したコードの根�
 
 - review packet を一時ファイルへ先に書き、その絶対パスを `--prompt-file` に渡す。
 - production code、skill、plan file の編集を禁止し、read-only mode を使う。
-- script は reviewer 実行だけを行い、packet 構築や plan の更新を行わない。
+- script は入力 packet に共通の変更要否基準・inspection 指示・出力契約を追加して reviewer を実行し、対象 plan の更新は呼び出し元へ返す。
 
 ### Run Claude reviewer
 
@@ -75,6 +78,6 @@ wrapper が exit 7 を返した場合は `reviewer-policy.md` の trust 判定�
 ## Result
 
 - reviewer、主要finding、risk、信頼性判定を返す。
+- `change-necessity-policy.md` に基づく評価と対応推奨を、元の finding と severity に添える。
 - trust 判定、形式不備、再実行の扱いは `reviewer-policy.md` に従う。
-- P1 / P2 の採否、plan更新、差し戻し、再レビューは呼び出し元へ返す。
-- P3 は任意の改善として返す。
+- 各 finding の採否、plan更新、差し戻し、再レビューは呼び出し元へ返す。

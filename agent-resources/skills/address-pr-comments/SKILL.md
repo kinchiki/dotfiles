@@ -25,6 +25,7 @@ GitHub PR のレビュー指摘を、実コードに照らして直すスキル�
 ## Resources
 
 - `references/github-review-thread-commands.md`: Step 1 の fetch command と field contract、Step 9 の reply / resolve command と writeback 条件が必要になったら読む。
+- `../ai-review/references/change-necessity-policy.md`: Step 2 の各指摘を判定する前に読む。
 - `../ai-review/references/test-selection-policy.md`: Step 2 でテスト追加を求める review 指摘を判定する直前に読む。
 - `../update-pr-description/SKILL.md`: Step 8 で PR description 更新を委譲するときに読む。
 
@@ -72,13 +73,15 @@ gh pr view <n-or-omit> --json number,headRefName,baseRefName,url,state,title
 - `isOutdated` が true か、現行コードがコメント内容と一致しない場合は skip 寄りに判断し、理由を書く。
 - テスト追加を求める指摘を判定する前に `../ai-review/references/test-selection-policy.md` を読む。
 - 同方針が除外する直接保証チェックだけを求める指摘は `recommend-skip` に分類し、方針を理由として記録する。
+- `../ai-review/references/change-necessity-policy.md` を読み、各指摘を共通基準で評価し、根拠を `approach_or_reason` に記録する。
+- reviewer や bot の severity は元の評価として保持し、対応要否と bucket は共通基準で判断する。
 - 各項目を必ず 1 つの bucket に分類する。
 
 | Bucket | Meaning |
 |--------|---------|
-| `must-fix` | typo、事実誤認、実バグ、要件違反、build / test failure、security issue など、修正すべき明確な問題。 |
-| `recommend-fix` | 妥当だが裁量のある改善。 |
-| `recommend-skip` | outdated、誤指摘、範囲外、要件との衝突、主観的 preference、bot noise、対応済み。 |
+| `must-fix` | 共通基準で「必須修正」と評価した問題。 |
+| `recommend-fix` | 共通基準で「任意改善」と評価した提案。 |
+| `recommend-skip` | 共通基準で「対応不要」と評価した指摘。outdated、誤指摘、要件との衝突、対応済みの指摘も含む。 |
 
 各判定は次の形にする。
 

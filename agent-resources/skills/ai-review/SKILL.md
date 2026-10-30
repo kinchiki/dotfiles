@@ -15,6 +15,7 @@ description: >-
 
 - `references/reviewer-policy.md`: reviewer、risk、model、同意、共通の結果形式を決める前に読む。
 - `references/reviewer-output-contract.md`: reviewer に要求する共通の最終メッセージ形式を確認するときに読む。
+- `references/change-necessity-policy.md`: レビュー生成前と結果を返す前に読み、指摘の必要性と対応推奨を判断する。
 - `references/code-review.md`: 未コミット差分をレビューするときだけ読む。
 - `references/plan-review.md`: 実装プランをレビューするときだけ読む。
 - `references/test-selection-policy.md`: コードレビューの prompt またはプランレビューの review packet へテスト方針を含めるときに読む。
@@ -47,11 +48,15 @@ description: >-
 
 ### Step 3: Run the selected review
 
+- `references/change-necessity-policy.md` を読み、レビュー生成に共通基準を適用する。
 - code review では `references/code-review.md` に従う。
 - plan review では `references/plan-review.md` に従う。
 - 選択した mode の reference と `references/reviewer-output-contract.md` を追加で読む。code review と plan review では `references/test-selection-policy.md` も読む。
 
 ### Step 4: Return the result
+
+`references/change-necessity-policy.md` を適用し、各 finding の評価（必須修正・任意改善・対応不要）と対応推奨を決める。
+元の severity と finding を保持し、評価とその根拠を添える。
 
 日本語で次を返す。
 

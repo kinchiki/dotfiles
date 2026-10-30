@@ -174,10 +174,19 @@ review_out="$review_dir/review.md"
 review_err="$review_dir/review.err"
 review_events="$review_dir/review.jsonl"
 review_prompt="$review_dir/prompt.md"
+script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+change_policy_file="$script_dir/../references/change-necessity-policy.md"
 # shellcheck source=review-trust.sh
-source "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/review-trust.sh"
+source "$script_dir/review-trust.sh"
 
 REVIEW_OUTPUT_CONTRACT="$(review_output_contract)" || exit 4
+
+if [[ ! -r "$change_policy_file" ]]; then
+  echo "UNTRUSTED: missing change necessity policy: $change_policy_file" >&2
+  exit 4
+fi
+
+change_necessity_policy="$(<"$change_policy_file")"
 
 cleanup() {
   if [[ "$keep_temp" == false ]]; then
@@ -208,6 +217,7 @@ inspection_output="$(sed -n '1,80p' "$inspection_file")"
 
 {
   cat "$prompt_file"
+  printf '\n\n次の変更要否の共通基準を、指摘の生成に適用する。\n\n%s\n' "$change_necessity_policy"
   printf '\n\n## Required local inspection\n'
   case "$reviewer" in
     codex)

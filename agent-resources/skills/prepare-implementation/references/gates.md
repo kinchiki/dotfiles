@@ -58,10 +58,13 @@ reviewer / model / effort は `../../ai-review/references/reviewer-policy.md` �
 
 `../../ai-review/SKILL.md` を読み、plan review mode で実行する。
 reviewer には、G1 の修正を反映した最新の plan.md、元ソースの参照先または依頼の抜粋、調査した path と既存 pattern、`## AIレビュー` で見送り済みの指摘を渡す。
+テスト選定方針は `../../ai-review/references/plan-review.md` に従って packet に含め、変更要否の共通基準は wrapper が追加する。
 結果の実行設定、信頼性、指摘を `## AIレビュー` に書く。
 `UNTRUSTED` または `BLOCKED` の場合は `../../ai-review/references/reviewer-policy.md` に従い、結果と原因を示して同じ reviewer を再実行するかを確認する。
 
 ## G2: 指摘の採否と最終承認
+
+`../../ai-review/references/change-necessity-policy.md` を読み、元の severity と finding を保持して、各指摘の評価と採用・見送りの推奨を判断する。
 
 指摘がある場合は、全指摘を1件ずつ次の形で示す。
 
@@ -72,6 +75,7 @@ reviewer: <reviewer / model / effort> — 信頼性: <TRUSTED など>
 
 **F1 [P1]** <指摘の要約>
 - 根拠: <reviewer が示した根拠>
+- 評価: 必須修正 | 任意改善 | 対応不要 — <共通基準で評価した根拠>
 - 推奨: 採用 | 見送り — <理由を1行>（反映案: <採用する場合の反映内容>）
 
 ---

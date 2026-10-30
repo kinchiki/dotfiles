@@ -20,6 +20,7 @@ description: >-
 - `../prepare-implementation/references/plan-template.md`: Step 0 で plan file を読む直前に `## 状態` と `## 拘束力` を読み、承認状態の確認と、拘束項目と非拘束項目の区別に使う。
 - `../ai-review/SKILL.md`: lint / test が緑になり、実際の diff が medium または high risk に分類された後にコードレビューを委譲する直前に読む。low risk では読まない。
 - `../ai-review/references/test-selection-policy.md`: Step 0 でテスト方針を抽出する直前に読む。
+- `../ai-review/references/change-necessity-policy.md`: Step 4 で review finding の対応要否を判断する前に読む。
 
 ## Hard constraints
 
@@ -31,11 +32,11 @@ description: >-
 - 発生可能性と影響に見合う事象だけを専用実装として実装する。低確率で単純なエラー処理で足りる事象は、専用実装の対象外とし、単純なエラー処理で対処する。
 - test を弱める・削除する・skip / pending にしない。
 - AI review の全 finding は severity にかかわらずユーザーへ提示し、項目ごとの修正または見送りの明示承認を得てから対応する。
-- ユーザーの承認前に AI review finding の修正、見送りの確定、PR body への記録を進めず、未承認の finding が残る場合は停止する。
+- ユーザーの承認前に AI review finding の修正、見送りの確定、PR body への記録を進めない。レビューに関する停止条件は Step 4 に従う。
 - 同一実装に対する2回目以降の AI review が必要なときは、再レビューの理由と対象を提示してユーザーの明示的な確認を得る。
 - orchestration には現在の AI agent で利用できる上位推論モデルを使う。満たせない、または確認できない場合は一度警告し、ユーザーが明示的にその trade-off を受け入れた場合だけ、弱い設定のまま続行する。
 - lint / test の修正ループは最大 3 round。
-- 次のいずれかに該当する場合は停止して報告する: plan が欠落・曖昧で次の未チェック task を特定できない / working tree に無関係な変更がある / 既存 branch や ticket の衝突を安全に解決できない / scope change が必要 / 3 round 経ても lint / test が失敗する / 明示的な同意後も必須の独立 reviewer が実行できない / AI review finding のユーザー判断が未完了 / blocking な P1 / P2 が残っている。
+- 次のいずれかに該当する場合は停止して報告する: plan が欠落・曖昧で次の未チェック task を特定できない / working tree に無関係な変更がある / 既存 branch や ticket の衝突を安全に解決できない / scope change が必要 / 3 round 経ても lint / test が失敗する / 明示的な同意後も必須の独立 reviewer が実行できない / Step 4 のレビューに関する停止条件に該当する。
 
 ## Workflow
 
@@ -88,15 +89,17 @@ description: >-
 - medium・high risk の場合だけ `../ai-review/SKILL.md` を読み、未コミット差分を code review mode でレビューする。
 - ai-review へ実装した AI、risk、目的、受入基準、lint / test 結果、特別なリスクを渡す。
 - ai-review は差分を編集せず、reviewer、信頼性判定、finding を返す。
-- reviewer の全 finding を severity、対象、根拠、対応案とともにユーザーへ提示し、各 finding について修正または見送りの明示承認を得る。
+- orchestrator が `../ai-review/references/change-necessity-policy.md` と実コードに照らして全 finding を評価し、必須修正・任意改善・対応不要を判定する。
+- 元の severity と finding を保持し、対象、根拠、共通基準による評価、対応推奨とともにユーザーへ提示し、各 finding について修正または見送りの明示承認を得る。
 - ユーザーが修正を承認した finding だけを実装し、lint / test を再実行する。
-- ユーザーが見送りを承認した finding は理由とともに報告へ記録する。P1 / P2 の見送りは blocking finding として扱い、commit と PR 作成へ進まない。
+- ユーザーが見送りを承認した finding は評価と理由を報告へ記録する。対応不要と判定した finding は、見送り承認後に停止理由から外す。
+- レビューに関する停止条件は次のいずれかとし、該当する間は commit と PR 作成へ進まない: ユーザーの採否判断が未完了 / 修正を承認した finding の対応・検証が未完了 / 必須修正と判定した問題が未解決。必須修正の問題は見送りが承認されても停止理由に残す。
 - 修正後に再レビューが必要な場合は、再レビューの理由、前回からの変更点、レビュー対象をユーザーへ提示して明示的な確認を得てから AI review を再実行する。確認が得られない場合は再レビューを実行せず停止する。
 - 修正後に必要な再レビューで新しい finding が返った場合も、同じ承認フローを繰り返す。
-- すべての `## タスク` がチェック済みで、lint / test が緑で、全 review finding の判断が完了し、blocking な review finding が残っていない場合だけ完了とする。
+- すべての `## タスク` がチェック済みで、lint / test が緑で、この Step のレビューに関する停止条件に該当しない場合だけ完了とする。
 
 ## Report
 
-日本語で報告: 変更概要 / 主な変更ファイルと対応するタスク / `## 実行メモ` に記録した逸脱 / lint・test 最終結果 / risk 分類と AI review 結果 / ユーザー承認に基づき対応した finding / 見送った finding / 残した blocking finding。
+日本語で報告: 変更概要 / 主な変更ファイルと対応するタスク / `## 実行メモ` に記録した逸脱 / lint・test 最終結果 / risk 分類と AI review 結果 / ユーザー承認に基づき対応した finding / 見送った finding / 未解決の必須修正。
 その後 `commit-changes` で論理 commit を作る。commit 後、`open-pr-followup` で PR 作成と初回 follow-up を行う。
 sliced の場合は、plan.md の path を渡して `prepare-implementation` を再開すると次のスライスへ進むことを最後に伝える。
