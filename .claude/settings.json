@@ -37,6 +37,10 @@
       "Bash(terraform fmt:*)",
       "Bash(tflint:*)",
       "Bash(trivy:*)",
+      "Bash(bin/rspec:*)",
+      "Bash(bin/rubocop:*)",
+      "Bash(bundle exec rspec:*)",
+      "Bash(bundle exec rubocop:*)",
       "WebFetch(domain:github.com)",
       "WebFetch(domain:raw.githubusercontent.com)",
       "WebFetch(domain:docs.anthropic.com)",
@@ -334,7 +338,11 @@
       "dip *",
       "gh *",
       "git *",
-      "git -C *"
+      "git -C *",
+      "bin/rspec *",
+      "bin/rubocop *",
+      "bundle exec rspec *",
+      "bundle exec rubocop *"
     ]
   },
   "effortLevel": "high",
@@ -342,5 +350,6 @@
   "theme": "dark",
   "preferredNotifChannel": "terminal_bell",
   "inputNeededNotifEnabled": true,
-  "agentPushNotifEnabled": true
+  "agentPushNotifEnabled": true,
+  "switchModelsOnFlag": false
 }
