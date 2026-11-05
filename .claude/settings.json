@@ -332,10 +332,7 @@
       "~/.claude/skills/ai-review/scripts/run-code-review-codex.sh *",
       "~/.claude/skills/ai-review/scripts/run-plan-review-codex.sh *",
       "terraform plan *",
-      "terraform plan",
-      "tflint",
       "tflint *",
-      "terraform validate",
       "terraform validate *",
       "docker *",
       "colima *",
@@ -346,7 +343,10 @@
       "bin/rspec *",
       "bin/rubocop *",
       "bundle exec rspec *",
-      "bundle exec rubocop *"
+      "bundle exec rubocop *",
+      "bundle exec rails db:migrate *",
+      "bundle exec rails db:test:prepare",
+      "bundle exec rails routes *"
     ]
   },
   "effortLevel": "high",
