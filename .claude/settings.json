@@ -174,7 +174,6 @@
       "~/src/"
     ]
   },
-  "model": "haiku",
   "hooks": {},
   "statusLine": {
     "type": "command",
@@ -353,7 +352,7 @@
   "plansDirectory": ".claude/plans",
   "theme": "dark",
   "preferredNotifChannel": "terminal_bell",
+  "switchModelsOnFlag": false,
   "inputNeededNotifEnabled": true,
-  "agentPushNotifEnabled": true,
-  "switchModelsOnFlag": false
+  "agentPushNotifEnabled": true
 }
