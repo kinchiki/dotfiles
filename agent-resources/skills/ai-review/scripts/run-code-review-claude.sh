@@ -85,7 +85,7 @@ $REVIEW_OUTPUT_CONTRACT
 # strict-mcp-config でMCP接続を止める
   # 利点: MCP 接続を止め、認証失敗を避けて外部状態に依存しないレビューにする。
   # 欠点: MCP 経由の issue・docs・監視情報など外部コンテキストを参照できない。
-claude -p \
+DISABLE_TELEMETRY=1 claude -p \
   --strict-mcp-config \
   --model "$CLAUDE_REVIEW_MODEL" \
   --effort "$CLAUDE_REVIEW_EFFORT" \

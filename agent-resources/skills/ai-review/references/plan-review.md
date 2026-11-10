@@ -67,7 +67,7 @@ Claude Code がレビュー対象を作成した場合は、Claude Code の `san
 環境変数の前置、パイプ、リダイレクト、`&&`、`tee` を付けず、展開済み絶対パスまたはdotfiles実体パスを使わない。
 
 ```bash
-~/.claude/skills/ai-review/scripts/run-plan-review-codex.sh --repo "<absolute repo path>" --prompt-file "<review packet file>" --model gpt-6-luna --effort xhigh
+~/.claude/skills/ai-review/scripts/run-plan-review-codex.sh --repo "<absolute repo path>" --prompt-file "<review packet file>" --model gpt-6.1-terra --effort high
 ```
 
 high risk の場合は `--model gpt-6.1-sol --effort high` を使う。

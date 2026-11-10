@@ -159,7 +159,7 @@ fi
 case "$reviewer" in
   codex)
     # this path runs a plain `codex exec` prompt review, not the `codex exec review` subcommand.
-    model="${model:-${CODEX_REVIEW_MODEL:-gpt-6-luna}}"
+    model="${model:-${CODEX_REVIEW_MODEL:-gpt-6.1-terra}}"
     effort="${effort:-${CODEX_REVIEW_EFFORT:-high}}"
     ;;
   claude)
@@ -274,7 +274,7 @@ case "$reviewer" in
       cd "$repo"
       # 利点: MCP 接続を止め、認証失敗を避けて外部状態に依存しないレビューにする。
       # 欠点: MCP 経由の issue・docs・監視情報など外部コンテキストを参照できない。
-      claude --print \
+      DISABLE_TELEMETRY=1 claude --print \
         --strict-mcp-config \
         --permission-mode plan \
         --model "$model" \
